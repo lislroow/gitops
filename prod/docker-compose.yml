@@ -2,6 +2,16 @@ version: '3.8'
 
 services:
 
+  apache:
+    image: httpd:latest
+    ports: 
+      - 81:80
+    restart: always
+    volumes:
+      - ./apache_httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+    networks:
+      - default-net
+
   redis:
     image: redis:latest
     container_name: redis
@@ -77,8 +87,6 @@ services:
   web-admin:
     image: lislroow/web-admin:latest
     container_name: web-admin
-    ports:
-      - 13100:3100
     restart: always
     networks:
       - default-net
