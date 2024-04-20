@@ -63,6 +63,7 @@ services:
         external_url 'http://gitlab.mgkim.net'
     ports:
       - '9000:80'
+      - '22:22'
     volumes:
       - gitlab_data:/var/opt/gitlab
       - gitlab_conf:/etc/gitlab
