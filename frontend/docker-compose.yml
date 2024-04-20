@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  web-admin:
+    image: lislroow/web-admin:latest
+    container_name: web-admin
+    ports:
+      - 3100:3100
+    restart: always
+    networks:
+      - backend-net
+      
+  #web-user:
+  #  image: lislroow/web-user:latest
+  #  container_name: web-user
+  #  ports:
+  #    - 3200:3200
+  #  networks:
+  #    - backend-net
+
+networks:
+  backend-net:
