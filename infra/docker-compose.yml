@@ -53,10 +53,30 @@ services:
     networks:
       - backend-net
 
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: always
+    hostname: 'gitlab.mgkim.net'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.mgkim.net'
+    ports:
+      - '9000:80'
+    volumes:
+      - gitlab_data:/var/opt/gitlab
+      - gitlab_conf:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+    shm_size: '256m'
+
+
 volumes:
   redis_data:
   mariadb_data:
   scouter_data:
+  gitlab_data:
+  gitlab_logs:
+  gitlab_conf:
 
 networks:
   backend-net:
