@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 16379:6379
+    restart: always
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - default-net
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    ports:
+      - 13306:3306
+    restart: always
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    env_file: .env_mariadb
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - default-net
+
+  scouter-server:
+    image: lislroow/scouter-server:latest
+    container_name: scouter-server
+    ports:
+      - 16100:6100
+      - 16100:6100/udp
+      - 16180:6180
+    restart: always
+    volumes:
+      - scouter_data:/apps/data
+    environment:
+      - SC_SERVER_ID=SCCOUTER-COLLECTOR 
+      - NET_HTTP_SERVER_ENABLED=true
+      - NET_HTTP_API_SWAGGER_ENABLED=true
+      - NET_HTTP_API_ENABLED=true
+      - MGR_PURGE_PROFILE_KEEP_DAYS=2
+      - MGR_PURGE_XLOG_KEEP_DAYS=5
+      - MGR_PURGE_COUNTER_KEEP_DAYS=15
+      - JAVA_OPT=-Xms1024m -Xmx1024m
+    networks:
+      - default-net
+      #default-net:
+      #  ipv4_address: 172.27.200.100
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: no
+    hostname: localhost
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
+    ports:
+      - 9000:80
+      - 22:22
+    volumes:
+      - gitlab_data:/var/opt/gitlab
+      - gitlab_conf:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+    shm_size: '256m'
+    networks:
+      - default-net
+
+  web-admin:
+    image: lislroow/web-admin:latest
+    container_name: web-admin
+    ports:
+      - 13100:3100
+    restart: always
+    networks:
+      - default-net
+        
+  #web-user:
+  #  image: lislroow/web-user:latest
+  #  container_name: web-user
+  #  ports:
+  #    - 13200:3200
+  #  networks:
+  #    - default-net
+
+  gateway:
+    image: lislroow/backend-gateway:latest
+    restart: always
+    env_file:
+      - .env_backend
+    networks:
+      - default-net
+
+  auth:
+    image: lislroow/backend-auth:latest
+    restart: always
+    env_file:
+      - .env_backend
+    networks:
+      - default-net
+
+  api-smpl:
+    image: lislroow/backend-api-smpl:latest
+    restart: always
+    env_file:
+      - .env_backend
+    networks:
+      - default-net
+
+  api-admin:
+    image: lislroow/backend-api-admin:latest
+    restart: always
+    env_file:
+      - .env_backend
+    networks:
+      - default-net
+
+  jsp-smpl:
+    image: lislroow/backend-jsp-smpl:latest
+    env_file:
+      - .env_backend
+    networks:
+      - default-net
+
+  ws-front:
+    image: lislroow/backend-ws-front:latest
+    env_file:
+      - .env_backend
+    networks:
+      - default-net
+
+volumes:
+  redis_data:
+  mariadb_data:
+  scouter_data:
+  gitlab_data:
+  gitlab_logs:
+  gitlab_conf:
+
+networks:
+  default-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.26.200.0/24
