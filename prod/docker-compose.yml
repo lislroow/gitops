@@ -4,6 +4,7 @@ services:
 
   apache:
     image: httpd:latest
+    container_name: prod.apache
     ports: 
       - 81:80
     restart: always
@@ -14,7 +15,7 @@ services:
 
   redis:
     image: redis:latest
-    container_name: redis
+    container_name: prod.redis
     ports:
       - 16379:6379
     restart: always
@@ -29,7 +30,7 @@ services:
 
   mariadb:
     image: mariadb:latest
-    container_name: mariadb
+    container_name: prod.mariadb
     ports:
       - 13306:3306
     restart: always
@@ -43,7 +44,7 @@ services:
 
   scouter-server:
     image: lislroow/scouter-server:latest
-    container_name: scouter-server
+    container_name: prod.scouter-server
     ports:
       - 16100:6100
       - 16100:6100/udp
@@ -67,12 +68,12 @@ services:
 
   gitlab:
     image: gitlab/gitlab-ce:latest
-    container_name: gitlab
-    restart: no
-    hostname: localhost
+    container_name: prod.gitlab
+    restart: always
+    hostname: gitlab.mgkim.net
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://localhost'
+        external_url 'http://gitlab.mgkim.net'
     ports:
       - 9000:80
       - 22:22
@@ -86,14 +87,14 @@ services:
 
   web-admin:
     image: lislroow/web-admin:latest
-    container_name: web-admin
+    container_name: prod.web-admin
     restart: always
     networks:
       - default-net
         
   #web-user:
   #  image: lislroow/web-user:latest
-  #  container_name: web-user
+  #  container_name: prod.web-user
   #  ports:
   #    - 13200:3200
   #  networks:
@@ -101,6 +102,7 @@ services:
 
   gateway:
     image: lislroow/backend-gateway:latest
+    container_name: prod.gateway
     restart: always
     env_file:
       - .env_backend
@@ -109,6 +111,7 @@ services:
 
   auth:
     image: lislroow/backend-auth:latest
+    container_name: prod.auth
     restart: always
     env_file:
       - .env_backend
@@ -117,6 +120,7 @@ services:
 
   api-smpl:
     image: lislroow/backend-api-smpl:latest
+    container_name: prod.api-smpl
     restart: always
     env_file:
       - .env_backend
@@ -125,6 +129,7 @@ services:
 
   api-admin:
     image: lislroow/backend-api-admin:latest
+    container_name: prod.api-admin
     restart: always
     env_file:
       - .env_backend
@@ -133,6 +138,7 @@ services:
 
   jsp-smpl:
     image: lislroow/backend-jsp-smpl:latest
+    container_name: prod.jsp-smpl
     env_file:
       - .env_backend
     networks:
@@ -140,6 +146,7 @@ services:
 
   ws-front:
     image: lislroow/backend-ws-front:latest
+    container_name: prod.ws-front
     env_file:
       - .env_backend
     networks:
