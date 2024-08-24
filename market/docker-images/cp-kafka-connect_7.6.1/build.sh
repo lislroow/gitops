@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BASE_DIR=$( cd $( dirname $0 ) && pwd -P )
-IMAGE_NAME="market/scouter-server:latest"
+IMAGE_NAME="market/cp-kafka-connect:7.6.1"
 REGISTRY="localhost:5000"
 
 echo "build ${IMAGE_NAME}"

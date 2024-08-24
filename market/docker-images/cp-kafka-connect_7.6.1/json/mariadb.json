@@ -1,0 +1,3035 @@
+{
+    "name": "io.debezium.connector.mariadb.MariaDbConnector",
+    "error_count": 2,
+    "groups": [
+        "Common",
+        "Transforms",
+        "Predicates",
+        "Error Handling",
+        "Topic Creation",
+        "Exactly Once Support",
+        "offsets.topic",
+        "Transforms: unwrap",
+        "MariaDB",
+        "Connector",
+        "History Storage",
+        "Events"
+    ],
+    "configs": [
+        {
+            "definition": {
+                "name": "name",
+                "type": "STRING",
+                "required": true,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "Globally unique name to use for this connector.",
+                "group": "Common",
+                "width": "MEDIUM",
+                "display_name": "Connector name",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "name",
+                "value": null,
+                "recommended_values": [],
+                "errors": [
+                    "Missing required configuration \"name\" which has no default value."
+                ],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "connector.class",
+                "type": "STRING",
+                "required": true,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "Name or alias of the class for this connector. Must be a subclass of org.apache.kafka.connect.connector.Connector. If the connector is org.apache.kafka.connect.file.FileStreamSinkConnector, you can either specify this full name,  or use \"FileStreamSink\" or \"FileStreamSinkConnector\" to make the configuration a bit shorter",
+                "group": "Common",
+                "width": "LONG",
+                "display_name": "Connector class",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "connector.class",
+                "value": "io.debezium.connector.mariadb.MariaDbConnector",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "tasks.max",
+                "type": "INT",
+                "required": false,
+                "default_value": "1",
+                "importance": "HIGH",
+                "documentation": "Maximum number of tasks to use for this connector.",
+                "group": "Common",
+                "width": "SHORT",
+                "display_name": "Tasks max",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "tasks.max",
+                "value": "1",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "key.converter",
+                "type": "CLASS",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "Converter class used to convert between Kafka Connect format and the serialized form that is written to Kafka. This controls the format of the keys in messages written to or read from Kafka, and since this is independent of connectors it allows any connector to work with any serialization format. Examples of common formats include JSON and Avro.",
+                "group": "Common",
+                "width": "SHORT",
+                "display_name": "Key converter class",
+                "dependents": [],
+                "order": 4
+            },
+            "value": {
+                "name": "key.converter",
+                "value": "org.apache.kafka.connect.json.JsonConverter",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "value.converter",
+                "type": "CLASS",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "Converter class used to convert between Kafka Connect format and the serialized form that is written to Kafka. This controls the format of the values in messages written to or read from Kafka, and since this is independent of connectors it allows any connector to work with any serialization format. Examples of common formats include JSON and Avro.",
+                "group": "Common",
+                "width": "SHORT",
+                "display_name": "Value converter class",
+                "dependents": [],
+                "order": 5
+            },
+            "value": {
+                "name": "value.converter",
+                "value": "org.apache.kafka.connect.json.JsonConverter",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "header.converter",
+                "type": "CLASS",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "HeaderConverter class used to convert between Kafka Connect format and the serialized form that is written to Kafka. This controls the format of the header values in messages written to or read from Kafka, and since this is independent of connectors it allows any connector to work with any serialization format. Examples of common formats include JSON and Avro. By default, the SimpleHeaderConverter is used to serialize header values to strings and deserialize them by inferring the schemas.",
+                "group": "Common",
+                "width": "SHORT",
+                "display_name": "Header converter class",
+                "dependents": [],
+                "order": 6
+            },
+            "value": {
+                "name": "header.converter",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms",
+                "type": "LIST",
+                "required": false,
+                "default_value": "",
+                "importance": "LOW",
+                "documentation": "Aliases for the transformations to be applied to records.",
+                "group": "Transforms",
+                "width": "LONG",
+                "display_name": "Transforms",
+                "dependents": [],
+                "order": 7
+            },
+            "value": {
+                "name": "transforms",
+                "value": "unwrap",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "predicates",
+                "type": "LIST",
+                "required": false,
+                "default_value": "",
+                "importance": "LOW",
+                "documentation": "Aliases for the predicates used by transformations.",
+                "group": "Predicates",
+                "width": "LONG",
+                "display_name": "Predicates",
+                "dependents": [],
+                "order": 8
+            },
+            "value": {
+                "name": "predicates",
+                "value": "",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "config.action.reload",
+                "type": "STRING",
+                "required": false,
+                "default_value": "restart",
+                "importance": "LOW",
+                "documentation": "The action that Connect should take on the connector when changes in external configuration providers result in a change in the connector's configuration properties. A value of 'none' indicates that Connect will do nothing. A value of 'restart' indicates that Connect should restart/reload the connector with the updated configuration properties.The restart may actually be scheduled in the future if the external configuration provider indicates that a configuration value will expire in the future.",
+                "group": "Common",
+                "width": "MEDIUM",
+                "display_name": "Reload Action",
+                "dependents": [],
+                "order": 9
+            },
+            "value": {
+                "name": "config.action.reload",
+                "value": "restart",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "errors.retry.timeout",
+                "type": "LONG",
+                "required": false,
+                "default_value": "0",
+                "importance": "MEDIUM",
+                "documentation": "The maximum duration in milliseconds that a failed operation will be reattempted. The default is 0, which means no retries will be attempted. Use -1 for infinite retries.",
+                "group": "Error Handling",
+                "width": "MEDIUM",
+                "display_name": "Retry Timeout for Errors",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "errors.retry.timeout",
+                "value": "0",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "errors.retry.delay.max.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": "60000",
+                "importance": "MEDIUM",
+                "documentation": "The maximum duration in milliseconds between consecutive retry attempts. Jitter will be added to the delay once this limit is reached to prevent thundering herd issues.",
+                "group": "Error Handling",
+                "width": "MEDIUM",
+                "display_name": "Maximum Delay Between Retries for Errors",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "errors.retry.delay.max.ms",
+                "value": "60000",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "errors.tolerance",
+                "type": "STRING",
+                "required": false,
+                "default_value": "none",
+                "importance": "MEDIUM",
+                "documentation": "Behavior for tolerating errors during connector operation. 'none' is the default value and signals that any error will result in an immediate connector task failure; 'all' changes the behavior to skip over problematic records.",
+                "group": "Error Handling",
+                "width": "SHORT",
+                "display_name": "Error Tolerance",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "errors.tolerance",
+                "value": "none",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "errors.log.enable",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "If true, write each error and the details of the failed operation and problematic record to the Connect application log. This is 'false' by default, so that only errors that are not tolerated are reported.",
+                "group": "Error Handling",
+                "width": "SHORT",
+                "display_name": "Log Errors",
+                "dependents": [],
+                "order": 4
+            },
+            "value": {
+                "name": "errors.log.enable",
+                "value": "false",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "errors.log.include.messages",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "Whether to include in the log the Connect record that resulted in a failure. For sink records, the topic, partition, offset, and timestamp will be logged. For source records, the key and value (and their schemas), all headers, and the timestamp, Kafka topic, Kafka partition, source partition, and source offset will be logged. This is 'false' by default, which will prevent record keys, values, and headers from being written to log files.",
+                "group": "Error Handling",
+                "width": "SHORT",
+                "display_name": "Log Error Details",
+                "dependents": [],
+                "order": 5
+            },
+            "value": {
+                "name": "errors.log.include.messages",
+                "value": "false",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "topic.creation.groups",
+                "type": "LIST",
+                "required": false,
+                "default_value": "",
+                "importance": "LOW",
+                "documentation": "Groups of configurations for topics created by source connectors",
+                "group": "Topic Creation",
+                "width": "LONG",
+                "display_name": "Topic Creation Groups",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "topic.creation.groups",
+                "value": "",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "exactly.once.support",
+                "type": "STRING",
+                "required": false,
+                "default_value": "requested",
+                "importance": "MEDIUM",
+                "documentation": "Permitted values are requested, required. If set to \"required\", forces a preflight check for the connector to ensure that it can provide exactly-once semantics with the given configuration. Some connectors may be capable of providing exactly-once semantics but not signal to Connect that they support this; in that case, documentation for the connector should be consulted carefully before creating it, and the value for this property should be set to \"requested\". Additionally, if the value is set to \"required\" but the worker that performs preflight validation does not have exactly-once support enabled for source connectors, requests to create or validate the connector will fail.",
+                "group": "Exactly Once Support",
+                "width": "SHORT",
+                "display_name": "Exactly once support",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "exactly.once.support",
+                "value": "requested",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transaction.boundary",
+                "type": "STRING",
+                "required": false,
+                "default_value": "poll",
+                "importance": "MEDIUM",
+                "documentation": "Permitted values are: poll, interval, connector. If set to 'poll', a new producer transaction will be started and committed for every batch of records that each task from this connector provides to Connect. If set to 'connector', relies on connector-defined transaction boundaries; note that not all connectors are capable of defining their own transaction boundaries, and in that case, attempts to instantiate a connector with this value will fail. Finally, if set to 'interval', commits transactions only after a user-defined time interval has passed.",
+                "group": "Exactly Once Support",
+                "width": "SHORT",
+                "display_name": "Transaction Boundary",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "transaction.boundary",
+                "value": "poll",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transaction.boundary.interval.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "If 'transaction.boundary' is set to 'interval', determines the interval for producer transaction commits by connector tasks. If unset, defaults to the value of the worker-level 'offset.flush.interval.ms' property. It has no effect if a different transaction.boundary is specified.",
+                "group": "Exactly Once Support",
+                "width": "SHORT",
+                "display_name": "Transaction boundary interval",
+                "dependents": [],
+                "order": 4
+            },
+            "value": {
+                "name": "transaction.boundary.interval.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "offsets.storage.topic",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "The name of a separate offsets topic to use for this connector. If empty or not specified, the worker’s global offsets topic name will be used. If specified, the offsets topic will be created if it does not already exist on the Kafka cluster targeted by this connector (which may be different from the one used for the worker's global offsets topic if the bootstrap.servers property of the connector's producer has been overridden from the worker's). Only applicable in distributed mode; in standalone mode, setting this property will have no effect.",
+                "group": "offsets.topic",
+                "width": "LONG",
+                "display_name": "Offsets topic",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "offsets.storage.topic",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.type",
+                "type": "CLASS",
+                "required": true,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "Class for the 'unwrap' transformation.",
+                "group": "Transforms: unwrap",
+                "width": "LONG",
+                "display_name": "Transformation type for unwrap",
+                "dependents": [],
+                "order": 0
+            },
+            "value": {
+                "name": "transforms.unwrap.type",
+                "value": "io.debezium.transforms.ExtractNewRecordState",
+                "recommended_values": [
+                    "io.debezium.connector.mysql.transforms.ReadToInsertEvent",
+                    "io.debezium.transforms.ByLogicalTableRouter",
+                    "io.debezium.transforms.ByLogicalTableRouter",
+                    "io.debezium.transforms.ExtractChangedRecordState",
+                    "io.debezium.transforms.ExtractChangedRecordState",
+                    "io.debezium.transforms.ExtractNewRecordState",
+                    "io.debezium.transforms.ExtractNewRecordState",
+                    "io.debezium.transforms.ExtractSchemaToNewRecord",
+                    "io.debezium.transforms.ExtractSchemaToNewRecord",
+                    "io.debezium.transforms.HeaderToValue",
+                    "io.debezium.transforms.HeaderToValue",
+                    "io.debezium.transforms.SchemaChangeEventFilter",
+                    "io.debezium.transforms.SchemaChangeEventFilter",
+                    "io.debezium.transforms.TimezoneConverter",
+                    "io.debezium.transforms.TimezoneConverter",
+                    "io.debezium.transforms.outbox.EventRouter",
+                    "io.debezium.transforms.outbox.EventRouter",
+                    "io.debezium.transforms.partitions.PartitionRouting",
+                    "io.debezium.transforms.partitions.PartitionRouting",
+                    "io.debezium.transforms.tracing.ActivateTracingSpan",
+                    "io.debezium.transforms.tracing.ActivateTracingSpan",
+                    "org.apache.kafka.connect.transforms.Cast$Key",
+                    "org.apache.kafka.connect.transforms.Cast$Key",
+                    "org.apache.kafka.connect.transforms.Cast$Key",
+                    "org.apache.kafka.connect.transforms.Cast$Key",
+                    "org.apache.kafka.connect.transforms.Cast$Value",
+                    "org.apache.kafka.connect.transforms.Cast$Value",
+                    "org.apache.kafka.connect.transforms.Cast$Value",
+                    "org.apache.kafka.connect.transforms.Cast$Value",
+                    "org.apache.kafka.connect.transforms.DropHeaders",
+                    "org.apache.kafka.connect.transforms.DropHeaders",
+                    "org.apache.kafka.connect.transforms.DropHeaders",
+                    "org.apache.kafka.connect.transforms.DropHeaders",
+                    "org.apache.kafka.connect.transforms.ExtractField$Key",
+                    "org.apache.kafka.connect.transforms.ExtractField$Key",
+                    "org.apache.kafka.connect.transforms.ExtractField$Key",
+                    "org.apache.kafka.connect.transforms.ExtractField$Key",
+                    "org.apache.kafka.connect.transforms.ExtractField$Value",
+                    "org.apache.kafka.connect.transforms.ExtractField$Value",
+                    "org.apache.kafka.connect.transforms.ExtractField$Value",
+                    "org.apache.kafka.connect.transforms.ExtractField$Value",
+                    "org.apache.kafka.connect.transforms.Filter",
+                    "org.apache.kafka.connect.transforms.Filter",
+                    "org.apache.kafka.connect.transforms.Filter",
+                    "org.apache.kafka.connect.transforms.Filter",
+                    "org.apache.kafka.connect.transforms.Flatten$Key",
+                    "org.apache.kafka.connect.transforms.Flatten$Key",
+                    "org.apache.kafka.connect.transforms.Flatten$Key",
+                    "org.apache.kafka.connect.transforms.Flatten$Key",
+                    "org.apache.kafka.connect.transforms.Flatten$Value",
+                    "org.apache.kafka.connect.transforms.Flatten$Value",
+                    "org.apache.kafka.connect.transforms.Flatten$Value",
+                    "org.apache.kafka.connect.transforms.Flatten$Value",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Key",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Key",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Key",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Key",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Value",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Value",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Value",
+                    "org.apache.kafka.connect.transforms.HeaderFrom$Value",
+                    "org.apache.kafka.connect.transforms.HoistField$Key",
+                    "org.apache.kafka.connect.transforms.HoistField$Key",
+                    "org.apache.kafka.connect.transforms.HoistField$Key",
+                    "org.apache.kafka.connect.transforms.HoistField$Key",
+                    "org.apache.kafka.connect.transforms.HoistField$Value",
+                    "org.apache.kafka.connect.transforms.HoistField$Value",
+                    "org.apache.kafka.connect.transforms.HoistField$Value",
+                    "org.apache.kafka.connect.transforms.HoistField$Value",
+                    "org.apache.kafka.connect.transforms.InsertField$Key",
+                    "org.apache.kafka.connect.transforms.InsertField$Key",
+                    "org.apache.kafka.connect.transforms.InsertField$Key",
+                    "org.apache.kafka.connect.transforms.InsertField$Key",
+                    "org.apache.kafka.connect.transforms.InsertField$Value",
+                    "org.apache.kafka.connect.transforms.InsertField$Value",
+                    "org.apache.kafka.connect.transforms.InsertField$Value",
+                    "org.apache.kafka.connect.transforms.InsertField$Value",
+                    "org.apache.kafka.connect.transforms.InsertHeader",
+                    "org.apache.kafka.connect.transforms.InsertHeader",
+                    "org.apache.kafka.connect.transforms.InsertHeader",
+                    "org.apache.kafka.connect.transforms.InsertHeader",
+                    "org.apache.kafka.connect.transforms.MaskField$Key",
+                    "org.apache.kafka.connect.transforms.MaskField$Key",
+                    "org.apache.kafka.connect.transforms.MaskField$Key",
+                    "org.apache.kafka.connect.transforms.MaskField$Key",
+                    "org.apache.kafka.connect.transforms.MaskField$Value",
+                    "org.apache.kafka.connect.transforms.MaskField$Value",
+                    "org.apache.kafka.connect.transforms.MaskField$Value",
+                    "org.apache.kafka.connect.transforms.MaskField$Value",
+                    "org.apache.kafka.connect.transforms.RegexRouter",
+                    "org.apache.kafka.connect.transforms.RegexRouter",
+                    "org.apache.kafka.connect.transforms.RegexRouter",
+                    "org.apache.kafka.connect.transforms.RegexRouter",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Key",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Key",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Key",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Key",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Value",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Value",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Value",
+                    "org.apache.kafka.connect.transforms.ReplaceField$Value",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Key",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Key",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Key",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Key",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Value",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Value",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Value",
+                    "org.apache.kafka.connect.transforms.SetSchemaMetadata$Value",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Key",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Key",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Key",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Key",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+                    "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+                    "org.apache.kafka.connect.transforms.TimestampRouter",
+                    "org.apache.kafka.connect.transforms.TimestampRouter",
+                    "org.apache.kafka.connect.transforms.TimestampRouter",
+                    "org.apache.kafka.connect.transforms.TimestampRouter",
+                    "org.apache.kafka.connect.transforms.ValueToKey",
+                    "org.apache.kafka.connect.transforms.ValueToKey",
+                    "org.apache.kafka.connect.transforms.ValueToKey",
+                    "org.apache.kafka.connect.transforms.ValueToKey"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.negate",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "Whether the configured predicate should be negated.",
+                "group": "Transforms: unwrap",
+                "width": "NONE",
+                "display_name": "negate",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "transforms.unwrap.negate",
+                "value": "false",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.predicate",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The alias of a predicate used to determine whether to apply this transformation.",
+                "group": "Transforms: unwrap",
+                "width": "NONE",
+                "display_name": "predicate",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "transforms.unwrap.predicate",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.delete.handling.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "drop",
+                "importance": "MEDIUM",
+                "documentation": "How to handle delete records. Options are: none - records are passed,drop - records are removed (the default),rewrite - __deleted field is added to records.Note: This option is scheduled for removal in a future release, use \"delete.tombstone.handling.mode\" instead",
+                "group": "Transforms: unwrap",
+                "width": "MEDIUM",
+                "display_name": "Handle delete records",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "transforms.unwrap.delete.handling.mode",
+                "value": "drop",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.add.fields",
+                "type": "LIST",
+                "required": false,
+                "default_value": "",
+                "importance": "LOW",
+                "documentation": "Adds each field listed, prefixed with __ (or __<struct>_ if the struct is specified). Example: 'version,connector,source.ts_ms' would add __version, __connector and __source_ts_ms fields. Optionally one can also map new field name like version:VERSION,connector:CONNECTOR,source.ts_ms:EVENT_TIMESTAMP.Please note that the new field name is case-sensitive.",
+                "group": "Transforms: unwrap",
+                "width": "LONG",
+                "display_name": "Adds the specified field(s) to the message if they exist.",
+                "dependents": [],
+                "order": 4
+            },
+            "value": {
+                "name": "transforms.unwrap.add.fields",
+                "value": "",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.add.fields.prefix",
+                "type": "STRING",
+                "required": false,
+                "default_value": "__",
+                "importance": "LOW",
+                "documentation": "Adds this prefix to each field listed.",
+                "group": "Transforms: unwrap",
+                "width": "SHORT",
+                "display_name": "Field prefix to be added to each field.",
+                "dependents": [],
+                "order": 5
+            },
+            "value": {
+                "name": "transforms.unwrap.add.fields.prefix",
+                "value": "__",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.add.headers",
+                "type": "LIST",
+                "required": false,
+                "default_value": "",
+                "importance": "LOW",
+                "documentation": "Adds each field listed to the header,  __ (or __<struct>_ if the struct is specified). Example: 'version,connector,source.ts_ms' would add __version, __connector and __source_ts_ms fields. Optionally one can also map new field name like version:VERSION,connector:CONNECTOR,source.ts_ms:EVENT_TIMESTAMP.Please note that the new field name is case-sensitive.",
+                "group": "Transforms: unwrap",
+                "width": "LONG",
+                "display_name": "Adds the specified fields to the header if they exist.",
+                "dependents": [],
+                "order": 6
+            },
+            "value": {
+                "name": "transforms.unwrap.add.headers",
+                "value": "",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.add.headers.prefix",
+                "type": "STRING",
+                "required": false,
+                "default_value": "__",
+                "importance": "LOW",
+                "documentation": "Adds this prefix listed to each header.",
+                "group": "Transforms: unwrap",
+                "width": "SHORT",
+                "display_name": "Header prefix to be added to each header.",
+                "dependents": [],
+                "order": 7
+            },
+            "value": {
+                "name": "transforms.unwrap.add.headers.prefix",
+                "value": "__",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.drop.fields.from.key",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "LOW",
+                "documentation": "Specifies whether to apply the drop fields behavior to the event key as well as the value. Default behavior is to only remove fields from the event value, not the key.",
+                "group": "Transforms: unwrap",
+                "width": "SHORT",
+                "display_name": "Specifies whether the fields to be dropped should also be omitted from the key",
+                "dependents": [],
+                "order": 8
+            },
+            "value": {
+                "name": "transforms.unwrap.drop.fields.from.key",
+                "value": "false",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.drop.fields.header.name",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "Specifies the name of a header that contains a list of fields to be removed from the event value.",
+                "group": "Transforms: unwrap",
+                "width": "SHORT",
+                "display_name": "Specifies a header that contains a list of field names to be removed",
+                "dependents": [],
+                "order": 9
+            },
+            "value": {
+                "name": "transforms.unwrap.drop.fields.header.name",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.drop.fields.keep.schema.compatible",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "LOW",
+                "documentation": "Controls the output event's schema compatibility when using the drop fields feature. `true`: dropped fields are removed if the schema indicates its optional leaving the schemas unchanged, `false`: dropped fields are removed from the key/value schemas, regardless of optionality.",
+                "group": "Transforms: unwrap",
+                "width": "SHORT",
+                "display_name": "Specifies if fields are dropped, will the event's schemas be compatible",
+                "dependents": [],
+                "order": 10
+            },
+            "value": {
+                "name": "transforms.unwrap.drop.fields.keep.schema.compatible",
+                "value": "true",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.drop.tombstones",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "LOW",
+                "documentation": "Debezium by default generates a tombstone record to enable Kafka compaction after a delete record was generated. This record is usually filtered out to avoid duplicates as a delete record is converted to a tombstone record, tooNote: This option is scheduled for removal in a future release, use \"delete.tombstone.handling.mode\" instead",
+                "group": "Transforms: unwrap",
+                "width": "SHORT",
+                "display_name": "Drop tombstones",
+                "dependents": [],
+                "order": 11
+            },
+            "value": {
+                "name": "transforms.unwrap.drop.tombstones",
+                "value": "false",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transforms.unwrap.route.by.field",
+                "type": "STRING",
+                "required": false,
+                "default_value": "",
+                "importance": "LOW",
+                "documentation": "The column which determines how the events will be routed, the value will replace the topic name.",
+                "group": "Transforms: unwrap",
+                "width": "LONG",
+                "display_name": "Route by field name",
+                "dependents": [],
+                "order": 12
+            },
+            "value": {
+                "name": "transforms.unwrap.route.by.field",
+                "value": "",
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "topic.prefix",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "Topic prefix that identifies and provides a namespace for the particular database server/cluster is capturing changes. The topic prefix should be unique across all other connectors, since it is used as a prefix for all Kafka topic names that receive events emitted by this connector. Only alphanumeric characters, hyphens, dots and underscores must be accepted.",
+                "group": "MariaDB",
+                "width": "MEDIUM",
+                "display_name": "Topic prefix",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "topic.prefix",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.hostname",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "Resolvable hostname or IP address of the database server.",
+                "group": "MariaDB",
+                "width": "MEDIUM",
+                "display_name": "Hostname",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "database.hostname",
+                "value": null,
+                "recommended_values": [],
+                "errors": [
+                    "Unable to connect: error parsing url : Wrong argument value 'preferred' for SslMode"
+                ],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.port",
+                "type": "INT",
+                "required": false,
+                "default_value": "3306",
+                "importance": "HIGH",
+                "documentation": "Port of the database server.",
+                "group": "MariaDB",
+                "width": "SHORT",
+                "display_name": "Port",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "database.port",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.user",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "Name of the database user to be used when connecting to the database.",
+                "group": "MariaDB",
+                "width": "SHORT",
+                "display_name": "User",
+                "dependents": [],
+                "order": 4
+            },
+            "value": {
+                "name": "database.user",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.password",
+                "type": "PASSWORD",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "Password of the database user to be used when connecting to the database.",
+                "group": "MariaDB",
+                "width": "SHORT",
+                "display_name": "Password",
+                "dependents": [],
+                "order": 5
+            },
+            "value": {
+                "name": "database.password",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.query.timeout.ms",
+                "type": "INT",
+                "required": false,
+                "default_value": "600000",
+                "importance": "LOW",
+                "documentation": "Time to wait for a query to execute, given in milliseconds. Defaults to 600 seconds (600,000 ms); zero means there is no limit.",
+                "group": "MariaDB",
+                "width": "NONE",
+                "display_name": "Query timeout",
+                "dependents": [],
+                "order": 6
+            },
+            "value": {
+                "name": "database.query.timeout.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.initial.statements",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "A semicolon separated list of SQL statements to be executed when a JDBC connection (not binlog reading connection) to the database is established. Note that the connector may establish JDBC connections at its own discretion, so this should typically be used for configuration of session parameters only, but not for executing DML statements. Use doubled semicolon (';;') to use a semicolon as a character and not as a delimiter.",
+                "group": "MariaDB",
+                "width": "LONG",
+                "display_name": "Initial statements",
+                "dependents": [],
+                "order": 7
+            },
+            "value": {
+                "name": "database.initial.statements",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.server.id",
+                "type": "LONG",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "A numeric ID of this database client, which must be unique across all currently-running database processes in the cluster. This connector joins the database cluster as another server (with this unique ID) so it can read the binlog.",
+                "group": "MariaDB",
+                "width": "LONG",
+                "display_name": "Cluster ID",
+                "dependents": [],
+                "order": 8
+            },
+            "value": {
+                "name": "database.server.id",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.server.id.offset",
+                "type": "LONG",
+                "required": false,
+                "default_value": "10000",
+                "importance": "HIGH",
+                "documentation": "Only relevant if parallel snapshotting is configured. During parallel snapshotting, multiple (4) connections open to the database client, and they each need their own unique connection ID. This offset is used to generate those IDs from the base configured cluster ID.",
+                "group": "MariaDB",
+                "width": "LONG",
+                "display_name": "Cluster ID offset",
+                "dependents": [],
+                "order": 9
+            },
+            "value": {
+                "name": "database.server.id.offset",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.ssl.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "preferred",
+                "importance": "MEDIUM",
+                "documentation": "Whether to use an encrypted connection to the database. Options include: 'disabled' to use an unencrypted connection; 'preferred' (the default) to establish a secure (encrypted) connection if the server supports secure connections, but fall back to an unencrypted connection otherwise; 'required' to use a secure (encrypted) connection, and fail if one cannot be established; 'verify_ca' like 'required' but additionally verify the server TLS certificate against the configured Certificate Authority (CA) certificates, or fail if no valid matching CA certificates are found; or 'verify_identity' like 'verify_ca' but additionally verify that the server certificate matches the host to which the connection is attempted.",
+                "group": "MariaDB",
+                "width": "MEDIUM",
+                "display_name": "SSL mode",
+                "dependents": [],
+                "order": 10
+            },
+            "value": {
+                "name": "database.ssl.mode",
+                "value": null,
+                "recommended_values": [
+                    "verify_identity",
+                    "disabled",
+                    "preferred",
+                    "required",
+                    "verify_ca"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.ssl.keystore",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The location of the key store file. This is optional and can be used for two-way authentication between the client and the database.",
+                "group": "MariaDB",
+                "width": "LONG",
+                "display_name": "SSL Keystore",
+                "dependents": [],
+                "order": 11
+            },
+            "value": {
+                "name": "database.ssl.keystore",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.ssl.keystore.password",
+                "type": "PASSWORD",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The password for the key store file. This is optional and only needed if 'database.ssl.keystore' is configured.",
+                "group": "MariaDB",
+                "width": "MEDIUM",
+                "display_name": "SSL Keystore Password",
+                "dependents": [],
+                "order": 12
+            },
+            "value": {
+                "name": "database.ssl.keystore.password",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.ssl.truststore",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The location of the trust store file for the server certificate verification.",
+                "group": "MariaDB",
+                "width": "LONG",
+                "display_name": "SSL Truststore",
+                "dependents": [],
+                "order": 13
+            },
+            "value": {
+                "name": "database.ssl.truststore",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.ssl.truststore.password",
+                "type": "PASSWORD",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The password for the trust store file. Used to check the integrity of the truststore, and unlock the truststore.",
+                "group": "MariaDB",
+                "width": "MEDIUM",
+                "display_name": "SSL Truststore Password",
+                "dependents": [],
+                "order": 14
+            },
+            "value": {
+                "name": "database.ssl.truststore.password",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "event.processing.failure.handling.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "fail",
+                "importance": "MEDIUM",
+                "documentation": "Specify how failures during processing of events (i.e. when encountering a corrupted event) should be handled, including: 'fail' (the default) an exception indicating the problematic event and its position is raised, causing the connector to be stopped; 'warn' the problematic event and its position will be logged and the event will be skipped; 'ignore' the problematic event will be skipped.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Event deserialization failure handling",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "event.processing.failure.handling.mode",
+                "value": null,
+                "recommended_values": [
+                    "warn",
+                    "fail",
+                    "ignore",
+                    "skip"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "max.batch.size",
+                "type": "INT",
+                "required": false,
+                "default_value": "2048",
+                "importance": "MEDIUM",
+                "documentation": "Maximum size of each batch of source records. Defaults to 2048.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Change event batch size",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "max.batch.size",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "max.queue.size",
+                "type": "INT",
+                "required": false,
+                "default_value": "8192",
+                "importance": "MEDIUM",
+                "documentation": "Maximum size of the queue for change events read from the database log but not yet recorded or forwarded. Defaults to 8192, and should always be larger than the maximum batch size.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Change event buffer size",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "max.queue.size",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "poll.interval.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": "500",
+                "importance": "MEDIUM",
+                "documentation": "Time to wait for new change events to appear after receiving no events, given in milliseconds. Defaults to 500 ms.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Poll interval (ms)",
+                "dependents": [],
+                "order": 4
+            },
+            "value": {
+                "name": "poll.interval.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "max.queue.size.in.bytes",
+                "type": "LONG",
+                "required": false,
+                "default_value": "0",
+                "importance": "MEDIUM",
+                "documentation": "Maximum size of the queue in bytes for change events read from the database log but not yet recorded or forwarded. Defaults to 0. Mean the feature is not enabled",
+                "group": "Connector",
+                "width": "LONG",
+                "display_name": "Change event buffer size in bytes",
+                "dependents": [],
+                "order": 5
+            },
+            "value": {
+                "name": "max.queue.size.in.bytes",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "provide.transaction.metadata",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "LOW",
+                "documentation": "Enables transaction metadata extraction together with event counting",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Store transaction metadata information in a dedicated topic.",
+                "dependents": [],
+                "order": 6
+            },
+            "value": {
+                "name": "provide.transaction.metadata",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "skipped.operations",
+                "type": "LIST",
+                "required": false,
+                "default_value": "t",
+                "importance": "LOW",
+                "documentation": "The comma-separated list of operations to skip during streaming, defined as: 'c' for inserts/create; 'u' for updates; 'd' for deletes, 't' for truncates, and 'none' to indicate nothing skipped. By default, only truncate operations will be skipped.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Skipped Operations",
+                "dependents": [],
+                "order": 7
+            },
+            "value": {
+                "name": "skipped.operations",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.delay.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": "0",
+                "importance": "LOW",
+                "documentation": "A delay period before a snapshot will begin, given in milliseconds. Defaults to 0 ms.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot Delay (milliseconds)",
+                "dependents": [],
+                "order": 8
+            },
+            "value": {
+                "name": "snapshot.delay.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.include.collection.list",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "This setting must be set to specify a list of tables/collections whose snapshot must be taken on creating or restarting the connector.",
+                "group": "Connector",
+                "width": "LONG",
+                "display_name": "Snapshot mode include data collection",
+                "dependents": [],
+                "order": 9
+            },
+            "value": {
+                "name": "snapshot.include.collection.list",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.fetch.size",
+                "type": "INT",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The maximum number of records that should be loaded into memory while performing a snapshot.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot fetch size",
+                "dependents": [],
+                "order": 10
+            },
+            "value": {
+                "name": "snapshot.fetch.size",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.max.threads",
+                "type": "INT",
+                "required": false,
+                "default_value": "1",
+                "importance": "MEDIUM",
+                "documentation": "The maximum number of threads used to perform the snapshot. Defaults to 1.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Snapshot maximum threads",
+                "dependents": [],
+                "order": 11
+            },
+            "value": {
+                "name": "snapshot.max.threads",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.mode.custom.name",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "When 'snapshot.mode' is set as custom, this setting must be set to specify a the name of the custom implementation provided in the 'name()' method. The implementations must implement the 'Snapshotter' interface and is called on each app boot to determine whether to do a snapshot.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot Mode Custom Name",
+                "dependents": [],
+                "order": 12
+            },
+            "value": {
+                "name": "snapshot.mode.custom.name",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.mode.configuration.based.snapshot.data",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "When 'snapshot.mode' is set as configuration_based, this setting permits to specify whenever the data should be snapshotted or not.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot mode property based snapshot data",
+                "dependents": [],
+                "order": 13
+            },
+            "value": {
+                "name": "snapshot.mode.configuration.based.snapshot.data",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.mode.configuration.based.snapshot.schema",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "When 'snapshot.mode' is set as configuration_based, this setting permits to specify whenever the schema should be snapshotted or not.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot mode property based snapshot schema",
+                "dependents": [],
+                "order": 14
+            },
+            "value": {
+                "name": "snapshot.mode.configuration.based.snapshot.schema",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.mode.configuration.based.start.stream",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "When 'snapshot.mode' is set as configuration_based, this setting permits to specify whenever the stream should start or not after snapshot.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot mode property based start stream",
+                "dependents": [],
+                "order": 15
+            },
+            "value": {
+                "name": "snapshot.mode.configuration.based.start.stream",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.mode.configuration.based.snapshot.on.schema.error",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "When 'snapshot.mode' is set as configuration_based, this setting permits to specify whenever the schema should be snapshotted or not in case of error.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot mode property based snapshot on schema error",
+                "dependents": [],
+                "order": 16
+            },
+            "value": {
+                "name": "snapshot.mode.configuration.based.snapshot.on.schema.error",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.mode.configuration.based.snapshot.on.data.error",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "When 'snapshot.mode' is set as configuration_based, this setting permits to specify whenever the data should be snapshotted or not in case of error.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot mode property based snapshot on data error",
+                "dependents": [],
+                "order": 17
+            },
+            "value": {
+                "name": "snapshot.mode.configuration.based.snapshot.on.data.error",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "retriable.restart.connector.wait.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": "10000",
+                "importance": "LOW",
+                "documentation": "Time to wait before restarting connector after retriable exception occurs. Defaults to 10000ms.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Retriable restart wait (ms)",
+                "dependents": [],
+                "order": 18
+            },
+            "value": {
+                "name": "retriable.restart.connector.wait.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "query.fetch.size",
+                "type": "INT",
+                "required": false,
+                "default_value": "0",
+                "importance": "MEDIUM",
+                "documentation": "The maximum number of records that should be loaded into memory while streaming. A value of '0' uses the default JDBC fetch size.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Query fetch size",
+                "dependents": [],
+                "order": 19
+            },
+            "value": {
+                "name": "query.fetch.size",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "errors.max.retries",
+                "type": "INT",
+                "required": false,
+                "default_value": "-1",
+                "importance": "LOW",
+                "documentation": "The maximum number of retries on connection errors before failing (-1 = no limit, 0 = disabled, > 0 = num of retries).",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "The maximum number of retries",
+                "dependents": [],
+                "order": 20
+            },
+            "value": {
+                "name": "errors.max.retries",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "incremental.snapshot.watermarking.strategy",
+                "type": "STRING",
+                "required": false,
+                "default_value": "INSERT_INSERT",
+                "importance": "LOW",
+                "documentation": "Specify the strategy used for watermarking during an incremental snapshot: 'insert_insert' both open and close signal is written into signal data collection (default); 'insert_delete' only open signal is written on signal data collection, the close will delete the relative open signal;",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Incremental snapshot watermarking strategy",
+                "dependents": [],
+                "order": 21
+            },
+            "value": {
+                "name": "incremental.snapshot.watermarking.strategy",
+                "value": null,
+                "recommended_values": [
+                    "insert_delete",
+                    "insert_insert"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "internal.log.position.check.enable",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "MEDIUM",
+                "documentation": "When enabled the connector checks if the position stored in the offset is still available in the log",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Enable/Disable log position check",
+                "dependents": [],
+                "order": 22
+            },
+            "value": {
+                "name": "internal.log.position.check.enable",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "decimal.handling.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "precise",
+                "importance": "MEDIUM",
+                "documentation": "Specify how DECIMAL and NUMERIC columns should be represented in change events, including: 'precise' (the default) uses java.math.BigDecimal to represent values, which are encoded in the change events using a binary representation and Kafka Connect's 'org.apache.kafka.connect.data.Decimal' type; 'string' uses string to represent values; 'double' represents values using Java's 'double', which may not offer the precision but will be far easier to use in consumers.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Decimal Handling",
+                "dependents": [],
+                "order": 23
+            },
+            "value": {
+                "name": "decimal.handling.mode",
+                "value": null,
+                "recommended_values": [
+                    "string",
+                    "double",
+                    "precise"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.lock.timeout.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": "10000",
+                "importance": "MEDIUM",
+                "documentation": "The maximum number of millis to wait for table locks at the beginning of a snapshot. If locks cannot be acquired in this time frame, the snapshot will be aborted. Defaults to 10 seconds",
+                "group": "Connector",
+                "width": "LONG",
+                "display_name": "Snapshot lock timeout (ms)",
+                "dependents": [],
+                "order": 24
+            },
+            "value": {
+                "name": "snapshot.lock.timeout.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "connect.timeout.ms",
+                "type": "INT",
+                "required": false,
+                "default_value": "30000",
+                "importance": "MEDIUM",
+                "documentation": "Maximum time to wait after trying to connect to the database before timing out, given in milliseconds. Defaults to 30 seconds (30,000 ms).",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Connection Timeout (ms)",
+                "dependents": [],
+                "order": 25
+            },
+            "value": {
+                "name": "connect.timeout.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "connect.keep.alive",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "LOW",
+                "documentation": "Whether a separate thread should be used to ensure the connection is kept alive.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Keep connection alive (true/false)",
+                "dependents": [],
+                "order": 26
+            },
+            "value": {
+                "name": "connect.keep.alive",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "connect.keep.alive.interval.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": "60000",
+                "importance": "LOW",
+                "documentation": "Interval for connection checking if keep alive thread is used, given in milliseconds Defaults to 1 minute (60,000 ms).",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Keep alive interval (ms)",
+                "dependents": [],
+                "order": 27
+            },
+            "value": {
+                "name": "connect.keep.alive.interval.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "initial",
+                "importance": "LOW",
+                "documentation": "The criteria for running a snapshot upon startup of the connector. Select one of the following snapshot options: 'when_needed': On startup, the connector runs a snapshot if one is needed.; 'schema_only': If the connector does not detect any offsets for the logical server name, it runs a snapshot that captures only the schema (table structures), but not any table data. After the snapshot completes, the connector begins to stream changes from the binlog.; 'schema_only_recovery': The connector performs a snapshot that captures only the database schema history. The connector then transitions back to streaming. Use this setting to restore a corrupted or lost database schema history topic. Do not use if the database schema was modified after the connector stopped.; 'initial' (default): If the connector does not detect any offsets for the logical server name, it runs a snapshot that captures the current full state of the configured tables. After the snapshot completes, the connector begins to stream changes from the binlog.; 'initial_only': The connector performs a snapshot as it does for the 'initial' option, but after the connector completes the snapshot, it stops, and does not stream changes from the binlog.; 'never': The connector does not run a snapshot. Upon first startup, the connector immediately begins reading from the beginning of the binlog. The 'never' mode should be used with care, and only when the binlog is known to contain all history.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Snapshot mode",
+                "dependents": [],
+                "order": 28
+            },
+            "value": {
+                "name": "snapshot.mode",
+                "value": null,
+                "recommended_values": [
+                    "always",
+                    "never",
+                    "initial_only",
+                    "configuration_based",
+                    "when_needed",
+                    "initial",
+                    "custom",
+                    "schema_only",
+                    "no_data",
+                    "recovery",
+                    "schema_only_recovery"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.query.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "select_all",
+                "importance": "LOW",
+                "documentation": "Controls query used during the snapshot",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Snapshot query mode",
+                "dependents": [],
+                "order": 29
+            },
+            "value": {
+                "name": "snapshot.query.mode",
+                "value": null,
+                "recommended_values": [
+                    "custom",
+                    "select_all"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.query.mode.custom.name",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "When 'snapshot.query.mode' is set as custom, this setting must be set to specify a the name of the custom implementation provided in the 'name()' method. The implementations must implement the 'SnapshotterQuery' interface and is called to determine how to build queries during snapshot.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Snapshot Query Mode Custom Name",
+                "dependents": [],
+                "order": 30
+            },
+            "value": {
+                "name": "snapshot.query.mode.custom.name",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "bigint.unsigned.handling.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "long",
+                "importance": "MEDIUM",
+                "documentation": "Specify how BIGINT UNSIGNED columns should be represented in change events, including: 'precise' uses java.math.BigDecimal to represent values, which are encoded in the change events using a binary representation and Kafka Connect's 'org.apache.kafka.connect.data.Decimal' type; 'long' (the default) represents values using Java's 'long', which may not offer the precision but will be far easier to use in consumers.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "The mode for handling bigint-unsigned values",
+                "dependents": [],
+                "order": 31
+            },
+            "value": {
+                "name": "bigint.unsigned.handling.mode",
+                "value": null,
+                "recommended_values": [
+                    "precise",
+                    "long"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "time.precision.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "adaptive_time_microseconds",
+                "importance": "MEDIUM",
+                "documentation": "Time, date and timestamps can be represented with different kinds of precisions, including: 'adaptive_time_microseconds': the precision of date and timestamp values is based the database column's precision; but time fields always use microseconds precision; 'connect': always represents time, date and timestamp values using Kafka Connect's built-in representations for Time, Date, and Timestamp, which uses millisecond precision regardless of the database columns' precision.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "The time precision mode to be used",
+                "dependents": [],
+                "order": 32
+            },
+            "value": {
+                "name": "time.precision.mode",
+                "value": null,
+                "recommended_values": [
+                    "adaptive",
+                    "adaptive_time_microseconds",
+                    "connect"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "enable.time.adjuster",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "LOW",
+                "documentation": "The database allows the user to insert year value as either 2-digit or 4-digit. In case of two digit the value is automatically mapped into 1970 - 2069.false - delegates the implicit conversion to the database; true - (the default) Debezium makes the conversion",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Enable Time Adjuster",
+                "dependents": [],
+                "order": 33
+            },
+            "value": {
+                "name": "enable.time.adjuster",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "schema.name.adjustment.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "none",
+                "importance": "LOW",
+                "documentation": "Specify how schema names should be adjusted for compatibility with the message converter used by the connector, including: 'avro' replaces the characters that cannot be used in the Avro type name with underscore; 'avro_unicode' replaces the underscore or characters that cannot be used in the Avro type name with corresponding unicode like _uxxxx. Note: _ is an escape sequence like backslash in Java;'none' does not apply any adjustment (default)",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Schema Name Adjustment",
+                "dependents": [],
+                "order": 34
+            },
+            "value": {
+                "name": "schema.name.adjustment.mode",
+                "value": null,
+                "recommended_values": [
+                    "none",
+                    "avro_unicode",
+                    "avro"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "min.row.count.to.stream.results",
+                "type": "INT",
+                "required": false,
+                "default_value": "1000",
+                "importance": "LOW",
+                "documentation": "The number of rows a table must contain to stream results rather than pull all into memory during snapshots. Defaults to 1,000. Use 0 to stream all results and completely avoid checking the size of each table.",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Stream result set of size",
+                "dependents": [],
+                "order": 35
+            },
+            "value": {
+                "name": "min.row.count.to.stream.results",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "incremental.snapshot.chunk.size",
+                "type": "INT",
+                "required": false,
+                "default_value": "1024",
+                "importance": "MEDIUM",
+                "documentation": "The maximum size of chunk (number of documents/rows) for incremental snapshotting",
+                "group": "Connector",
+                "width": "MEDIUM",
+                "display_name": "Incremental snapshot chunk size",
+                "dependents": [],
+                "order": 36
+            },
+            "value": {
+                "name": "incremental.snapshot.chunk.size",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "incremental.snapshot.allow.schema.changes",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "LOW",
+                "documentation": "Detect schema change during an incremental snapshot and re-select a current chunk to avoid locking DDLs. Note that changes to a primary key are not supported and can cause incorrect results if performed during an incremental snapshot. Another limitation is that if a schema change affects only columns' default values, then the change won't be detected until the DDL is processed from the binlog stream. This doesn't affect the snapshot events' values, but the schema of snapshot events may have outdated defaults.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Allow schema changes during incremental snapshot if supported.",
+                "dependents": [],
+                "order": 37
+            },
+            "value": {
+                "name": "incremental.snapshot.allow.schema.changes",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "schema.history.internal.store.only.captured.databases.ddl",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "LOW",
+                "documentation": "Controls what DDL will Debezium store in database schema history. By default (true) only DDL that manipulates a table from captured schema/database will be stored. If set to false, then Debezium will store all incoming DDL statements.",
+                "group": "Connector",
+                "width": "SHORT",
+                "display_name": "Store only DDL that modifies tables of databases that are captured based on include/exclude lists",
+                "dependents": [],
+                "order": 38
+            },
+            "value": {
+                "name": "schema.history.internal.store.only.captured.databases.ddl",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.locking.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "minimal",
+                "importance": "LOW",
+                "documentation": "Controls how long the connector holds onto the global read lock while it is performing a snapshot. The default is 'minimal', meaning the connector holds the global read lock (and thus prevents updates) for just the initial portion of the snapshot while the database schemas and other metadata are being read. The remaining work in a snapshot involves selecting all rows from each table, and this can be done using the snapshot process' REPEATABLE READ transaction isolation even when the lock is no longer held and other operations are updating the database. However, in some cases it may be desirable to block all writes for the entire duration of the snapshot; in such cases set this to 'extended'. Using a value of 'none' will prevent the connector from acquiring any table locks during the snapshot process. This mode can only be used in combination with snapshot.mode values of 'schema_only' or 'schema_only_recovery' and is only safe to use if no schema changes are happening while the snapshot is taken.",
+                "group": "Connector",
+                "width": "NONE",
+                "display_name": "Snapshot locking mode",
+                "dependents": [],
+                "order": 39
+            },
+            "value": {
+                "name": "snapshot.locking.mode",
+                "value": null,
+                "recommended_values": [
+                    "minimal",
+                    "custom",
+                    "none",
+                    "extended"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "schema.history.internal",
+                "type": "CLASS",
+                "required": false,
+                "default_value": "io.debezium.storage.kafka.history.KafkaSchemaHistory",
+                "importance": "LOW",
+                "documentation": "The name of the SchemaHistory class that should be used to store and recover database schema changes. The configuration properties for the history are prefixed with the 'schema.history.internal.' string.",
+                "group": "History Storage",
+                "width": "LONG",
+                "display_name": "Database schema history class",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "schema.history.internal",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": false
+            }
+        },
+        {
+            "definition": {
+                "name": "schema.history.internal.skip.unparseable.ddl",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "LOW",
+                "documentation": "Controls the action Debezium will take when it meets a DDL statement in binlog, that it cannot parse.By default the connector will stop operating but by changing the setting it can ignore the statements which it cannot parse. If skipping is enabled then Debezium can miss metadata changes.",
+                "group": "History Storage",
+                "width": "SHORT",
+                "display_name": "Skip DDL statements that cannot be parsed",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "schema.history.internal.skip.unparseable.ddl",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "schema.history.internal.store.only.captured.tables.ddl",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "LOW",
+                "documentation": "Controls what DDL will Debezium store in database schema history. By default (false) Debezium will store all incoming DDL statements. If set to true, then only DDL that manipulates a captured table will be stored.",
+                "group": "History Storage",
+                "width": "SHORT",
+                "display_name": "Store only DDL that modifies tables that are captured based on include/exclude lists",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "schema.history.internal.store.only.captured.tables.ddl",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "converters",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "Optional list of custom converters that would be used instead of default ones. The converters are defined using '<converter.prefix>.type' config option and configured using options '<converter.prefix>.<option>'",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "List of prefixes defining custom values converters.",
+                "dependents": [],
+                "order": 1
+            },
+            "value": {
+                "name": "converters",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "post.processors",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "Optional list of post processors. The processors are defined using '<post.processor.prefix>.type' config option and configured using options '<post.processor.prefix.<option>'",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "List of change event post processors.",
+                "dependents": [],
+                "order": 2
+            },
+            "value": {
+                "name": "post.processors",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "tombstones.on.delete",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "MEDIUM",
+                "documentation": "Whether delete operations should be represented by a delete event and a subsequent tombstone event (true) or only by a delete event (false). Emitting the tombstone event (the default behavior) allows Kafka to completely delete all events pertaining to the given key once the source record got deleted.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Change the behaviour of Debezium with regards to delete operations",
+                "dependents": [],
+                "order": 3
+            },
+            "value": {
+                "name": "tombstones.on.delete",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "heartbeat.interval.ms",
+                "type": "INT",
+                "required": false,
+                "default_value": "0",
+                "importance": "MEDIUM",
+                "documentation": "Length of an interval in milli-seconds in in which the connector periodically sends heartbeat messages to a heartbeat topic. Use 0 to disable heartbeat messages. Disabled by default.",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "Connector heartbeat interval (milli-seconds)",
+                "dependents": [],
+                "order": 4
+            },
+            "value": {
+                "name": "heartbeat.interval.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "heartbeat.topics.prefix",
+                "type": "STRING",
+                "required": false,
+                "default_value": "__debezium-heartbeat",
+                "importance": "LOW",
+                "documentation": "The prefix that is used to name heartbeat topics.Defaults to __debezium-heartbeat.",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "A prefix used for naming of heartbeat topics",
+                "dependents": [],
+                "order": 5
+            },
+            "value": {
+                "name": "heartbeat.topics.prefix",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "signal.data.collection",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The name of the data collection that is used to send signals/commands to Debezium. Signaling is disabled when not set.",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "Signaling data collection",
+                "dependents": [],
+                "order": 6
+            },
+            "value": {
+                "name": "signal.data.collection",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "signal.poll.interval.ms",
+                "type": "LONG",
+                "required": false,
+                "default_value": "5000",
+                "importance": "MEDIUM",
+                "documentation": "Interval for looking for new signals in registered channels, given in milliseconds. Defaults to 5 seconds.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Signal processor poll interval",
+                "dependents": [],
+                "order": 7
+            },
+            "value": {
+                "name": "signal.poll.interval.ms",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "signal.enabled.channels",
+                "type": "LIST",
+                "required": false,
+                "default_value": "source",
+                "importance": "MEDIUM",
+                "documentation": "List of channels names that are enabled. Source channel is enabled by default",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Enabled channels names",
+                "dependents": [],
+                "order": 8
+            },
+            "value": {
+                "name": "signal.enabled.channels",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "topic.naming.strategy",
+                "type": "CLASS",
+                "required": false,
+                "default_value": "io.debezium.schema.SchemaTopicNamingStrategy",
+                "importance": "MEDIUM",
+                "documentation": "The name of the TopicNamingStrategy class that should be used to determine the topic name for data change, schema change, transaction, heartbeat event etc.",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "Topic naming strategy class",
+                "dependents": [],
+                "order": 9
+            },
+            "value": {
+                "name": "topic.naming.strategy",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "notification.enabled.channels",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "List of notification channels names that are enabled.",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Enabled notification channels names",
+                "dependents": [],
+                "order": 10
+            },
+            "value": {
+                "name": "notification.enabled.channels",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "notification.sink.topic.name",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "The name of the topic for the notifications. This is required in case 'sink' is in the list of enabled channels",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Notification topic name",
+                "dependents": [],
+                "order": 11
+            },
+            "value": {
+                "name": "notification.sink.topic.name",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "transaction.metadata.factory",
+                "type": "CLASS",
+                "required": false,
+                "default_value": "io.debezium.pipeline.txmetadata.DefaultTransactionMetadataFactory",
+                "importance": "LOW",
+                "documentation": "Class to make transaction context & transaction struct/schemas",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "Factory class to create transaction context & transaction struct maker classes",
+                "dependents": [],
+                "order": 12
+            },
+            "value": {
+                "name": "transaction.metadata.factory",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "custom.metric.tags",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "The custom metric tags will accept key-value pairs to customize the MBean object name which should be appended the end of regular name, each key would represent a tag for the MBean object name, and the corresponding value would be the value of that tag the key is. For example: k1=v1,k2=v2",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "Customize metric tags",
+                "dependents": [],
+                "order": 13
+            },
+            "value": {
+                "name": "custom.metric.tags",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "column.include.list",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "Regular expressions matching columns to include in change events",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Include Columns",
+                "dependents": [],
+                "order": 14
+            },
+            "value": {
+                "name": "column.include.list",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "column.exclude.list",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "Regular expressions matching columns to exclude from change events",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Exclude Columns",
+                "dependents": [],
+                "order": 15
+            },
+            "value": {
+                "name": "column.exclude.list",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "table.include.list",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "The tables for which changes are to be captured",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Include Tables",
+                "dependents": [],
+                "order": 16
+            },
+            "value": {
+                "name": "table.include.list",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "table.exclude.list",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A comma-separated list of regular expressions that match the fully-qualified names of tables to be excluded from monitoring",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Exclude Tables",
+                "dependents": [],
+                "order": 17
+            },
+            "value": {
+                "name": "table.exclude.list",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "message.key.columns",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A semicolon-separated list of expressions that match fully-qualified tables and column(s) to be used as message key. Each expression must match the pattern '<fully-qualified table name>:<key columns>', where the table names could be defined as (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on the specific connector, and the key columns are a comma-separated list of columns representing the custom key. For any table without an explicit key configuration the table's primary key column(s) will be used as message key. Example: dbserver1.inventory.orderlines:orderId,orderLineId;dbserver1.inventory.orders:id",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Columns PK mapping",
+                "dependents": [],
+                "order": 18
+            },
+            "value": {
+                "name": "message.key.columns",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.select.statement.overrides",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": " This property contains a comma-separated list of fully-qualified tables (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on the specific connectors. Select statements for the individual tables are specified in further configuration properties, one for each table, identified by the id 'snapshot.select.statement.overrides.[DB_NAME].[TABLE_NAME]' or 'snapshot.select.statement.overrides.[SCHEMA_NAME].[TABLE_NAME]', respectively. The value of those properties is the select statement to use when retrieving data from the specific table during snapshotting. A possible use case for large append-only tables is setting a specific point where to start (resume) snapshotting, in case a previous snapshotting was interrupted.",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "List of tables where the default select statement used during snapshotting should be overridden.",
+                "dependents": [],
+                "order": 19
+            },
+            "value": {
+                "name": "snapshot.select.statement.overrides",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "column.mask.hash.([^.]+).with.salt.(.+)",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A comma-separated list of regular expressions matching fully-qualified names of columns that should be masked by hashing the input. Using the specified hash algorithms and salt.",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Mask Columns Using Hash and Salt",
+                "dependents": [],
+                "order": 20
+            },
+            "value": {
+                "name": "column.mask.hash.([^.]+).with.salt.(.+)",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "column.mask.with.(d+).chars",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A comma-separated list of regular expressions matching fully-qualified names of columns that should be masked with configured amount of asterisk ('*') characters.",
+                "group": "Events",
+                "width": "NONE",
+                "display_name": "Mask Columns With n Asterisks",
+                "dependents": [],
+                "order": 21
+            },
+            "value": {
+                "name": "column.mask.with.(d+).chars",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "column.truncate.to.(d+).chars",
+                "type": "INT",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A comma-separated list of regular expressions matching fully-qualified names of columns that should be truncated to the configured amount of characters.",
+                "group": "Events",
+                "width": "NONE",
+                "display_name": "Truncate Columns To n Characters",
+                "dependents": [],
+                "order": 22
+            },
+            "value": {
+                "name": "column.truncate.to.(d+).chars",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "include.schema.changes",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "MEDIUM",
+                "documentation": "Whether the connector should publish changes in the database schema to a Kafka topic with the same name as the database server ID. Each schema change will be recorded using a key that contains the database name and whose value include logical description of the new schema and optionally the DDL statement(s). The default is 'true'. This is independent of how the connector internally records database schema history.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Include database schema changes",
+                "dependents": [],
+                "order": 23
+            },
+            "value": {
+                "name": "include.schema.changes",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "include.schema.comments",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "Whether the connector parse table and column's comment to metadata object. Note: Enable this option will bring the implications on memory usage. The number and size of ColumnImpl objects is what largely impacts how much memory is consumed by the Debezium connectors, and adding a String to each of them can potentially be quite heavy. The default is 'false'.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Include Table and Column Comments",
+                "dependents": [],
+                "order": 24
+            },
+            "value": {
+                "name": "include.schema.comments",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "column.propagate.source.type",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A comma-separated list of regular expressions matching fully-qualified names of columns that adds the column’s original type and original length as parameters to the corresponding field schemas in the emitted change records.",
+                "group": "Events",
+                "width": "NONE",
+                "display_name": "Propagate Source Types by Columns",
+                "dependents": [],
+                "order": 25
+            },
+            "value": {
+                "name": "column.propagate.source.type",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "datatype.propagate.source.type",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A comma-separated list of regular expressions matching the database-specific data type names that adds the data type's original type and original length as parameters to the corresponding field schemas in the emitted change records.",
+                "group": "Events",
+                "width": "NONE",
+                "display_name": "Propagate Source Types by Data Type",
+                "dependents": [],
+                "order": 26
+            },
+            "value": {
+                "name": "datatype.propagate.source.type",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "internal.snapshot.scan.all.columns.force",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "LOW",
+                "documentation": "Restore pre 1.5 behaviour and scan all tables to discover columns. If you are excluding one table then turning this on may improve performance. If you are excluding a lot of tables the default behavior should work well.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Snapshot force scan all columns of all tables",
+                "dependents": [],
+                "order": 27
+            },
+            "value": {
+                "name": "internal.snapshot.scan.all.columns.force",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "snapshot.tables.order.by.row.count",
+                "type": "STRING",
+                "required": false,
+                "default_value": "disabled",
+                "importance": "MEDIUM",
+                "documentation": "Controls the order in which tables are processed in the initial snapshot. A `descending` value will order the tables by row count descending. A `ascending` value will order the tables by row count ascending. A value of `disabled` (the default) will disable ordering by row count.",
+                "group": "Events",
+                "width": "NONE",
+                "display_name": "Initial snapshot tables order by row count",
+                "dependents": [],
+                "order": 28
+            },
+            "value": {
+                "name": "snapshot.tables.order.by.row.count",
+                "value": null,
+                "recommended_values": [
+                    "disabled",
+                    "ascending",
+                    "descending"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "heartbeat.action.query",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "LOW",
+                "documentation": "The query executed with every heartbeat.",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "An optional query to execute with every heartbeat",
+                "dependents": [],
+                "order": 29
+            },
+            "value": {
+                "name": "heartbeat.action.query",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "include.query",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "false",
+                "importance": "MEDIUM",
+                "documentation": "Whether the connector should include the original SQL query that generated the change event. Note: This option requires the database to be configured using the server option binlog_rows_query_log_events (MySQL) or binlog_annotate_row_events (MariaDB) set to ON.Query will not be present for events generated from snapshot. WARNING: Enabling this option may expose tables or fields explicitly excluded or masked by including the original SQL statement in the change event. For this reason the default value is 'false'.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Include original SQL query with in change events",
+                "dependents": [],
+                "order": 30
+            },
+            "value": {
+                "name": "include.query",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "table.ignore.builtin",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "LOW",
+                "documentation": "Flag specifying whether built-in tables should be ignored.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Ignore system databases",
+                "dependents": [
+                    "database.include.list"
+                ],
+                "order": 31
+            },
+            "value": {
+                "name": "table.ignore.builtin",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.include.list",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "The databases for which changes are to be captured",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Include Databases",
+                "dependents": [
+                    "table.include.list"
+                ],
+                "order": 32
+            },
+            "value": {
+                "name": "database.include.list",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "database.exclude.list",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "A comma-separated list of regular expressions that match database names to be excluded from monitoring",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Exclude Databases",
+                "dependents": [],
+                "order": 33
+            },
+            "value": {
+                "name": "database.exclude.list",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "binlog.buffer.size",
+                "type": "INT",
+                "required": false,
+                "default_value": "0",
+                "importance": "MEDIUM",
+                "documentation": "The size of a look-ahead buffer used by the binlog reader to decide whether the transaction in progress is going to be committed or rolled back. Use 0 to disable look-ahead buffering. Defaults to 0 (i.e. buffering is disabled.",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "Binlog reader buffer size",
+                "dependents": [],
+                "order": 34
+            },
+            "value": {
+                "name": "binlog.buffer.size",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "event.deserialization.failure.handling.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "fail",
+                "importance": "MEDIUM",
+                "documentation": "Specify how failures during deserialization of binlog events (i.e. when encountering a corrupted event) should be handled, including: 'fail' (the default) an exception indicating the problematic event and its binlog position is raised, causing the connector to be stopped; 'warn' the problematic event and its binlog position will be logged and the event will be skipped; 'ignore' the problematic event will be skipped.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Event deserialization failure handling",
+                "dependents": [],
+                "order": 35
+            },
+            "value": {
+                "name": "event.deserialization.failure.handling.mode",
+                "value": null,
+                "recommended_values": [
+                    "warn",
+                    "fail",
+                    "ignore",
+                    "skip"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "inconsistent.schema.handling.mode",
+                "type": "STRING",
+                "required": false,
+                "default_value": "fail",
+                "importance": "MEDIUM",
+                "documentation": "Specify how binlog events that belong to a table missing from internal schema representation (i.e. internal representation is not consistent with database) should be handled, including: 'fail' (the default) an exception indicating the problematic event and its binlog position is raised, causing the connector to be stopped; 'warn' the problematic event and its binlog position will be logged and the event will be skipped; 'skip' the problematic event will be skipped.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Inconsistent schema failure handling",
+                "dependents": [],
+                "order": 36
+            },
+            "value": {
+                "name": "inconsistent.schema.handling.mode",
+                "value": null,
+                "recommended_values": [
+                    "warn",
+                    "fail",
+                    "ignore",
+                    "skip"
+                ],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "gtid.source.filter.dml.events",
+                "type": "BOOLEAN",
+                "required": false,
+                "default_value": "true",
+                "importance": "MEDIUM",
+                "documentation": "When set to true, only produce DML events for transactions that were written on the server with matching GTIDs defined by the `gtid.source.includes` or `gtid.source.excludes`, if they were specified.",
+                "group": "Events",
+                "width": "SHORT",
+                "display_name": "Filter DML events",
+                "dependents": [],
+                "order": 37
+            },
+            "value": {
+                "name": "gtid.source.filter.dml.events",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "gtid.source.includes",
+                "type": "LIST",
+                "required": false,
+                "default_value": null,
+                "importance": "HIGH",
+                "documentation": "The source domain IDs used to include GTID ranges when determining the starting position in the MariaDB server's binlog.",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Include GTID sources",
+                "dependents": [
+                    "table.include.list"
+                ],
+                "order": 38
+            },
+            "value": {
+                "name": "gtid.source.includes",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        },
+        {
+            "definition": {
+                "name": "gtid.source.excludes",
+                "type": "STRING",
+                "required": false,
+                "default_value": null,
+                "importance": "MEDIUM",
+                "documentation": "The source domain IDs used to exclude GTID ranges when determining the starting position in the MariaDB server's binlog.",
+                "group": "Events",
+                "width": "LONG",
+                "display_name": "Exclude GTID sources",
+                "dependents": [],
+                "order": 39
+            },
+            "value": {
+                "name": "gtid.source.excludes",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": false
+            }
+        },
+        {
+            "definition": {
+                "name": "sourceinfo.struct.maker",
+                "type": "CLASS",
+                "required": false,
+                "default_value": "io.debezium.connector.mariadb.MariaDbSourceInfoStructMaker",
+                "importance": "LOW",
+                "documentation": "The name of the SourceInfoStructMaker class that returns SourceInfo schema and struct.",
+                "group": "Events",
+                "width": "MEDIUM",
+                "display_name": "Source info struct maker class",
+                "dependents": [],
+                "order": 40
+            },
+            "value": {
+                "name": "sourceinfo.struct.maker",
+                "value": null,
+                "recommended_values": [],
+                "errors": [],
+                "visible": true
+            }
+        }
+    ]
+}
