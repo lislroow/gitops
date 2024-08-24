@@ -1,0 +1,21 @@
+services:
+  mariadb-develop:
+    image: mariadb:latest
+    container_name: mariadb-develop
+    ports:
+      - 3306:3306
+    restart: no
+    volumes:
+      - mariadb-develop_data:/var/lib/mysql
+    env_file: mariadb/develop.env
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - local-default
+
+volumes:
+  mariadb-develop_data:
+
+networks:
+  local-default:
+    external: true
