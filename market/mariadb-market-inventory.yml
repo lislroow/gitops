@@ -1,0 +1,25 @@
+services:
+  mariadb-market-inventory:
+    image: mariadb:latest
+    container_name: mariadb-market-inventory
+    ports:
+      - 3403:3403
+    restart: no
+    volumes:
+      - mariadb-market-inventory_data:/var/lib/mysql
+    env_file: mariadb/market-inventory.env
+    environment:
+      TZ: Asia/Seoul
+    command:
+      - --log-bin
+      - --log-basename=log_mariadb
+      - --binlog_format=ROW
+    networks:
+      - local-default
+
+volumes:
+  mariadb-market-inventory_data:
+
+networks:
+  local-default:
+    external: true
