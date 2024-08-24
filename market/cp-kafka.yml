@@ -1,0 +1,66 @@
+services:
+  cp-zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: cp-zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+    ports:
+      - 2181:2181
+    restart: always
+    networks:
+      - local-default
+
+  cp-kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: cp-kafka
+    ports:
+      - 9092:9092
+    restart: always
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: cp-zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cp-kafka:9092,PLAINTEXT_HOST://cp-kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    networks:
+      - local-default
+    depends_on:
+      - cp-zookeeper
+
+  cp-kafka-connect:
+    image: market/cp-kafka-connect:7.6.1
+    container_name: cp-kafka-connect
+    ports:
+      - 8083:8083
+    restart: always
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: cp-kafka:9092
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "market-"
+      CONNECT_CONFIG_STORAGE_TOPIC: "market-config"
+      CONNECT_OFFSET_STORAGE_TOPIC: "market-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "market-status"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib,/etc/kafka-connect/jars"
+    depends_on:
+      - cp-kafka
+    networks:
+      - local-default
+
+networks:
+  local-default:
+    external: true
