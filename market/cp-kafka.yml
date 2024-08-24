@@ -34,7 +34,7 @@ services:
       - cp-zookeeper
 
   cp-kafka-connect:
-    image: market/cp-kafka-connect:7.6.1
+    image: localhost:5000/market/cp-kafka-connect:7.6.1
     container_name: cp-kafka-connect
     ports:
       - 8083:8083
