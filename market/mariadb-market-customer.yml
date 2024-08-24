@@ -4,7 +4,7 @@ services:
     container_name: mariadb-market-customer
     ports:
       - 3401:3401
-    restart: no
+    restart: always
     volumes:
     - mariadb-market-customer_data:/var/lib/mysql
     env_file: mariadb/market-customer.env
