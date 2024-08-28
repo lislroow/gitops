@@ -35,8 +35,11 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 ```
 
+spring producer 실행 후 topic 및 topic 메시지 확인
+
 ```
-[appuser@2351c027ba61 ~]$ kafka-topics --bootstrap-server localhost:9092 --list
+$ kafka-topics --bootstrap-server localhost:9092 --list
+
 CustomOAuth2UserService.loadUser
 __consumer_offsets
 cdc_customer
@@ -44,7 +47,11 @@ market-config
 market-offsets
 market-status
 
-kafka-console-consumer --bootstrap-server localhost:9092 --from-beginning --topic CustomOAuth2UserService.loadUser
+$ kafka-console-consumer --bootstrap-server localhost:9092 --from-beginning --topic CustomOAuth2UserService.loadUser
+
+{"id":"00u7uljhpo7g4k","password":"{bcrypt}$2a$10$mGLANNq3.4pVVcsIxlP/QehgBpdI.Vi91t7Di5YWlNsnTpHK5meOa","email":"mgkim.net@gmail.com","nickname":"무명왕","picture":"https://lh3.googleusercontent.com/a/ACg8ocLIczZ4384A_jJUKFy2u3yg7J-EGwwwRjdkgfrHoQ7T_H2ElSU=s96-c","role":"ROLE_USER","lockedYn":"N","dormantYn":"N","passwordExpireDate":[2024,11,23,18,7,55,195029700],"registrationId":"google","oauth2Id":"108568153386903408749","createDate":[2024,8,25,18,7,55,195029700],"modifyDate":[2024,8,25,18,7,55,195029700]}
+
+kafka-topics --bootstrap-server localhost:9092 --delete --topic CustomOAuth2UserService.loadUser
 ```
 
 ### 'cp-kafka' cdc 구성
