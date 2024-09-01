@@ -1,0 +1,12 @@
+services:
+  mariadb-csmk:
+    image: mariadb:latest
+    container_name: mariadb-csmk
+    ports:
+      - 3306:3306
+    restart: always
+    volumes:
+      - ./mariadb-csmk_data:/var/lib/mysql
+    env_file: mariadb-csmk.env
+    environment:
+      TZ: Asia/Seoul
