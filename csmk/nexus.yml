@@ -7,6 +7,6 @@ services:
       - 5000:5000
     restart: always
     volumes:
-      - ./nexus_data:/nexus-data
+      - /data/nexus_data:/nexus-data
     user: "root:root"
 
