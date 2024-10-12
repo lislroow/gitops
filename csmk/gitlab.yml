@@ -1,0 +1,17 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:15.2.1-ce.0
+    container_name: gitlab
+    restart: "no"
+    hostname: 172.28.200.40
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://172.28.200.40'
+    ports:
+      - '8090:80'
+      - '8022:22'
+    volumes:
+      - /data/gitlab/data:/var/opt/gitlab
+      - /data/gitlab/conf:/etc/gitlab
+      - /data/gitlab/logs:/var/log/gitlab
+    shm_size: '256m'
