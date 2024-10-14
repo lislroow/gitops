@@ -7,8 +7,8 @@ services:
       - '9000:9000'
     ulimits:
       nofiles:
-        soft: '262144'
-        hard: '262144'
+        soft: 262144
+        hard: 262144
     environment:
       - sonar.jdbc.url=jdbc:postgresql://sonarqube-postgres:5432/sonar
       - sonar.jdbc.username=sonar
