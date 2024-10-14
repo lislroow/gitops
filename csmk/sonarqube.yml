@@ -1,0 +1,31 @@
+services:
+  sonarqube:
+    image: sonarqube:7.9.6-community
+    container_name: sonarqube
+    restart: "no"
+    ports:
+      - '9000:9000'
+    ulimits:
+      nofiles:
+        soft: '262144'
+        hard: '262144'
+    environment:
+      - sonar.jdbc.url=jdbc:postgresql://sonarqube-postgres:5432/sonar
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=sonar
+    hostname: 172.28.200.40
+    volumes:
+      - /data/sonarqube/conf:/opt/sonarqube/conf
+      - /data/sonarqube/data:/opt/sonarqube/data
+      - /data/sonarqube/logs:/opt/sonarqube/logs
+      - /data/sonarqube/extensions:/opt/sonarqube/extensions
+  postgres:
+    image: postgres:13.4
+    networks:
+      - sonarnet
+    container_name: sonarqube-postgres
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - /data/sonarqube/postgresql/data:/var/lib/postgresql/data
