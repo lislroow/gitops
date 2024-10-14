@@ -13,7 +13,6 @@ services:
       - sonar.jdbc.url=jdbc:postgresql://sonarqube-postgres:5432/sonar
       - sonar.jdbc.username=sonar
       - sonar.jdbc.password=sonar
-    hostname: 172.28.200.40
     volumes:
       - /data/sonarqube/conf:/opt/sonarqube/conf
       - /data/sonarqube/data:/opt/sonarqube/data
@@ -21,8 +20,6 @@ services:
       - /data/sonarqube/extensions:/opt/sonarqube/extensions
   postgres:
     image: postgres:13.4
-    networks:
-      - sonarnet
     container_name: sonarqube-postgres
     environment:
       - POSTGRES_USER=sonar
