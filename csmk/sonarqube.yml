@@ -2,13 +2,13 @@ services:
   sonarqube:
     image: sonarqube:7.9.6-community
     container_name: sonarqube
-    restart: "no"
+    restart: "always"
     ports:
       - '9000:9000'
-    ulimits:
-      nofiles:
-        soft: 262144
-        hard: 262144
+    #ulimits:
+    #  nofiles:
+    #    soft: 65536
+    #    hard: 65536
     environment:
       - sonar.jdbc.url=jdbc:postgresql://sonarqube-postgres:5432/sonar
       - sonar.jdbc.username=sonar
