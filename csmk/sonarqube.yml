@@ -1,6 +1,7 @@
 services:
   sonarqube:
-    image: sonarqube:7.9.6-community
+    #image: sonarqube:7.9.6-community
+    image: sonarqube:10.6-community
     container_name: sonarqube
     restart: "always"
     ports:
