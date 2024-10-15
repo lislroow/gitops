@@ -6,25 +6,23 @@ services:
     restart: "always"
     ports:
       - '9000:9000'
+    depends_on: [sonarqube-db]
     #ulimits:
     #  nofiles:
     #    soft: 65536
     #    hard: 65536
     environment:
-      - sonar.jdbc.url=jdbc:postgresql://sonarqube-postgres:5432/sonar
+      - sonar.jdbc.url=jdbc:postgresql://sonarqube-db:5432/sonar
       - sonar.jdbc.username=sonar
       - sonar.jdbc.password=sonar
     volumes:
-      - /data/sonarqube/conf:/opt/sonarqube/conf
-      - /data/sonarqube/data:/opt/sonarqube/data
-      - /data/sonarqube/logs:/opt/sonarqube/logs
-      - /data/sonarqube/extensions:/opt/sonarqube/extensions
-  postgres:
+      - /data/sonarqube:/opt/sonarqube
+  sonarqube-db:
     image: postgres:13.4
-    container_name: sonarqube-postgres
+    container_name: sonarqube-db
     restart: "always"
     environment:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
     volumes:
-      - /data/sonarqube/postgresql/data:/var/lib/postgresql/data
+      - /data/sonarqube/db:/var/lib/postgresql/data
