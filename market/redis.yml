@@ -10,7 +10,7 @@ services:
       - "mode=standalone"
     volumes:
       - redis-auth-user_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --port 6310 --appendonly yes
     networks:
       - local-default
   redis-auth-guest:
@@ -24,7 +24,7 @@ services:
       - "mode=standalone"
     volumes:
       - redis-auth-guest_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --port 6311 --appendonly yes
     networks:
       - local-default
   redis-cache-product:
@@ -38,7 +38,7 @@ services:
       - "mode=standalone"
     volumes:
       - redis-cache-product_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --port 6320 --appendonly yes
     networks:
       - local-default
 
