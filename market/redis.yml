@@ -1,6 +1,6 @@
 services:
   redis-auth-user:
-    image: redis:latest
+    image: redis:7.4.1
     container_name: redis-auth-user
     ports:
       - 6310:6310
@@ -14,7 +14,7 @@ services:
     networks:
       - local-default
   redis-auth-guest:
-    image: redis:latest
+    image: redis:7.4.1
     container_name: redis-auth-guest
     ports:
       - 6311:6311
@@ -28,7 +28,7 @@ services:
     networks:
       - local-default
   redis-cache-product:
-    image: redis:latest
+    image: redis:7.4.1
     container_name: redis-cache-product
     ports:
       - 6320:6320
