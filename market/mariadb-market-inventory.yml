@@ -1,6 +1,6 @@
 services:
   mariadb-market-inventory:
-    image: mariadb:latest
+    image: mariadb:11.5.2
     container_name: mariadb-market-inventory
     ports:
       - 3403:3403

@@ -1,6 +1,6 @@
 services:
   mariadb-market-product:
-    image: mariadb:latest
+    image: mariadb:11.5.2
     container_name: mariadb-market-product
     ports:
       - 3405:3405

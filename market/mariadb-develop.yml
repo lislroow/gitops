@@ -1,6 +1,6 @@
 services:
   mariadb-develop:
-    image: mariadb:latest
+    image: mariadb:11.5.2
     container_name: mariadb-develop
     ports:
       - 3306:3306
