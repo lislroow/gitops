@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_DIR=$( cd $( dirname $0 ) && pwd -P )
+BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
 IMAGE_NAME="market/scouter-server:latest"
 REGISTRY="localhost:5000"
 
