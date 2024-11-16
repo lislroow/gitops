@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  vertica:
+    image: vertica/vertica-ce:24.1.0-0
+    container_name: vertica
+    ports:
+      - "5433:5433"
+      - "5444:5444"
+    environment:
+      APP_DB_USER: "mkuser"
+      APP_DB_PASSWORD: "1"
+      TZ: "Asia/Seoul"
+    volumes:
+      - vertica_data:/data
+    networks:
+      - local-default
+    deploy:
+      mode: global
+
+volumes:
+  vertica-data:
+
+networks:
+  local-default:
+    external: true
