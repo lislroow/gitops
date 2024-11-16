@@ -18,7 +18,7 @@ services:
       mode: global
 
 volumes:
-  vertica-data:
+  vertica_data:
 
 networks:
   local-default:
