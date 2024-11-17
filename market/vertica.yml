@@ -6,6 +6,7 @@ services:
     ports:
       - "5433:5433"
       - "5444:5444"
+    restart: always
     environment:
       APP_DB_USER: "mkuser"
       APP_DB_PASSWORD: "1"
