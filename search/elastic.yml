@@ -3,7 +3,7 @@ version: "2.2"
 services:
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
-    restart: none
+    restart: always
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
     user: "0"
