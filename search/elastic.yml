@@ -1,8 +1,5 @@
-version: "2.2"
-
 services:
   setup:
-    env_file: elastic.env
     container_name: elastic-setup
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     restart: always
@@ -66,7 +63,6 @@ services:
       retries: 120
 
   es01:
-    env_file: elastic.env
     container_name: elastic-es01
     depends_on:
       setup:
@@ -112,7 +108,6 @@ services:
       retries: 120
 
   es02:
-    env_file: elastic.env
     container_name: elastic-es02
     depends_on:
       - es01
@@ -154,7 +149,6 @@ services:
       retries: 120
 
   es03:
-    env_file: elastic.env
     container_name: elastic-es03
     depends_on:
       - es02
@@ -196,7 +190,6 @@ services:
       retries: 120
 
   kibana:
-    env_file: elastic.env
     container_name: elastic-kibana
     depends_on:
       es01:
