@@ -2,7 +2,7 @@ services:
   setup:
     container_name: elastic-setup
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
-    restart: always
+    restart: none
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
     user: "0"
@@ -64,6 +64,7 @@ services:
 
   es01:
     container_name: elastic-es01
+    restart: always
     depends_on:
       setup:
         condition: service_healthy
@@ -109,6 +110,7 @@ services:
 
   es02:
     container_name: elastic-es02
+    restart: always
     depends_on:
       - es01
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
@@ -150,6 +152,7 @@ services:
 
   es03:
     container_name: elastic-es03
+    restart: always
     depends_on:
       - es02
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
@@ -191,6 +194,7 @@ services:
 
   kibana:
     container_name: elastic-kibana
+    restart: always
     depends_on:
       es01:
         condition: service_healthy
