@@ -5,13 +5,14 @@ services:
     restart: always
     ports:
       - 9000:9000
-    depends_on: [postgres]
+    #depends_on: [postgres]
     #ulimits:
     #  nofiles:
     #    soft: 65536
     #    hard: 65536
     environment:
-      - sonar.jdbc.url=jdbc:postgresql://postgres:5432/spring
-      - sonar.jdbc.username=spring
-      - sonar.jdbc.password=1
+      - SONAR_JDBC_URL=jdbc:postgresql://172.28.200.50:5432/spring
+      - SONAR_JDBC_USERNAME=spring
+      - SONAR_JDBC_PASSWORD=1
+      - SONAR_EMBEDDED_DATABASE_PORT=-1  # H2 비활성화
     mem_limit: 3g
