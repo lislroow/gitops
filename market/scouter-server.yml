@@ -18,6 +18,7 @@ services:
       - MGR_PURGE_XLOG_KEEP_DAYS=2
       - MGR_PURGE_COUNTER_KEEP_DAYS=2
       - JAVA_OPT=-Xms512m -Xmx512m
+    mem_limit: 1g
     networks:
       - local-default
 
