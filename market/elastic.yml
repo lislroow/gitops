@@ -1,6 +1,6 @@
 services:
-  elastic-setup:
-    container_name: elastic-setup
+  es-setup:
+    container_name: es-setup
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     restart: none
     volumes:
@@ -51,10 +51,10 @@ services:
       retries: 120
   
   es01:
-    container_name: elastic
+    container_name: es01
     restart: always
     depends_on:
-      elastic-setup:
+      es-setup:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
