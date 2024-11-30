@@ -1,6 +1,6 @@
 services:
   sonarqube:
-    image: sonarqube:10.6-community
+    image: sonarqube:10.7-community
     container_name: sonarqube
     restart: always
     ports:
@@ -11,7 +11,7 @@ services:
     #    soft: 65536
     #    hard: 65536
     environment:
-      - SONAR_JDBC_URL=jdbc:postgresql://172.28.200.50:5432/spring
+      - SONAR_JDBC_URL=jdbc:postgresql://172.28.200.50:5432/sonarqube
       - SONAR_JDBC_USERNAME=spring
       - SONAR_JDBC_PASSWORD=1
       - SONAR_EMBEDDED_DATABASE_PORT=-1  # H2 비활성화
