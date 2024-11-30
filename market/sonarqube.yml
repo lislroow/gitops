@@ -1,0 +1,17 @@
+services:
+  sonarqube:
+    image: sonarqube:10.6-community
+    container_name: sonarqube
+    restart: always
+    ports:
+      - 9000:9000
+    depends_on: [postgres]
+    #ulimits:
+    #  nofiles:
+    #    soft: 65536
+    #    hard: 65536
+    environment:
+      - sonar.jdbc.url=jdbc:postgresql://postgres:5432/spring
+      - sonar.jdbc.username=spring
+      - sonar.jdbc.password=1
+    mem_limit: 3g
