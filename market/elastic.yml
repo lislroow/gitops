@@ -54,7 +54,7 @@ services:
     container_name: elastic
     restart: always
     depends_on:
-      setup:
+      elastic-setup:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
