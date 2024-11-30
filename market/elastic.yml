@@ -63,6 +63,7 @@ services:
     ports:
       - ${ES_PORT}:9200
     environment:
+      - discovery.type=single-node
       - node.name=es01
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - bootstrap.memory_lock=true
