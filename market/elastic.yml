@@ -1,6 +1,5 @@
 services:
   es-setup:
-    container_name: es-setup
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     restart: none
     volumes:
@@ -17,9 +16,9 @@ services:
           echo "Creating certs";
           echo -ne \
           "instances:\n"\
-          "  - name: es01\n"\
+          "  - name: elastic\n"\
           "    dns:\n"\
-          "      - es01\n"\
+          "      - elastic\n"\
           "      - localhost\n"\
           "    ip:\n"\
           "      - 127.0.0.1\n"\
@@ -32,21 +31,20 @@ services:
         find . -type d -exec chmod 750 \{\} \;;
         find . -type f -exec chmod 640 \{\} \;;
         echo "Waiting for Elasticsearch availability";
-        until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+        until curl -s --cacert config/certs/ca/ca.crt https://elastic:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:trustno1" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"trustno1\"}" | grep -q "^{}"; do sleep 10; done;
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:trustno1" -H "Content-Type: application/json" https://elastic:9200/_security/user/kibana_system/_password -d "{\"password\":\"trustno1\"}" | grep -q "^{}"; do sleep 10; done;
         echo "All done!";
       '
     healthcheck:
-      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
+      test: ["CMD-SHELL", "[ -f config/certs/elastic/elastic.crt ]"]
       interval: 1s
       timeout: 5s
       retries: 120
     networks:
       - local-default
   
-  es01:
-    container_name: elastic
+  elastic:
     #container_name: es01
     restart: always
     depends_on:
@@ -55,22 +53,22 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     volumes:
       - elastic_certs:/usr/share/elasticsearch/config/certs
-      - es01_data:/usr/share/elasticsearch/data
+      - elastic_data:/usr/share/elasticsearch/data
     ports:
       - 9280:9200
     environment:
       - discovery.type=single-node
-      - node.name=es01
+      - node.name=elastic
       - ELASTIC_PASSWORD=trustno1
       - bootstrap.memory_lock=true
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=certs/es01/es01.key
-      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.http.ssl.key=certs/elastic/elastic.key
+      - xpack.security.http.ssl.certificate=certs/elastic/elastic.crt
       - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.key=certs/es01/es01.key
-      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.transport.ssl.key=certs/elastic/elastic.key
+      - xpack.security.transport.ssl.certificate=certs/elastic/elastic.crt
       - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.verification_mode=certificate
       - xpack.license.self_generated.type=basic
@@ -93,10 +91,9 @@ services:
       - local-default
   
   kibana:
-    container_name: kibana
     restart: always
     depends_on:
-      es01:
+      elastic:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:8.14.3
     volumes:
@@ -106,7 +103,7 @@ services:
       - 5681:5601
     environment:
       - SERVERNAME=kibana
-      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - ELASTICSEARCH_HOSTS=https://elastic:9200
       - ELASTICSEARCH_USERNAME=kibana_system
       - ELASTICSEARCH_PASSWORD=trustno1
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
@@ -125,7 +122,7 @@ services:
 
 volumes:
   elastic_certs:
-  es01_data:
+  elastic_data:
   kibana_data:
 
 networks:
