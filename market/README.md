@@ -80,3 +80,19 @@ fi
 docker ps -q | xargs -I {} docker inspect --format '{{.Name}} {{range .Mounts}}{{if eq .Name "3cbeedf67e372e768c4ac38846a2296da6c991b659b45a79220c639d9850b65f"}}{{.Name}}{{end}}{{end}}' {}
 ```
 
+- IPv6 비활성화
+
+```
+##/etc/docker/daemon.json 
+#{
+#  "insecure-registries": ["localhost:5000"],
+#  "dns": ["8.8.8.8", "8.8.4.4"],
+#  "hosts": ["tcp://0.0.0.0:2375", "unix:///var/run/docker.sock"],
+#  "ip": "0.0.0.0"
+#}
+
+#/etc/sysctl.conf
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+```
