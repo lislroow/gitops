@@ -5,11 +5,17 @@ services:
     ports:
       - 3306:3306
     restart: always
+    #env_file: mariadb/develop.env
+    environment:
+      - TZ: Asia/Seoul
+      - MYSQL_HOST=localhost
+      - MYSQL_PORT=3306
+      - MYSQL_ROOT_PASSWORD=1
+      - MYSQL_DATABASE=develop
+      - MYSQL_USER=mkuser
+      - MYSQL_PASSWORD=1
     volumes:
       - mariadb-develop_data:/var/lib/mysql
-    env_file: mariadb/develop.env
-    environment:
-      TZ: Asia/Seoul
     networks:
       - local-default
 

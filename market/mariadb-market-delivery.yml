@@ -5,15 +5,20 @@ services:
     ports:
       - 3402:3402
     restart: always
-    volumes:
-      - mariadb-market-delivery_data:/var/lib/mysql
-    env_file: mariadb/market-delivery.env
     environment:
-      TZ: Asia/Seoul
+      - TZ: Asia/Seoul
+      - MYSQL_HOST=localhost
+      - MYSQL_TCP_PORT=3306
+      - MYSQL_ROOT_PASSWORD=1
+      - MYSQL_DATABASE=market-delivery
+      - MYSQL_USER=mkuser
+      - MYSQL_PASSWORD=1
     command:
       - --log-bin
       - --log-basename=log_mariadb
       - --binlog_format=ROW
+    volumes:
+      - mariadb-market-delivery_data:/var/lib/mysql
     networks:
       - local-default
 
