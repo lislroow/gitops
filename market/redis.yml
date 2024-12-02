@@ -13,6 +13,7 @@ services:
     command: redis-server --port 6310 --appendonly yes
     networks:
       - local-default
+  
   redis-auth-guest:
     image: redis:7.4.1
     container_name: redis-auth-guest
@@ -27,6 +28,7 @@ services:
     command: redis-server --port 6311 --appendonly yes
     networks:
       - local-default
+  
   redis-cache-product:
     image: redis:7.4.1
     container_name: redis-cache-product

@@ -1,6 +1,6 @@
 services:
   cp-zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.6.1
     container_name: cp-zookeeper
     environment:
       ZOOKEEPER_SERVER_ID: 1
@@ -15,7 +15,7 @@ services:
       - local-default
 
   cp-kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.6.1
     container_name: cp-kafka
     ports:
       - 59092:59092

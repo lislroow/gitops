@@ -1,6 +1,6 @@
 services:
   zipkin:
-    image: ghcr.io/openzipkin/zipkin-slim:${TAG:-latest}
+    image: openzipkin/zipkin:3.4.2
     container_name: zipkin
     ports:
       - 9411:9411

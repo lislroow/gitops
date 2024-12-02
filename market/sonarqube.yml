@@ -10,9 +10,26 @@ services:
     #  nofiles:
     #    soft: 65536
     #    hard: 65536
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      #- sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_conf:/opt/sonarqube/conf
+      #- sonarqube_extensions:/opt/sonarqube/extensions
     environment:
       - SONAR_JDBC_URL=jdbc:postgresql://172.28.200.50:5432/sonarqube
       - SONAR_JDBC_USERNAME=spring
       - SONAR_JDBC_PASSWORD=1
       - SONAR_EMBEDDED_DATABASE_PORT=-1  # H2 비활성화
     mem_limit: 3g
+    networks:
+      - local-default
+  
+volumes:
+  sonarqube_data:
+  #sonarqube_logs:
+  sonarqube_conf:
+  #sonarqube_extensions:
+
+networks:
+  local-default:
+    external: true

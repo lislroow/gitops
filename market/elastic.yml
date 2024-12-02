@@ -4,7 +4,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     restart: none
     volumes:
-      - certs:/usr/share/elasticsearch/config/certs
+      - elastic_certs:/usr/share/elasticsearch/config/certs
     user: "0"
     command: >
       bash -c '
@@ -42,17 +42,20 @@ services:
       interval: 1s
       timeout: 5s
       retries: 120
+    networks:
+      - local-default
   
   es01:
     container_name: elastic
+    #container_name: es01
     restart: always
     depends_on:
       es-setup:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     volumes:
-      - certs:/usr/share/elasticsearch/config/certs
-      - esdata01:/usr/share/elasticsearch/data
+      - es_certs:/usr/share/elasticsearch/config/certs
+      - es01_data:/usr/share/elasticsearch/data
     ports:
       - 9280:9200
     environment:
@@ -86,6 +89,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    networks:
+      - local-default
   
   kibana:
     container_name: kibana
@@ -95,8 +100,8 @@ services:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:8.14.3
     volumes:
-      - certs:/usr/share/kibana/config/certs
-      - kibanadata:/usr/share/kibana/data
+      - elastic_certs:/usr/share/kibana/config/certs
+      - kibana_data:/usr/share/kibana/data
     ports:
       - 5681:5601
     environment:
@@ -115,11 +120,14 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    networks:
+      - local-default
 
 volumes:
-  certs:
-    driver: local
-  esdata01:
-    driver: local
-  kibanadata:
-    driver: local
+  elastic_certs:
+  es01_data:
+  kibana_data:
+
+networks:
+  local-default:
+    external: true
