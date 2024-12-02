@@ -7,9 +7,11 @@ services:
       - 5000:5000
     restart: no
     environment:
-      - MAX_HEAP=768m
-      - MIN_HEAP=256m
-      - JAVA_OPTS=-server -XX:MaxPermSize=192m -Djava.net.preferIPv4Stack=true
+      - NEXUS_JAVA_OPTS: |
+        -Xms256m
+        -Xmx768m
+        -XX:MaxDirectMemorySize=256m
+        -Djava.net.preferIPv4Stack=true
     volumes:
       - nexus_data:/nexus-data
     networks:
