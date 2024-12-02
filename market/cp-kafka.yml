@@ -2,14 +2,18 @@ services:
   cp-zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
     container_name: cp-zookeeper
+    ports:
+      - 2181:2181
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-    ports:
-      - 2181:2181
+    volumes:
+      - cp-zookeeper_secrets:/etc/zookeeper/secrets
+      - cp-zookeeper_data:/var/lib/zookeeper/data
+      - cp-zookeeper_log:/var/lib/zookeeper/log
     restart: always
     networks:
       - local-default
@@ -28,10 +32,13 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-    networks:
-      - local-default
+    volumes:
+      - cp-kafka_secrets:/etc/kafka/secrets
+      - cp-kafka_data:/var/lib/kafka/data
     depends_on:
       - cp-zookeeper
+    networks:
+      - local-default
 
   cp-kafka-connect:
     image: localhost:5000/market/cp-kafka-connect:7.6.1
@@ -56,10 +63,24 @@ services:
       CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib,/etc/kafka-connect/jars"
+    volumes:
+      - cp-kafka-connect_secrets:/etc/kafka-connect/secrets
+      - cp-kafka-connect_jars:/etc/kafka-connect/jars
+      - cp-kafka_secrets:/etc/kafka/secrets
+      - cp-kafka_data:/var/lib/kafka/data
     depends_on:
       - cp-kafka
     networks:
       - local-default
+
+volumes:
+  cp-zookeeper_secrets:
+  cp-zookeeper_data:
+  cp-zookeeper_log:
+  cp-kafka_secrets:
+  cp-kafka_data:
+  cp-kafka-connect_secrets:
+  cp-kafka-connect_jars:
 
 networks:
   local-default:
