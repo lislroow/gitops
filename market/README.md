@@ -96,3 +96,35 @@ net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
 ```
+
+- nexus 의 heap size 설정
+
+매뉴얼에서 heap size 설정을 찾을 수 없어서, docker inspect 로부터 찾음
+
+```
+"Config": {
+    "Hostname": "42d744abf40c",
+    "Domainname": "",
+    "User": "nexus",
+    "AttachStdin": false,
+    "AttachStdout": true,
+    "AttachStderr": true,
+    "ExposedPorts": {
+        "5000/tcp": {},
+        "8081/tcp": {}
+    },
+    "Tty": false,
+    "OpenStdin": false,
+    "StdinOnce": false,
+    "Env": [
+        "INSTALL4J_ADD_VM_PARAMS=-Xms256m -Xmx768m -XX:MaxDirectMemorySize=256m -Djava.util.prefs.userRoot=/nexus-data/javaprefs",
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "container=oci",
+        "SONATYPE_DIR=/opt/sonatype",
+        "NEXUS_HOME=/opt/sonatype/nexus",
+        "NEXUS_DATA=/nexus-data",
+        "NEXUS_CONTEXT=",
+        "SONATYPE_WORK=/opt/sonatype/sonatype-work",
+        "DOCKER_TYPE=rh-docker"
+    ],
+```
