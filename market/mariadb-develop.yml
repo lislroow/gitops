@@ -7,7 +7,7 @@ services:
     restart: always
     #env_file: mariadb/develop.env
     environment:
-      - TZ: Asia/Seoul
+      - TZ=Asia/Seoul
       - MYSQL_HOST=localhost
       - MYSQL_PORT=3306
       - MYSQL_ROOT_PASSWORD=1
