@@ -1,0 +1,28 @@
+services:
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    restart: no
+    ports:
+      - 80:80
+    entrypoint: [
+      "certbot", 
+      "certonly", 
+      "--standalone", 
+      "-d", "mm.mgkim.net"
+    ]
+    stdin_open: true
+    tty: true
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_lib:/var/lib/letsencrypt
+    networks:
+      - local-default
+
+volumes:
+  certbot_etc:
+  certbot_lib:
+
+networks:
+  local-default:
+    external: true
