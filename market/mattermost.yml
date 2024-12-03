@@ -8,8 +8,15 @@ services:
     container_name: mattermost
     restart: unless-stopped
     ports:
+      - 8065:8065
       - 8443:8443/udp
       - 8443:8443/tcp
+    environment:
+      - TZ=UTC
+      - MM_SQLSETTINGS_DRIVERNAME=postgres
+      - MM_SQLSETTINGS_DATASOURCE=postgres://spring:1@postgresql:5432/mattermost?sslmode=disable&connect_timeout=10
+      - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
+      - MM_SERVICESETTINGS_SITEURL=https://rocky8-market:8443
     security_opt:
       - no-new-privileges:true
     pids_limit: 200
@@ -27,12 +34,6 @@ services:
       # to avoid Token request failed: certificate signed by unknown authority 
       # (link: https://github.com/mattermost/mattermost-server/issues/13059 and https://github.com/mattermost/docker/issues/34)
       # - ${GITLAB_PKI_CHAIN_PATH}:/etc/ssl/certs/pki_chain.pem:ro
-    environment:
-      - TZ=UTC
-      - MM_SQLSETTINGS_DRIVERNAME=postgres
-      - MM_SQLSETTINGS_DATASOURCE=postgres://spring:1@postgresql:5432/mattermost?sslmode=disable&connect_timeout=10
-      - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
-      - MM_SERVICESETTINGS_SITEURL=https://rocky8-market:8443
     networks:
       - local-default
 
@@ -42,6 +43,11 @@ services:
     container_name: mattermost-nginx
     image: nginx:alpine
     restart: unless-stopped
+    ports:
+      - 443:443
+      - 80:80
+    environment:
+      - TZ=UTC
     security_opt:
       - no-new-privileges:true
     pids_limit: 100
@@ -56,11 +62,8 @@ services:
       - ./mattermost/rocky8-market.crt:/cert.pem:ro
       - ./mattermost/rocky8-market.key:/key.pem:ro
       - ./mattermost/nginx/webroot:/usr/share/nginx/html
-    environment:
-      - TZ=UTC
-    ports:
-      - 443:443
-      - 80:80
+    networks:
+      - local-default
 
 volumes:
   mattermost_config:
