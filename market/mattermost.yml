@@ -19,7 +19,7 @@ services:
       - MM_SQLSETTINGS_DRIVERNAME=postgres
       - MM_SQLSETTINGS_DATASOURCE=postgres://spring:1@postgresql:5432/mattermost?sslmode=disable&connect_timeout=10
       - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
-      - MM_SERVICESETTINGS_SITEURL=https://rocky8-market:8443
+      - MM_SERVICESETTINGS_SITEURL=https://rocky8-market
     security_opt:
       - no-new-privileges:true
     pids_limit: 200
