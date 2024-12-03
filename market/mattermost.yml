@@ -1,0 +1,75 @@
+# https://docs.docker.com/compose/environment-variables/
+
+version: "2.4"
+
+services:
+  mattermost:
+    image: mattermost/mattermost-team-edition:8.1.9
+    container_name: mattermost
+    restart: unless-stopped
+    ports:
+      - 8443:8443/udp
+      - 8443:8443/tcp
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 200
+    read_only: false
+    tmpfs:
+      - /tmp
+    volumes:
+      - mattermost_config:/mattermost/config:rw
+      - mattermost_data:/mattermost/data:rw
+      - mattermost_logs:/mattermost/logs:rw
+      - mattermost_plugins:/mattermost/plugins:rw
+      - mattermost_client-plugins:/mattermost/client/plugins:rw
+      - mattermost_bleve-indexes:/mattermost/bleve-indexes:rw
+      # When you want to use SSO with GitLab, you have to add the cert pki chain of GitLab inside Alpine
+      # to avoid Token request failed: certificate signed by unknown authority 
+      # (link: https://github.com/mattermost/mattermost-server/issues/13059 and https://github.com/mattermost/docker/issues/34)
+      # - ${GITLAB_PKI_CHAIN_PATH}:/etc/ssl/certs/pki_chain.pem:ro
+    environment:
+      - TZ=UTC
+      - MM_SQLSETTINGS_DRIVERNAME=postgres
+      - MM_SQLSETTINGS_DATASOURCE=postgres://spring:1@postgresql:5432/mattermost?sslmode=disable&connect_timeout=10
+      - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
+      - MM_SERVICESETTINGS_SITEURL=https://rocky8-market:8443
+    networks:
+      - local-default
+
+  mattermost-nginx:
+    depends_on:
+      - mattermost
+    container_name: mattermost-nginx
+    image: nginx:alpine
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 100
+    read_only: true
+    tmpfs:
+      - /var/run
+      - /var/cache
+      - /var/log/nginx
+    volumes:
+      - ./mattermost/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./mattermost/nginx/dhparams4096.pem:/dhparams4096.pem
+      - ./mattermost/rocky8-market.crt:/cert.pem:ro
+      - ./mattermost/rocky8-market.key:/key.pem:ro
+      - ./mattermost/nginx/webroot:/usr/share/nginx/html
+    environment:
+      - TZ=UTC
+    ports:
+      - 443:443
+      - 80:80
+
+volumes:
+  mattermost_config:
+  mattermost_data:
+  mattermost_logs:
+  mattermost_plugins:
+  mattermost_client-plugins:
+  mattermost_bleve-indexes:
+
+networks:
+  local-default:
+    external: true
