@@ -13,6 +13,9 @@ services:
       - 8443:8443/tcp
     environment:
       - TZ=UTC
+      - MM_USERNAME=admin
+      - MM_EMAIL=lislroow@daum.com
+      - MM_PASSWORD=trustno1
       - MM_SQLSETTINGS_DRIVERNAME=postgres
       - MM_SQLSETTINGS_DATASOURCE=postgres://spring:1@postgresql:5432/mattermost?sslmode=disable&connect_timeout=10
       - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
@@ -59,8 +62,8 @@ services:
     volumes:
       - ./mattermost/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./mattermost/nginx/dhparams4096.pem:/dhparams4096.pem
-      - ./mattermost/rocky8-market.crt:/cert.pem:ro
-      - ./mattermost/rocky8-market.key:/key.pem:ro
+      - ./mattermost/nginx/cert/rocky8-market.crt:/cert.pem:ro
+      - ./mattermost/nginx/cert/rocky8-market.key:/key.pem:ro
       - ./mattermost/nginx/webroot:/usr/share/nginx/html
     networks:
       - local-default
