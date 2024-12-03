@@ -9,12 +9,13 @@ services:
       "certbot", 
       "certonly", 
       "--standalone", 
-      "-d", "mm.mgkim.net"
+      "-d", "mm.mgkim.net",
+      "--debug"
     ]
     stdin_open: true
     tty: true
     volumes:
-      - certbot_etc:/etc/letsencrypt
+      - ./certbot:/etc/letsencrypt
       - certbot_lib:/var/lib/letsencrypt
     networks:
       - local-default
