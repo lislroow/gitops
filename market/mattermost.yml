@@ -58,9 +58,9 @@ services:
     volumes:
       - ./mattermost/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./mattermost/nginx/dhparams4096.pem:/dhparams4096.pem
-      - ./mattermost/nginx/cert/rocky8-market.crt:/cert.pem:ro
-      - ./mattermost/nginx/cert/rocky8-market.key:/key.pem:ro
       - ./mattermost/nginx/webroot:/usr/share/nginx/html
+      - /etc/letsencrypt/live/mm.mgkim.net/fullchain.pem:/cert.pem:ro
+      - /etc/letsencrypt/live/mm.mgkim.net/privkey.pem:/key.pem:ro
     networks:
       - local-default
 
