@@ -1,7 +1,7 @@
 services:
-  mariadb-market-customer:
+  mariadb-customer:
     image: mariadb:11.5.2
-    container_name: mariadb-market-customer
+    container_name: mariadb-customer
     ports:
       - 3401:3306
     restart: always
@@ -10,21 +10,21 @@ services:
       - MYSQL_HOST=localhost
       - MYSQL_TCP_PORT=3306
       - MYSQL_ROOT_PASSWORD=1
-      - MYSQL_DATABASE=market-customer
-      - MYSQL_USER=mkuser
+      - MYSQL_DATABASE=customer
+      - MYSQL_USER=market
       - MYSQL_PASSWORD=1
     command:
       - --log-bin
       - --log-basename=log_mariadb
       - --binlog_format=ROW
     volumes:
-    - mariadb-market-customer_data:/var/lib/mysql
+    - mariadb-customer_data:/var/lib/mysql
     networks:
       - local-default
-  
-  mariadb-market-delivery:
+
+  mariadb-delivery:
     image: mariadb:11.5.2
-    container_name: mariadb-market-delivery
+    container_name: mariadb-delivery
     ports:
       - 3402:3306
     restart: always
@@ -33,21 +33,21 @@ services:
       - MYSQL_HOST=localhost
       - MYSQL_TCP_PORT=3306
       - MYSQL_ROOT_PASSWORD=1
-      - MYSQL_DATABASE=market-delivery
-      - MYSQL_USER=mkuser
+      - MYSQL_DATABASE=delivery
+      - MYSQL_USER=market
       - MYSQL_PASSWORD=1
     command:
       - --log-bin
       - --log-basename=log_mariadb
       - --binlog_format=ROW
     volumes:
-      - mariadb-market-delivery_data:/var/lib/mysql
+      - mariadb-delivery_data:/var/lib/mysql
     networks:
       - local-default
-  
-  mariadb-market-inventory:
+
+  mariadb-inventory:
     image: mariadb:11.5.2
-    container_name: mariadb-market-inventory
+    container_name: mariadb-inventory
     ports:
       - 3403:3306
     restart: always
@@ -56,21 +56,21 @@ services:
       - MYSQL_HOST=localhost
       - MYSQL_TCP_PORT=3306
       - MYSQL_ROOT_PASSWORD=1
-      - MYSQL_DATABASE=market-inventory
-      - MYSQL_USER=mkuser
+      - MYSQL_DATABASE=inventory
+      - MYSQL_USER=market
       - MYSQL_PASSWORD=1
     command:
       - --log-bin
       - --log-basename=log_mariadb
       - --binlog_format=ROW
     volumes:
-      - mariadb-market-inventory_data:/var/lib/mysql
+      - mariadb-inventory_data:/var/lib/mysql
     networks:
       - local-default
-  
-  mariadb-market-order:
+
+  mariadb-order:
     image: mariadb:11.5.2
-    container_name: mariadb-market-order
+    container_name: mariadb-order
     ports:
       - 3404:3306
     restart: always
@@ -79,21 +79,21 @@ services:
       - MYSQL_HOST=localhost
       - MYSQL_TCP_PORT=3306
       - MYSQL_ROOT_PASSWORD=1
-      - MYSQL_DATABASE=market-order
-      - MYSQL_USER=mkuser
+      - MYSQL_DATABASE=order
+      - MYSQL_USER=market
       - MYSQL_PASSWORD=1
     command:
       - --log-bin
       - --log-basename=log_mariadb
       - --binlog_format=ROW
     volumes:
-      - mariadb-market-order_data:/var/lib/mysql
+      - mariadb-order_data:/var/lib/mysql
     networks:
       - local-default
-  
-  mariadb-market-product:
+
+  mariadb-product:
     image: mariadb:11.5.2
-    container_name: mariadb-market-product
+    container_name: mariadb-product
     ports:
       - 3405:3306
     restart: always
@@ -102,24 +102,24 @@ services:
       - MYSQL_HOST=localhost
       - MYSQL_TCP_PORT=3306
       - MYSQL_ROOT_PASSWORD=1
-      - MYSQL_DATABASE=market-product
-      - MYSQL_USER=mkuser
+      - MYSQL_DATABASE=product
+      - MYSQL_USER=market
       - MYSQL_PASSWORD=1
     command:
       - --log-bin
       - --log-basename=log_mariadb
       - --binlog_format=ROW
     volumes:
-      - mariadb-market-product_data:/var/lib/mysql
+      - mariadb-product_data:/var/lib/mysql
     networks:
       - local-default
 
 volumes:
-  mariadb-market-customer_data:
-  mariadb-market-delivery_data:
-  mariadb-market-inventory_data:
-  mariadb-market-order_data:
-  mariadb-market-product_data:
+  mariadb-customer_data:
+  mariadb-delivery_data:
+  mariadb-inventory_data:
+  mariadb-order_data:
+  mariadb-product_data:
 
 networks:
   local-default:
