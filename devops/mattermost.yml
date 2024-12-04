@@ -3,10 +3,6 @@ services:
     image: mattermost/mattermost-team-edition:release-10.3
     container_name: mattermost
     restart: unless-stopped
-    ports:
-      - 8065:8065
-      - 8443:8443/udp
-      - 8443:8443/tcp
     environment:
       - TZ=UTC
       - MM_USERNAME=admin
