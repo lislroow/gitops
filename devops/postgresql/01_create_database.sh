@@ -2,7 +2,7 @@
 
 mapfile -t LIST < <(cat <<- EOF
 
-postgres
+mattermost
 sonarqube
 
 EOF
