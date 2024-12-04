@@ -6,7 +6,7 @@ services:
       - 5432:5432
     restart: always
     environment:
-      POSTGRES_DB: spring
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1
     volumes:
