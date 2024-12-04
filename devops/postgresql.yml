@@ -1,0 +1,23 @@
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgres:17.0
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - ./postgresql:/docker-entrypoint-initdb.d
+    networks:
+      - local-default
+
+volumes:
+  postgresql_data:
+
+networks:
+  local-default:
+    external: true

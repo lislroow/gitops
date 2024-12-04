@@ -19,7 +19,7 @@ services:
       - sonarqube_extensions:/opt/sonarqube/extensions
     environment:
       - SONAR_JDBC_URL=jdbc:postgresql://172.28.200.50:5432/sonarqube
-      - SONAR_JDBC_USERNAME=spring
+      - SONAR_JDBC_USERNAME=postgres
       - SONAR_JDBC_PASSWORD=1
       - SONAR_EMBEDDED_DATABASE_PORT=-1  # H2 비활성화
     #mem_limit: 3g

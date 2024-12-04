@@ -13,7 +13,7 @@ services:
       - MM_EMAIL=lislroow@daum.com
       - MM_PASSWORD=trustno1
       - MM_SQLSETTINGS_DRIVERNAME=postgres
-      - MM_SQLSETTINGS_DATASOURCE=postgres://spring:1@postgresql:5432/mattermost?sslmode=disable&connect_timeout=10
+      - MM_SQLSETTINGS_DATASOURCE=postgres://postgres:1@postgresql:5432/mattermost?sslmode=disable&connect_timeout=10
       - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
       - MM_SERVICESETTINGS_SITEURL=https://mm.mgkim.net
     security_opt:
