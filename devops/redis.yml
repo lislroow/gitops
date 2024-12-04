@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:7.4.1
+    container_name: redis
+    ports:
+      - 6379:6379
+    restart: always
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    volumes:
+      - redis_data:/data
+    command: redis-server --port 6379 --appendonly yes
+    networks:
+      - local-default
+
+volumes:
+  redis_data:
+
+networks:
+  local-default:
+    external: true
