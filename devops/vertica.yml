@@ -7,7 +7,7 @@ services:
       - 5444:5444
     restart: always
     environment:
-      APP_DB_USER: "mkuser"
+      APP_DB_USER: "vertica"
       APP_DB_PASSWORD: "1"
       TZ: "Asia/Seoul"
     volumes:
