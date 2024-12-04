@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       POSTGRES_DB: spring
-      POSTGRES_USER: spring
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1
     volumes:
       - postgresql_data:/var/lib/postgresql/data
