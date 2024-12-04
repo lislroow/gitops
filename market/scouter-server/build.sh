@@ -2,7 +2,7 @@
 
 BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
 IMAGE_NAME="market/scouter-server:latest"
-REGISTRY="localhost:5000"
+REGISTRY="nexus.mgkim.net"
 
 echo "build ${IMAGE_NAME}"
 

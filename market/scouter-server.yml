@@ -2,10 +2,10 @@ services:
   scouter-server:
     image: market/scouter-server:latest
     container_name: scouter-server
-    ports:
-      - 6100:6100
-      - 6100:6100/udp
-      - 6180:6180
+    #ports:
+    #  - 6100:6100
+    #  - 6100:6100/udp
+    #  - 6180:6180
     restart: always
     volumes:
       - scouter_data:/app/data
