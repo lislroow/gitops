@@ -26,7 +26,7 @@ services:
     image: mariadb:11.5.2
     container_name: mariadb-market-delivery
     ports:
-      - 3402:3402
+      - 3402:3306
     restart: always
     environment:
       - TZ=Asia/Seoul
@@ -49,7 +49,7 @@ services:
     image: mariadb:11.5.2
     container_name: mariadb-market-inventory
     ports:
-      - 3403:3403
+      - 3403:3306
     restart: always
     environment:
       - TZ=Asia/Seoul
@@ -72,7 +72,7 @@ services:
     image: mariadb:11.5.2
     container_name: mariadb-market-order
     ports:
-      - 3404:3404
+      - 3404:3306
     restart: always
     environment:
       - TZ=Asia/Seoul
@@ -95,7 +95,7 @@ services:
     image: mariadb:11.5.2
     container_name: mariadb-market-product
     ports:
-      - 3405:3405
+      - 3405:3306
     restart: always
     environment:
       - TZ=Asia/Seoul
