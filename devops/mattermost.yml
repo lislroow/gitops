@@ -36,34 +36,6 @@ services:
     networks:
       - local-default
 
-  mattermost-nginx:
-    depends_on:
-      - mattermost
-    container_name: mattermost-nginx
-    image: nginx:alpine
-    restart: unless-stopped
-    ports:
-      - 443:443
-      - 80:80
-    environment:
-      - TZ=UTC
-    security_opt:
-      - no-new-privileges:true
-    pids_limit: 100
-    read_only: true
-    tmpfs:
-      - /var/run
-      - /var/cache
-      - /var/log/nginx
-    volumes:
-      - ./mattermost/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./mattermost/nginx/dhparams4096.pem:/dhparams4096.pem
-      - ./mattermost/nginx/webroot:/usr/share/nginx/html
-      - /etc/letsencrypt/live/mm.mgkim.net/fullchain.pem:/cert.pem:ro
-      - /etc/letsencrypt/live/mm.mgkim.net/privkey.pem:/key.pem:ro
-    networks:
-      - local-default
-
 volumes:
   mattermost_config:
   mattermost_data:
