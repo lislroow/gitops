@@ -6,6 +6,7 @@ services:
       - 8022:22
     restart: always
     shm_size: '256m'
+    hostname: gitlab.mgkim.net
     volumes:
       - gitlab_data:/var/opt/gitlab
       - gitlab_conf:/etc/gitlab
