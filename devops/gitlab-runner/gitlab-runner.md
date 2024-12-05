@@ -6,7 +6,7 @@
 - gitlab 연결 테스트: `docker exec -it gitlab-runner curl -k http://gitlab/` 
 
 ```shell
-RUNNER_TOKEN="GR1348941-fSH9-qmHcNYWNay6aAm"
+RUNNER_TOKEN="<registration-token>"
 docker exec -it gitlab-runner gitlab-runner register \
   --non-interactive \
   --url "http://gitlab/" \
