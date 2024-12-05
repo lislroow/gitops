@@ -5,15 +5,11 @@ services:
     ports:
       - 8022:22
     restart: always
-    #hostname: gitlab.mgkim.net
-    #environment:
-    #  GITLAB_OMNIBUS_CONFIG: |
-    #    external_url 'http://gitlab.mgkim.net'
-    #    nginx['enable'] = false
     shm_size: '256m'
     volumes:
       - gitlab_data:/var/opt/gitlab
       - gitlab_conf:/etc/gitlab
+      - ./gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
       - gitlab_logs:/var/log/gitlab
     networks:
       - local-default
