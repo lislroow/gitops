@@ -1,12 +1,12 @@
 services:
   gitlab:
-    image: gitlab/gitlab-ce:15.2.1-ce.0
+    image: gitlab/gitlab-ce:17.4.5-ce.0
     container_name: gitlab
     restart: "no"
-    hostname: 172.28.200.40
+    hostname: gitlab.mgkim.net
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://172.28.200.40'
+        external_url 'http://gitlab.mgkim.net'
     ports:
       - '8090:80'
       - '8022:22'
