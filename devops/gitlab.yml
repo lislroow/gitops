@@ -2,16 +2,28 @@ services:
   gitlab:
     image: gitlab/gitlab-ce:17.4.5-ce.0
     container_name: gitlab
-    restart: "no"
+    ports:
+      - 9080:80
+      - 9022:22
+    restart: always
     hostname: gitlab.mgkim.net
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'http://gitlab.mgkim.net'
-    ports:
-      - '8090:80'
-      - '8022:22'
-    volumes:
-      - /data/gitlab/data:/var/opt/gitlab
-      - /data/gitlab/conf:/etc/gitlab
-      - /data/gitlab/logs:/var/log/gitlab
+        nginx['enable'] = false
     shm_size: '256m'
+    volumes:
+      - gitlab_data:/var/opt/gitlab
+      - gitlab_conf:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+    networks:
+      - local-default
+
+volumes:
+  gitlab_data:
+  gitlab_conf:
+  gitlab_logs:
+
+networks:
+  local-default:
+    external: true
