@@ -6,13 +6,14 @@
 - gitlab 연결 테스트: `docker exec -it gitlab-runner curl -k http://gitlab/` 
 
 ```shell
-RUNNER_TOKEN="<Registration Token>"
+RUNNER_TOKEN="GR1348941-fSH9-qmHcNYWNay6aAm"
 docker exec -it gitlab-runner gitlab-runner register \
   --non-interactive \
   --url "http://gitlab/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
-  --docker-image alpine:latest
+  --docker-image amazoncorretto:17-alpine-jdk \
+  --tag-list "gradle"
 
 cat /var/lib/docker/volumes/devops_gitlab-runner_conf/_data/config.toml
 ```

@@ -1,6 +1,6 @@
 services:
   gitlab-runner:
-    image: gitlab/gitlab-runner:alpine3.19-bleeding
+    image: gitlab/gitlab-runner:alpine-v17.4.2
     restart: always
     container_name: gitlab-runner
     ports:
