@@ -1,6 +1,6 @@
 services:
   scouter-server:
-    image: nexus.mgkim.net/market/scouter-server
+    image: docker.mgkim.net:5000/market/scouter-server:1.0
     container_name: scouter-server
     restart: always
     volumes:
