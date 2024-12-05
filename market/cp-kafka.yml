@@ -41,7 +41,7 @@ services:
       - local-default
 
   cp-kafka-connect:
-    image: localhost:5000/market/cp-kafka-connect:7.6.1
+    image: docker.mgkim.net:5000/market/cp-kafka-connect:7.6.1
     container_name: cp-kafka-connect
     ports:
       - 8083:8083
