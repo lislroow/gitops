@@ -24,6 +24,8 @@ services:
       - /etc/letsencrypt/live/mm.mgkim.net/privkey.pem:/key_mm.mgkim.net.pem:ro
       - /etc/letsencrypt/live/nexus.mgkim.net/fullchain.pem:/cert_nexus.mgkim.net.pem:ro
       - /etc/letsencrypt/live/nexus.mgkim.net/privkey.pem:/key_nexus.mgkim.net.pem:ro
+      - /etc/letsencrypt/live/docker.mgkim.net/fullchain.pem:/cert_docker.mgkim.net.pem:ro
+      - /etc/letsencrypt/live/docker.mgkim.net/privkey.pem:/key_docker.mgkim.net.pem:ro
       - /etc/letsencrypt/live/gitlab.mgkim.net/fullchain.pem:/cert_gitlab.mgkim.net.pem:ro
       - /etc/letsencrypt/live/gitlab.mgkim.net/privkey.pem:/key_gitlab.mgkim.net.pem:ro
     networks:

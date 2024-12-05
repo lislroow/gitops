@@ -3,7 +3,6 @@ services:
     image: gitlab/gitlab-ce:17.4.5-ce.0
     container_name: gitlab
     ports:
-      - 8080:80
       - 8022:22
     restart: always
     #hostname: gitlab.mgkim.net
