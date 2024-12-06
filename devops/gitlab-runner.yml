@@ -7,6 +7,7 @@ services:
       - 8093:8093
     volumes:
       - gitlab-runner_conf:/etc/gitlab-runner
+      - /root/.docker/config.json:/root/.docker/config.json
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - local-default
