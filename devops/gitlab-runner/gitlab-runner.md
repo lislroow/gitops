@@ -34,7 +34,7 @@ shutdown_timeout = 0
 RUNNER_TOKEN="<registration-token>"
 docker exec -it gitlab-runner gitlab-runner register \
   --non-interactive \
-  --url "http://gitlab/" \
+  --url "https://gitlab.mgkim.net/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
   --docker-image amazoncorretto:17-alpine-jdk \
@@ -42,7 +42,7 @@ docker exec -it gitlab-runner gitlab-runner register \
 
 docker exec -it gitlab-runner gitlab-runner register \
   --non-interactive \
-  --url "http://gitlab/" \
+  --url "https://gitlab.mgkim.net/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
   --docker-image amazoncorretto:8-alpine-jdk \
@@ -50,7 +50,7 @@ docker exec -it gitlab-runner gitlab-runner register \
 
 docker exec -it gitlab-runner gitlab-runner register \
   --non-interactive \
-  --url "http://gitlab/" \
+  --url "https://gitlab.mgkim.net/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
   --docker-image docker.mgkim.net:5000/devops/alpine-deploy:1.0 \
