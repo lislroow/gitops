@@ -10,6 +10,19 @@ services:
       - /root/.docker/config.json:/root/.docker/config.json
 ```
 
+#### gitlab-runner concurrent
+
+- `concurrent = 2`
+
+```toml
+# [root@rocky8-devops ~]# cat /var/lib/docker/volumes/devops_gitlab-runner_conf/_data/config.toml 
+# concurrent = 1
+concurrent = 2
+check_interval = 0
+connection_max_age = "15m0s"
+shutdown_timeout = 0
+```
+
 #### gitlab-runner register
 
 - GitLab 17.x에서는 Runner registration token이 곧 폐지(deprecated) 될 예정
