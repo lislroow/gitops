@@ -1,3 +1,15 @@
+#### deploy with ssh
+
+```shell
+# gitlab-runner
+ssh-keygen -t rsa -b 4096 -C "gitlab-runner" -f ~/.ssh/id_rsa
+
+# deploy-server
+echo "<~/.ssh/id_rsa>" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+
 #### docker-image in gitlab-runner 
 
 - gitlab-runner 내부에서 docker pull 을 할때 ~/.docker/config.json 에 인증 정보가 없으면 `no basic auth credentials` 가 발생함
@@ -37,7 +49,7 @@ docker exec -it gitlab-runner gitlab-runner register \
   --url "https://gitlab.mgkim.net/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
-  --docker-image amazoncorretto:17-alpine-jdk \
+  --docker-image docker.mgkim.net:5000/mgkim/amazoncorretto:17-alpine-jdk-docker \
   --tag-list "java17"
 
 docker exec -it gitlab-runner gitlab-runner register \
@@ -45,7 +57,7 @@ docker exec -it gitlab-runner gitlab-runner register \
   --url "https://gitlab.mgkim.net/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
-  --docker-image amazoncorretto:8-alpine-jdk \
+  --docker-image docker.mgkim.net:5000/mgkim/amazoncorretto:8-alpine-jdk-docker \
   --tag-list "java8"
 
 docker exec -it gitlab-runner gitlab-runner register \
@@ -54,9 +66,44 @@ docker exec -it gitlab-runner gitlab-runner register \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
   --docker-image docker.mgkim.net:5000/devops/alpine-deploy:1.0 \
-  --tag-list "deploy"
+  --tag-list "deploy" \
+  --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+  --docker-volumes "/root/.ssh/id_rsa:/root/.ssh/id_rsa:ro"
 
 cat /var/lib/docker/volumes/devops_gitlab-runner_conf/_data/config.toml
+
+concurrent = 3
+check_interval = 0
+connection_max_age = "15m0s"
+shutdown_timeout = 0
+
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = "6fda0f509845"
+  url = "https://gitlab.mgkim.net/"
+  id = 9
+  token = "ATsXj13a5Lx7ybjgb2nG"
+  token_obtained_at = 2024-12-07T14:26:43Z
+  token_expires_at = 0001-01-01T00:00:00Z
+  executor = "docker"
+  [runners.custom_build_dir]
+  [runners.cache]
+    MaxUploadedArchiveSize = 0
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+  [runners.docker]
+    tls_verify = false
+    image = "docker.mgkim.net:5000/devops/alpine-deploy:1.0"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    shm_size = 0
+    network_mtu = 0
 ```
 
 #### gitlab-runner configuration
