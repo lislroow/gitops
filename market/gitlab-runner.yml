@@ -11,6 +11,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - local-default
+    extra_hosts:
+      - rocky8-market:172.28.200.50
 
 volumes:
   gitlab-runner_conf:
