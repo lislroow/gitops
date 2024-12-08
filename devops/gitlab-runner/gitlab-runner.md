@@ -41,7 +41,8 @@ shutdown_timeout = 0
 - GitLab 17.x에서는 Runner registration token이 곧 폐지(deprecated) 될 예정
 - [X] Admin Area > Settings > Access Tokens에서 생성, `--token` (Scope: write_registry, read_registry)
 - [O] 프로젝트 → Settings > CI/CD > Runners::Registration Token, `--registration-token`
-- gitlab 연결 테스트: `docker exec -it gitlab-runner curl -k http://gitlab/` 
+- gitlab 연결 테스트: `docker exec -it gitlab-runner curl -k http://gitlab.mgkim.net/`
+- `--docker-volumes "/root/.ssh/id_rsa:/root/.ssh/id_rsa:ro"` 는 docker-runner 가 아닌 docker host 의 volume 이 mount 됨
 
 ```shell
 RUNNER_TOKEN="<registration-token>"
@@ -64,12 +65,13 @@ docker exec -it gitlab-runner gitlab-runner register \
 docker exec -it gitlab-runner gitlab-runner register \
   --non-interactive \
   --url "https://gitlab.mgkim.net/" \
-  --registration-token "$RUNNER_TOKEN" \
+  --registration-token "RUNNER_TOKEN" \
   --executor "docker" \
   --docker-image docker.mgkim.net:5000/devops/alpine-deploy:1.0 \
   --tag-list "deploy" \
+  --docker-extra-hosts "rocky8-market:172.28.200.50" \
   --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
-  --docker-volumes "/root/.ssh/id_rsa:/root/.ssh/id_rsa:ro"
+  --docker-volumes "/root/.ssh:/root/.ssh:ro"
 
 cat /var/lib/docker/volumes/devops_gitlab-runner_conf/_data/config.toml
 
