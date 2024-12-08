@@ -3,9 +3,10 @@
 ```shell
 # gitlab-runner
 ssh-keygen -t rsa -b 4096 -C "gitlab-runner" -f ~/.ssh/id_rsa
+ssh-keyscan -H rocky8-market >> ~/.ssh/known_hosts
 
 # deploy-server
-echo "<~/.ssh/id_rsa>" >> ~/.ssh/authorized_keys
+echo "<~/.ssh/id_rsa.pub>" >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 ```
 
