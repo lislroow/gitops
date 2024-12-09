@@ -5,6 +5,7 @@ services:
     container_name: scouter-server
     ports:
       - 6100:6100
+      - 6100:6100/udp
     volumes:
       - scouter_data:/app/data
     environment:
