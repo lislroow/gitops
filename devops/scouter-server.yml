@@ -4,6 +4,7 @@ services:
     restart: always
     container_name: scouter-server
     ports:
+      - 6180:6180
       - 6100:6100
       - 6100:6100/udp
     volumes:
