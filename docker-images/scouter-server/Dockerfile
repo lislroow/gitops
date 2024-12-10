@@ -18,7 +18,7 @@ EXPOSE 6100/tcp
 EXPOSE 6100/udp
 WORKDIR /app
 COPY ./app /app
-RUN apk add --no-cache dos2unix
+RUN apk add --no-cache dos2unix file
 RUN file /app/start-scouter.sh
 RUN dos2unix /app/start-scouter.sh
 RUN file /app/start-scouter.sh
