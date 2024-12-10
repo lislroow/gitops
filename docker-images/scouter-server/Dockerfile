@@ -18,6 +18,4 @@ EXPOSE 6100/tcp
 EXPOSE 6100/udp
 WORKDIR /app
 COPY ./app /app
-ENTRYPOINT ["/bin/bash", "-c", "pwd && ls -al && \
-  java -Xmx1024m -classpath ./scouter-server-boot.jar \
-       scouter.boot.Boot ./lib"]
+ENTRYPOINT ["/bin/bash", "-c", "pwd && ls -al && ./start-scouter.sh"]
