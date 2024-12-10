@@ -2,7 +2,7 @@
 BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
 
 if [[ `uname -s` == "MINGW64_NT-"* ]]; then
-  export JAVA_HOME='/c/develop/tools/corretto/corretto-1.8.0_382'
+  export JAVA_HOME='/c/develop/tools/corretto/corretto-8'
   export PATH="$JAVA_HOME/bin:$PATH"
 fi
 
