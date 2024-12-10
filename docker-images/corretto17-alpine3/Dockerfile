@@ -14,3 +14,6 @@ RUN apk add --no-cache \
 ENV LANG=ko_KR.UTF-8 \
     LC_ALL=ko_KR.UTF-8 \
     TZ=Asia/Seoul
+RUN apk add --no-cache \
+    vim \
+    curl
