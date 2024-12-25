@@ -15,8 +15,14 @@ services:
       DB_PASSWORD: 1
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: 1
+    command: start-dev
+    volumes:
+      - keycloak_data:/opt/keycloak/data
     networks:
       - local-default
+
+volumes:
+  keycloak_data:
 
 networks:
   local-default:
