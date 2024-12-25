@@ -1,6 +1,6 @@
 services:
-  postgresql:
-    container_name: postgresql
+  postgres:
+    container_name: postgres
     image: postgres:17.0
     ports:
       - 5432:5432
@@ -10,12 +10,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - local-default
 
 volumes:
-  postgresql_data:
+  postgres_data:
 
 networks:
   local-default:
