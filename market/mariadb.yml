@@ -4,7 +4,7 @@ services:
     container_name: mariadb-customer
     ports:
       - 3401:3306
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Seoul
       - MYSQL_HOST=localhost
@@ -27,7 +27,7 @@ services:
     container_name: mariadb-delivery
     ports:
       - 3402:3306
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Seoul
       - MYSQL_HOST=localhost
@@ -50,7 +50,7 @@ services:
     container_name: mariadb-inventory
     ports:
       - 3403:3306
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Seoul
       - MYSQL_HOST=localhost
@@ -73,7 +73,7 @@ services:
     container_name: mariadb-order
     ports:
       - 3404:3306
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Seoul
       - MYSQL_HOST=localhost
@@ -96,7 +96,7 @@ services:
     container_name: mariadb-product
     ports:
       - 3405:3306
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Seoul
       - MYSQL_HOST=localhost

@@ -19,7 +19,7 @@ services:
     container_name: redis-auth-guest
     ports:
       - 6311:6311
-    restart: always
+    restart: no
     labels:
       - "name=redis-auth-guest"
       - "mode=standalone"
@@ -34,7 +34,7 @@ services:
     container_name: redis-cache-product
     ports:
       - 6320:6320
-    restart: always
+    restart: no
     labels:
       - "name=redis-cache-product"
       - "mode=standalone"
