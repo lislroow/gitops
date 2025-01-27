@@ -1,3 +1,5 @@
+
+
 - env 파일(elastic.env)은 elastic.yml 에 모두 할당함
 
 - elastic 8 은 kernal parameter 설정이 2개 필요함
@@ -21,7 +23,13 @@ sysctl -p
 
 - 인증서
 
-ca.crt + es01.crt 2개가 추가되어야 https://es01:9280 에 인증서 오류가 발생하지 않음
+ca.crt 를 추가해야 https://elastic:9280 에 인증서 오류가 발생하지 않음
+
+```
+$ docker cp elastic:/usr/share/elasticsearch/config/certs/ca/ca.crt .
+ 
+pwsh$ certutil -addstore root "C:\path\to\ca.crt"
+```
 
 - apiKey
 
