@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  elasticsearch:
+    endpoints: ["https://elastic:9280"] # Elasticsearch의 주소
+    username: "elastic"            # Elasticsearch 사용자 ID
+    password: "trustno1"           # Elasticsearch 사용자 비밀번호
+    index: "otel-collector-{type}-{yyyy-MM}" # 데이터가 저장될 인덱스 패턴
+    sniff: false # Elasticsearch 클러스터의 노드 탐색 비활성화
+    insecure: false # HTTPS가 아닌 경우 true로 설정
+
+processors:
+  batch:
+    timeout: 5s
+
+extensions:
+  health_check:
+    endpoint: "0.0.0.0:13133"
+  pprof:
+    endpoint: "0.0.0.0:1888"
+  zpages:
+    endpoint: "0.0.0.0:55679"
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch]
+
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [elasticsearch]
+
+  extensions: [health_check, pprof, zpages]
