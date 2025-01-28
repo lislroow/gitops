@@ -7,6 +7,11 @@ receivers:
 exporters:
   elasticsearch:
     endpoints: ["https://elastic:9280"]
+    tls:
+      insecure: false
+      ca_file: /etc/ca.crt
+      cert_file: /etc/elastic.crt
+      key_file: /etc/elastic.key
     headers:
       Authorization: "ApiKey kdRBwoJsRGSdzUR_NoAOnA"
 

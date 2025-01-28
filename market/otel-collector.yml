@@ -12,6 +12,10 @@ services:
       - 4318:4318 # OTLP http receiver
       - 55679:55679 # zpages extension
     restart: no
+    volumes:
+      - ./otel-collector/ca.crt:/etc/ca.crt
+      - ./otel-collector/elastic.crt:/etc/elastic.crt
+      - ./otel-collector/elastic.key:/etc/elastic.key
     networks:
       - local-default
 
