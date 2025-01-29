@@ -157,9 +157,14 @@ services:
     container_name: apm-server
     environment:
       - output.elasticsearch.hosts=["elastic:9200"]
+      - output.elasticsearch.username="elastic"
+      - output.elasticsearch.password="trustno1"
+      - output.elasticsearch.ssl.certificate_authorities=["/usr/share/apm-server/config/certs/ca.crt"]
+      - output.elasticsearch.ssl.verification_mode=full
     ports:
       - 8200:8200
     volumes:
+      - elastic_certs:/usr/share/apm-server/config/certs
       - ./elastic/apm-server.yaml:/usr/share/apm-server/apm-server.yml:ro
       - ./elastic/apm-server/log:/var/log/apm-server:rw
       #- /tls/certs/ca/ca.crt:/usr/share/ca/ca.crt:ro
