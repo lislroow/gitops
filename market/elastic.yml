@@ -157,12 +157,12 @@ services:
     container_name: apm-server
     restart: always
     image: docker.elastic.co/apm/apm-server:8.14.3
-    environment:
-      - output.elasticsearch.hosts=["https://elastic:9200"]
-      - output.elasticsearch.username="elastic"
-      - output.elasticsearch.password="trustno1"
-      - output.elasticsearch.ssl.certificate_authorities=["/usr/share/apm-server/config/certs/ca.crt"]
-      - output.elasticsearch.ssl.verification_mode=full
+    #environment:
+    #  - output.elasticsearch.hosts=["https://elastic:9200"]
+    #  - output.elasticsearch.username="elastic"
+    #  - output.elasticsearch.password="trustno1"
+    #  - output.elasticsearch.ssl.certificate_authorities=["/usr/share/apm-server/config/certs/ca.crt"]
+    #  - output.elasticsearch.ssl.verification_mode=full
     ports:
       - 8200:8200
     volumes:
@@ -176,10 +176,14 @@ services:
       #- /tls/certs/elasticsearch/elasticsearch.key:/usr/share/elasticsearch/elasticsearch.key:ro
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
     cap_drop: ["ALL"]
-    #command: >
-    #  apm-server -e
-    #    -E apm-server.rum.enabled=true
-    #    -E output.elasticsearch.hosts=['https://elastic:9280']
+    command: >
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E output.elasticsearch.hosts=['https://elastic:9200']
+        -E output.elasticsearch.username="elastic"
+        -E output.elasticsearch.password="trustno1"
+        -E output.elasticsearch.ssl.certificate_authorities=["/usr/share/apm-server/config/certs/ca.crt"]
+        -E output.elasticsearch.ssl.verification_mode=full
     depends_on:
       - elastic
     networks:
