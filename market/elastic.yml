@@ -160,7 +160,7 @@ services:
     ports:
       - 8200:8200
     volumes:
-      - elastic_certs:/usr/share/apm-server/config/certs
+      - ./elastic/certs:/usr/share/apm-server/config/certs
       - ./elastic/apm-server.yaml:/usr/share/apm-server/apm-server.yml:ro
       - ./elastic/apm-server/log:/var/log/apm-server:rw
       #- /tls/certs/ca/ca.crt:/usr/share/ca/ca.crt:ro
