@@ -121,7 +121,61 @@ services:
       retries: 120
     networks:
       - local-default
-
+  
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v3.1.0
+    volumes:
+      - ./elastic/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - local-default
+  
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.118.0
+    container_name: otel-collector
+    volumes:
+      - ./output:/etc/output:rw
+      - ./otel-collector/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
+    restart: no
+    depends_on:
+      - prometheus
+      - elastic
+    networks:
+      - local-default
+  
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:8.14.3
+    container_name: apm-server
+    environment:
+      - output.elasticsearch.hosts=["elastic:9200"]
+    ports:
+      - 8200:8200
+    volumes:
+      - ./elastic/apm-server.yaml:/usr/share/apm-server/apm-server.yml:ro
+      - ./elastic/apm-server/log:/var/log/apm-server:rw
+      #- /tls/certs/ca/ca.crt:/usr/share/ca/ca.crt:ro
+      #- /tls/certs/apm-server/apm-server.crt:/usr/share/apm-server/apm-server.crt:ro
+      #- /tls/certs/apm-server/apm-server.key:/usr/share/apm-server/apm-server.key:ro
+      #- /tls/certs/elasticsearch/elasticsearch.crt:/usr/share/elasticsearch/elasticsearch.crt:ro
+      #- /tls/certs/elasticsearch/elasticsearch.key:/usr/share/elasticsearch/elasticsearch.key:ro
+    cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+    cap_drop: ["ALL"]
+    command: >
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E output.elasticsearch.hosts=['elastic:9200']
+    networks:
+      - local-default
+  
 volumes:
   elastic_certs:
   elastic_data:

@@ -1,0 +1,58 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "0.0.0.0:4318"
+
+exporters:
+  file:
+    path: /etc/output/logs.json
+  prometheus:
+    endpoint: "0.0.0.0:9090"
+  otlp/elastic:
+    endpoint: "apm-server:8200"
+    tls:
+      insecure: true
+  logging:
+    loglevel: debug
+  #elasticsearch:
+  #  endpoints: ["https://elastic:9280"]
+  #  tls:
+  #    insecure: false
+  #    ca_file: /etc/ca.crt
+  #    cert_file: /etc/elastic.crt
+  #    key_file: /etc/elastic.key
+  #  headers:
+  #    Authorization: "ApiKey kdRBwoJsRGSdzUR_NoAOnA"
+
+processors:
+  batch:
+    timeout: 5s
+
+extensions:
+  health_check:
+    endpoint: "0.0.0.0:13133"
+  pprof:
+    endpoint: "0.0.0.0:1888"
+  zpages:
+    endpoint: "0.0.0.0:55679"
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, otlp/elastic]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, otlp/elastic]
+
+    traces:
+      receivers: [otlp]
+      #processors: [batch]
+      processors: []
+      exporters: [logging, otlp/elastic]
+
+  extensions: [health_check, pprof, zpages]
