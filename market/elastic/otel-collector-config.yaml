@@ -13,8 +13,6 @@ exporters:
     endpoint: "apm-server:8200"
     tls:
       insecure: true
-  logging:
-    loglevel: debug
   #elasticsearch:
   #  endpoints: ["https://elastic:9280"]
   #  tls:
@@ -42,17 +40,17 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, otlp/elastic]
+      exporters: [otlp/elastic]
 
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, otlp/elastic]
+      exporters: [otlp/elastic]
 
     traces:
       receivers: [otlp]
       #processors: [batch]
       processors: []
-      exporters: [logging, otlp/elastic]
+      exporters: [otlp/elastic]
 
   extensions: [health_check, pprof, zpages]
