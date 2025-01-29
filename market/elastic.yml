@@ -137,7 +137,7 @@ services:
     container_name: otel-collector
     volumes:
       - ./output:/etc/output:rw
-      - ./otel-collector/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+      - ./elastic/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
       - 1888:1888 # pprof extension
       - 8888:8888 # Prometheus metrics exposed by the Collector
@@ -173,6 +173,8 @@ services:
       apm-server -e
         -E apm-server.rum.enabled=true
         -E output.elasticsearch.hosts=['elastic:9200']
+    depends_on:
+      - elastic
     networks:
       - local-default
   
