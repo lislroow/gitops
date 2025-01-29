@@ -1,8 +1,8 @@
 services:
   es-setup:
     container_name: es-setup
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     restart: none
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     volumes:
       - elastic_certs:/usr/share/elasticsearch/config/certs
     user: "0"
@@ -124,6 +124,7 @@ services:
   
   prometheus:
     container_name: prometheus
+    restart: always
     image: prom/prometheus:v3.1.0
     volumes:
       - ./elastic/prometheus.yaml:/etc/prometheus/prometheus.yml
@@ -153,10 +154,11 @@ services:
       - local-default
   
   apm-server:
-    image: docker.elastic.co/apm/apm-server:8.14.3
     container_name: apm-server
+    restart: always
+    image: docker.elastic.co/apm/apm-server:8.14.3
     environment:
-      - output.elasticsearch.hosts=["https://elastic:9280"]
+      - output.elasticsearch.hosts=["https://elastic:9200"]
       - output.elasticsearch.username="elastic"
       - output.elasticsearch.password="trustno1"
       - output.elasticsearch.ssl.certificate_authorities=["/usr/share/apm-server/config/certs/ca.crt"]
@@ -174,10 +176,10 @@ services:
       #- /tls/certs/elasticsearch/elasticsearch.key:/usr/share/elasticsearch/elasticsearch.key:ro
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
     cap_drop: ["ALL"]
-    command: >
-      apm-server -e
-        -E apm-server.rum.enabled=true
-        -E output.elasticsearch.hosts=['elastic:9200']
+    #command: >
+    #  apm-server -e
+    #    -E apm-server.rum.enabled=true
+    #    -E output.elasticsearch.hosts=['https://elastic:9280']
     depends_on:
       - elastic
     networks:
