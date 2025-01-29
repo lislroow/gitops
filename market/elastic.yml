@@ -160,14 +160,9 @@ services:
     ports:
       - 8200:8200
     volumes:
-      - ./elastic/certs:/usr/share/apm-server/config/certs
+      - elastic_certs:/usr/share/apm-server/config/certs:ro
       - ./elastic/apm-server.yaml:/usr/share/apm-server/apm-server.yml:ro
       - ./elastic/apm-server/log:/var/log/apm-server:rw
-      #- /tls/certs/ca/ca.crt:/usr/share/ca/ca.crt:ro
-      #- /tls/certs/apm-server/apm-server.crt:/usr/share/apm-server/apm-server.crt:ro
-      #- /tls/certs/apm-server/apm-server.key:/usr/share/apm-server/apm-server.key:ro
-      #- /tls/certs/elasticsearch/elasticsearch.crt:/usr/share/elasticsearch/elasticsearch.crt:ro
-      #- /tls/certs/elasticsearch/elasticsearch.key:/usr/share/elasticsearch/elasticsearch.key:ro
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
     cap_drop: ["ALL"]
     command: >
@@ -176,7 +171,7 @@ services:
         -E output.elasticsearch.hosts=["https://elastic:9200"]
         -E output.elasticsearch.username=elastic
         -E output.elasticsearch.password=trustno1
-        -E output.elasticsearch.ssl.certificate_authorities=["/usr/share/apm-server/config/certs/ca.crt"]
+        -E output.elasticsearch.ssl.certificate_authorities=["/usr/share/apm-server/config/certs/ca/ca.crt"]
         -E output.elasticsearch.ssl.verification_mode=full
     depends_on:
       - elastic
