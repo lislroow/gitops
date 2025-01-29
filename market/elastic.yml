@@ -29,8 +29,8 @@ services:
         fi;
         echo "Setting file permissions"
         chown -R root:root config/certs;
-        find . -type d -exec chmod 750 \{\} \;;
-        find . -type f -exec chmod 640 \{\} \;;
+        find . -type d -exec chmod 755 \{\} \;;
+        find . -type f -exec chmod 644 \{\} \;;
         echo "Waiting for Elasticsearch availability";
         until curl -s --cacert config/certs/ca/ca.crt https://elastic:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
@@ -160,7 +160,7 @@ services:
     ports:
       - 8200:8200
     volumes:
-      - elastic_certs:/usr/share/apm-server/config/certs:ro
+      - elastic_certs:/usr/share/apm-server/config/certs
       - ./elastic/apm-server.yaml:/usr/share/apm-server/apm-server.yml:ro
       - ./elastic/apm-server/log:/var/log/apm-server:rw
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
