@@ -1,7 +1,7 @@
 services:
   nexus:
     image: sonatype/nexus3:3.74.0
-    restart: always
+    restart: no
     container_name: nexus
     ports:
       - 8081:8081
