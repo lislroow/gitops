@@ -122,6 +122,19 @@ services:
     networks:
       - local-default
   
+  grafana:
+    container_name: grafana
+    restart: always
+    image: grafana/grafana:11.5.0
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=1
+    networks:
+      - local-default
+  
   prometheus:
     container_name: prometheus
     restart: always
