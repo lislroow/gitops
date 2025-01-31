@@ -3,6 +3,12 @@ receivers:
     protocols:
       http:
         endpoint: "0.0.0.0:4318"
+  hostmetrics:
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      load:
 
 exporters:
   file:
@@ -10,6 +16,7 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
     enable_open_metrics: true
+    namespace: "otelcol"
   otlp/elastic:
     endpoint: "apm-server:8200"
     tls:
@@ -42,7 +49,7 @@ service:
       exporters: [otlp/elastic]
 
     metrics:
-      receivers: [otlp]
+      receivers: [otlp, hostmetrics]
       processors: [batch]
       exporters: [otlp/elastic, prometheus]
 
