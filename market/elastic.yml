@@ -142,14 +142,14 @@ services:
       - ./elastic/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
       - 1888:1888 # pprof extension
-      - 8888:8888 # Prometheus metrics exposed by the Collector
-      - 8889:8889 # Prometheus exporter metrics
+      - 9463:9463 # OpenTelemetry Collector 자체의 메트릭
+      - 8889:8889 # Prometheus metrics export
       - 13133:13133 # health_check extension
       - 4318:4318 # OTLP http receiver
       - 55679:55679 # zpages extension
     depends_on:
+      - apm-server
       - prometheus
-      - elastic
     networks:
       - local-default
   

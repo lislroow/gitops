@@ -8,7 +8,8 @@ exporters:
   file:
     path: /etc/output/logs.json
   prometheus:
-    endpoint: "0.0.0.0:9090"
+    endpoint: "0.0.0.0:8889"
+    enable_open_metrics: true
   otlp/elastic:
     endpoint: "apm-server:8200"
     tls:
@@ -27,6 +28,13 @@ extensions:
     endpoint: "0.0.0.0:55679"
 
 service:
+  telemetry:
+    logs:
+      level: "info"
+    metrics:
+      level: "detailed"
+      address: "0.0.0.0:9463"
+  
   pipelines:
     logs:
       receivers: [otlp]
@@ -36,7 +44,7 @@ service:
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/elastic]
+      exporters: [otlp/elastic, prometheus]
 
     traces:
       receivers: [otlp]
