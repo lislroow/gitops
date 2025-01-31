@@ -1,6 +1,6 @@
 #!/bin/bash
 
-unused_volumes=$(docker volume ls --filter dangling=true -q)
+unused_volumes=$(docker volume ls --filter dangling=true -q | grep -v market | grep -v devops)
 
 if [ -z "$unused_volumes" ]; then
   echo "사용되지 않는 볼륨이 없습니다."
