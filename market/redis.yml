@@ -9,45 +9,15 @@ services:
       - "name=redis"
       - "mode=standalone"
     volumes:
-      - redis_data:/data
+      #- redis_data:/data
+      - redis_data_2:/data
     command: redis-server --port 6310 --appendonly yes
     networks:
       - local-default
-  
-  #redis-auth-guest:
-  #  image: redis:7.4.1
-  #  container_name: redis-auth-guest
-  #  ports:
-  #    - 6311:6311
-  #  restart: no
-  #  labels:
-  #    - "name=redis-auth-guest"
-  #    - "mode=standalone"
-  #  volumes:
-  #    - redis-auth-guest_data:/data
-  #  command: redis-server --port 6311 --appendonly yes
-  #  networks:
-  #    - local-default
-  #
-  #redis-cache-product:
-  #  image: redis:7.4.1
-  #  container_name: redis-cache-product
-  #  ports:
-  #    - 6320:6320
-  #  restart: no
-  #  labels:
-  #    - "name=redis-cache-product"
-  #    - "mode=standalone"
-  #  volumes:
-  #    - redis-cache-product_data:/data
-  #  command: redis-server --port 6320 --appendonly yes
-  #  networks:
-  #    - local-default
 
 volumes:
-  redis_data:
-  #redis-auth-guest_data:
-  #redis-cache-product_data:
+  #redis_data:
+  redis_data_2:
 
 networks:
   local-default:
