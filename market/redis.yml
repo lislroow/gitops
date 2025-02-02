@@ -8,10 +8,10 @@ services:
     labels:
       - "name=redis"
       - "mode=standalone"
-    volumes:
+    #volumes:
       #- redis_data:/data
-      - redis_data_2:/data
-    command: redis-server --port 6310 --appendonly yes
+      #- redis_data_2:/data
+    command: redis-server --port 6310 --appendonly no
     networks:
       - local-default
 
