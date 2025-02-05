@@ -1,6 +1,7 @@
 services:
   jenkins:
-    image: jenkins/jenkins:2.496-jdk17
+    #image: jenkins/jenkins:2.496-jdk17
+    image: mgkim/jenkins:2.496-jdk17
     restart: unless-stopped
     container_name: jenkins
     ports:
