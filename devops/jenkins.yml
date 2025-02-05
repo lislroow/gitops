@@ -8,20 +8,27 @@ services:
       - 50000:50000
     volumes:
       - jenkins_data:/var/jenkins_home
+      - /root/.ssh/id_ed25519:/var/jenkins_home/.ssh/id_ed25519
     networks:
       - local-default
   
-  jenkins-agent-maven:
-    image: jenkins/ssh-agent:alpine-jdk17
-    restart: unless-stopped
-    container_name: jenkins-agent-maven
-    volumes:
-      - /root/.ssh/id_ed25519:/root/.ssh/id_ed25519
-    environment:
-      - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPZMFi77J+M2GH6hwnCM8bi9UBWRx1M7++p6eOP90Yu0 root@rocky8-market
-      - GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=accept-new
-    networks:
-      - local-default
+  #agent-java:
+  #  image: jenkins/ssh-agent:alpine-jdk17
+  #  restart: unless-stopped
+  #  container_name: agent-java
+  #  volumes:
+  #    - /root/.ssh/id_ed25519:/home/jenkins/.ssh/id_ed25519
+  #  environment:
+  #    - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPZMFi77J+M2GH6hwnCM8bi9UBWRx1M7++p6eOP90Yu0 root@rocky8-market
+  #    - GIT_SSH_COMMAND=ssh -i /home/jenkins/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new
+  #  #command: >
+  #  #  /bin/sh -c "mkdir -p /home/jenkins/.ssh && 
+  #  #  ssh-keyscan github.com > /home/jenkins/.ssh/known_hosts && 
+  #  #  chmod 600 /home/jenkins/.ssh/known_hosts &&
+  #  #  chown jenkins:jenkins /home/jenkins/.ssh/known_hosts &&
+  #  #  java -jar /home/jenkins/remoting.jar -workDir /home/jenkins -jar-cache /home/jenkins/remoting/jarCache"
+  #  networks:
+  #    - local-default
 
 volumes:
   jenkins_data:
