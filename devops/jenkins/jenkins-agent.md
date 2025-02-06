@@ -35,3 +35,5 @@ dr-xr-x---. 9 root root 4096 Feb  5 14:45 ..
 
 `Manage Credentials`
 
+ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+chmod 600 ~/.ssh/known_hosts

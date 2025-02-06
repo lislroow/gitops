@@ -6,7 +6,7 @@ RUN apt-get update && \
    #mkdir -p /var/jenkins_home/.config/containers && \
    #chown -R jenkins:jenkins /var/jenkins_home/.config
 
-#USER jenkins
+USER jenkins
 
 # Podman을 rootless로 사용하기 위한 환경변수 설정
 #ENV XDG_RUNTIME_DIR=/var/jenkins_home/.podman
