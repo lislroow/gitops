@@ -1,4 +1,5 @@
-FROM jenkins/ssh-agent:alpine-jdk17
+FROM jenkins/ssh-agent:alpine3.21
+
 RUN apk add --no-cache \
     tzdata \
     bash \
@@ -12,6 +13,7 @@ RUN apk add --no-cache \
     && echo "ko_KR.UTF-8 UTF-8" > /etc/locale.gen \
     && echo "LANG=ko_KR.UTF-8" > /etc/locale.conf \
     && apk del .locale-build-deps
+
 RUN mkdir -p /home/jenkins/.ssh && \
     ssh-keyscan github.com > /home/jenkins/.ssh/known_hosts && \
     chmod 600 /home/jenkins/.ssh/known_hosts
