@@ -30,9 +30,8 @@ RUN apk add --no-cache \
     docker-cli \
     docker \
     shadow
-RUN chown root:docker /var/run/docker.sock
-RUN chmod 660 /var/run/docker.sock
-RUN usermod -aG docker jenkins
+#RUN usermod -aG docker jenkins
+RUN usermod -aG 984 jenkins
 RUN curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 RUN mkdir -p /var/lib/docker
