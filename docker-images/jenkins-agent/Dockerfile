@@ -26,6 +26,7 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 COPY id_ed25519 /home/jenkins/.ssh/id_ed25519
 RUN chown -R jenkins:jenkins /home/jenkins/.ssh
 
+RUN echo "172.28.50.1 nexus" >> /etc/hosts
 RUN addgroup -g 984 docker && \
     apk add --no-cache \
       docker-cli \
