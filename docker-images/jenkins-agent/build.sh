@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
-IMAGE_NAME="mgkim/agent:latest-alpine"
+IMAGE_NAME="mgkim/ssh-agent:alpine3.21"
 REGISTRY="localhost:5000"
 
 echo "build ${IMAGE_NAME}"

@@ -13,7 +13,6 @@ RUN apk add --no-cache \
     && echo "ko_KR.UTF-8 UTF-8" > /etc/locale.gen \
     && echo "LANG=ko_KR.UTF-8" > /etc/locale.conf \
     && apk del .locale-build-deps
-
 RUN mkdir -p /home/jenkins/.ssh && \
     ssh-keyscan github.com > /home/jenkins/.ssh/known_hosts && \
     chmod 600 /home/jenkins/.ssh/known_hosts
@@ -26,3 +25,13 @@ ENV JAVA_HOME=/home/jenkins/corretto-17
 ENV PATH=$JAVA_HOME/bin:$PATH
 COPY id_ed25519 /home/jenkins/.ssh/id_ed25519
 RUN chown -R jenkins:jenkins /home/jenkins/.ssh
+
+RUN apk add --no-cache \
+    docker-cli \
+    docker \
+    shadow
+RUN usermod -aG docker jenkins
+RUN curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+RUN mkdir -p /var/lib/docker
+VOLUME /var/lib/docker
