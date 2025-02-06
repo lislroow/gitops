@@ -1,10 +1,10 @@
 FROM jenkins/jenkins:2.496-jdk17
 USER root
 RUN apt-get update && \
-    apt-get install -y podman && \
     mkdir -p /var/jenkins_home/.ssh && \
     cp /root/.ssh/id_ed25519 /var/jenkins_home/.ssh/id_ed25519 && \
     chown -R jenkins:jenkins /var/jenkins_home/.ssh
+   # apt-get install -y podman && \
    # rootless 환경 설정을 위한 준비
    #mkdir -p /var/jenkins_home/.config/containers && \
    #chown -R jenkins:jenkins /var/jenkins_home/.config
