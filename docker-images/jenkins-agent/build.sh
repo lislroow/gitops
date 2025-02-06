@@ -1,10 +1,12 @@
 #!/bin/bash
 
 BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
-IMAGE_NAME="mgkim/ssh-agent:alpine-jdk17"
+IMAGE_NAME="mgkim/agent:latest-alpine"
 REGISTRY="localhost:5000"
 
 echo "build ${IMAGE_NAME}"
 
+cp /root/.ssh/id_ed25519 .
 docker build -t ${REGISTRY}/${IMAGE_NAME} .
+rm -rf id_ed25519
 docker push ${REGISTRY}/${IMAGE_NAME}

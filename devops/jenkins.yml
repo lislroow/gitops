@@ -14,16 +14,16 @@ services:
     networks:
       - local-default
   
-  agent-java:
+  jenkins-agent:
     #image: jenkins/ssh-agent:alpine-jdk17
-    image: localhost:5000/mgkim/ssh-agent:alpine-jdk17
+    image: localhost:5000/mgkim/agent:latest-alpine
     restart: unless-stopped
-    container_name: agent-java
-    volumes:
-      - /root/.ssh/id_ed25519:/home/jenkins/.ssh/id_ed25519
+    container_name: jenkins-agent
+    #volumes:
+    #  - /root/.ssh/id_ed25519:/home/jenkins/.ssh/id_ed25519
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPZMFi77J+M2GH6hwnCM8bi9UBWRx1M7++p6eOP90Yu0 root@rocky8-market
-      - GIT_SSH_COMMAND=ssh -i /home/jenkins/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new
+      #- GIT_SSH_COMMAND=ssh -i /home/jenkins/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new
     #command: >
     #  /bin/sh -c "mkdir -p /home/jenkins/.ssh && 
     #  ssh-keyscan github.com > /home/jenkins/.ssh/known_hosts && 
