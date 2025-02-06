@@ -26,12 +26,12 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 COPY id_ed25519 /home/jenkins/.ssh/id_ed25519
 RUN chown -R jenkins:jenkins /home/jenkins/.ssh
 
-RUN apk add --no-cache \
-    docker-cli \
-    docker \
-    shadow
-#RUN usermod -aG docker jenkins
-RUN usermod -aG 984 jenkins
+RUN addgroup -g 984 docker && \
+    apk add --no-cache \
+      docker-cli \
+      docker \
+      shadow
+RUN usermod -aG docker jenkins
 RUN curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 RUN mkdir -p /var/lib/docker
