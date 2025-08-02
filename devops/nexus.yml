@@ -1,6 +1,6 @@
 services:
   nexus:
-    image: sonatype/nexus3:3.74.0
+    image: sonatype/nexus3:3.82.0-java17-alpine
     restart: unless-stopped
     container_name: nexus
     ports:
