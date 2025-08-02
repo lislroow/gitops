@@ -15,8 +15,9 @@ services:
       - MYSQL_PASSWORD=1
     volumes:
       - mariadb_data:/var/lib/mysql
-    networks:
-      - local-default
+    network_mode: host
+    #networks:
+    #  - local-default
 
 volumes:
   mariadb_data:
