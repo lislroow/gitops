@@ -12,6 +12,4 @@ for file in $BASEDIR/lib/*.jar; do
 done
 CLASSPATH="${CLASSPATH}:${BASEDIR}/scouter-server-boot.jar"
 
-#echo "classpath=" $CLASSPATH
-
-java -Xmx1024m -classpath $CLASSPATH -Dscouter.config=conf/scouter.conf scouter.boot.Boot 
+java -classpath $CLASSPATH -Dscouter.config=conf/scouter.conf scouter.boot.Boot 
