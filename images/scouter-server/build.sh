@@ -1,8 +1,8 @@
 #!/bin/bash
 
 BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
-IMAGE_NAME="market/scouter-server:1.0"
-REGISTRY="docker.mgkim.net:5000"
+IMAGE_NAME="mgkim/scouter-server:1.0"
+REGISTRY="localhost:5000"
 
 echo "build ${IMAGE_NAME}"
 

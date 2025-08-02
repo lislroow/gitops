@@ -2,7 +2,7 @@
 
 BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
 IMAGE_NAME="mgkim/amazoncorretto:8-alpine3.20"
-REGISTRY="docker.mgkim.net:5000"
+REGISTRY="localhost:5000"
 
 echo "build ${IMAGE_NAME}"
 
