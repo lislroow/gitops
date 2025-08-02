@@ -1,6 +1,6 @@
 services:
   scouter-server:
-    image: docker.mgkim.net:5000/market/scouter-server:1.0
+    image: localhost:5000/mgkim/scouter-server:1.0
     restart: always
     container_name: scouter-server
     ports:
@@ -18,8 +18,9 @@ services:
       - MGR_PURGE_COUNTER_KEEP_DAYS=2
       - JAVA_OPT=-Xms512m -Xmx512m
     #mem_limit: 1g
-    networks:
-      - local-default
+    network_mode: host
+    #networks:
+    #  - local-default
 
 volumes:
   scouter_data:
