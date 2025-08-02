@@ -6,6 +6,4 @@ EXPOSE 6100/tcp
 EXPOSE 6100/udp
 WORKDIR /app
 COPY ./app /app
-RUN /app/start-scouter.sh
-RUN /app/start-scouter.sh
 ENTRYPOINT ["/bin/bash", "-c", "pwd && ls -al && /app/start-scouter.sh"]
