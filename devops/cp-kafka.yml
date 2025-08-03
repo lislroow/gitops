@@ -1,6 +1,6 @@
 services:
   cp-zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.1
+    image: confluentinc/cp-zookeeper:7.2.15-1-ubi8
     container_name: cp-zookeeper
     ports:
       - 2181:2181
@@ -20,7 +20,8 @@ services:
     #  - local-default
 
   cp-kafka:
-    image: confluentinc/cp-kafka:7.6.1
+    image: confluentinc/cp-kafka:7.2.15-1-ubi8
+
     container_name: cp-kafka
     ports:
       - 29092:29092
