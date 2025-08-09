@@ -1,8 +1,8 @@
 #!/bin/bash
 
 BASEDIR=$( cd "$( dirname "$0" )" && pwd -P )
-IMAGE_NAME="mgkim/amazoncorretto:8-alpine-jdk-docker"
-REGISTRY="docker.mgkim.net:5000"
+IMAGE_NAME="study/amazoncorretto:8-alpine-jdk-docker"
+REGISTRY="localhost:5000"
 
 echo "build ${IMAGE_NAME}"
 
