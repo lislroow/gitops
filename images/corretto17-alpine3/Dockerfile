@@ -11,6 +11,7 @@ RUN apk add --no-cache \
     && echo "ko_KR.UTF-8 UTF-8" > /etc/locale.gen \
     && echo "LANG=ko_KR.UTF-8" > /etc/locale.conf \
     && apk del .locale-build-deps
+COPY ./scouter.agent /app/scouter
 ENV LANG=ko_KR.UTF-8 \
     LC_ALL=ko_KR.UTF-8 \
     TZ=Asia/Seoul

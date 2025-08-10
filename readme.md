@@ -9,11 +9,15 @@ firewall-cmd --get-active-zones
 firewall-cmd --permanent \
   --add-rich-rule='rule family="ipv4" source address="172.28.200.0/24" port protocol="tcp" port="8081" accept'
 firewall-cmd --permanent \
+  --add-rich-rule='rule family="ipv4" source address="172.28.200.0/24" port protocol="tcp" port="5000" accept'
+firewall-cmd --permanent \
   --add-rich-rule='rule family="ipv4" source address="172.28.200.0/24" port protocol="tcp" port="6379" accept'
 firewall-cmd --permanent \
   --add-rich-rule='rule family="ipv4" source address="172.28.200.0/24" port protocol="tcp" port="6100" accept'
 firewall-cmd --permanent \
   --add-rich-rule='rule family="ipv4" source address="172.28.200.0/24" port protocol="udp" port="6100" accept'
+firewall-cmd --permanent \
+  --add-rich-rule='rule family="ipv4" source address="172.28.200.0/24" port protocol="tcp" port="29092" accept'
 
 firewall-cmd --permanent \
   --add-rich-rule='rule family="ipv4" port protocol="tcp" port="8081" drop'
