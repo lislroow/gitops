@@ -51,7 +51,7 @@ docker exec -it gitlab-runner gitlab-runner register \
   --url "https://gitlab.mgkim.net/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
-  --docker-image docker.mgkim.net:5000/mgkim/amazoncorretto:17-alpine-jdk-docker \
+  --docker-image docker.mgkim.net:5000/study/amazoncorretto:17-alpine-jdk-docker \
   --tag-list "java17"
 
 docker exec -it gitlab-runner gitlab-runner register \
@@ -59,7 +59,7 @@ docker exec -it gitlab-runner gitlab-runner register \
   --url "https://gitlab.mgkim.net/" \
   --registration-token "$RUNNER_TOKEN" \
   --executor "docker" \
-  --docker-image docker.mgkim.net:5000/mgkim/amazoncorretto:8-alpine-jdk-docker \
+  --docker-image docker.mgkim.net:5000/study/amazoncorretto:8-alpine-jdk-docker \
   --tag-list "java8"
 
 docker exec -it gitlab-runner gitlab-runner register \

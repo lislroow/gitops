@@ -1,7 +1,7 @@
 services:
   jenkins:
     #image: jenkins/jenkins:2.496-jdk17
-    image: localhost:5000/mgkim/jenkins:2.496-jdk17
+    image: localhost:5000/study/jenkins:2.496-jdk17
     restart: unless-stopped
     container_name: jenkins
     ports:
@@ -16,7 +16,7 @@ services:
   
   jenkins-agent:
     #image: jenkins/ssh-agent:alpine-jdk17
-    image: localhost:5000/mgkim/ssh-agent:alpine3.21
+    image: localhost:5000/study/ssh-agent:alpine3.21
     restart: unless-stopped
     container_name: jenkins-agent
     privileged: true

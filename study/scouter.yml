@@ -1,6 +1,6 @@
 services:
   scouter-server:
-    image: localhost:5000/mgkim/scouter:1.0
+    image: localhost:5000/study/scouter:1.0
     restart: always
     container_name: scouter
     ports:
