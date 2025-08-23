@@ -9,6 +9,7 @@ echo "[docker] start scouter"
 
 docker run -d \
   --name "scouter" \
+  --hostname "scouter" \
   -p 6100:6100 \
   -p 6100:6100/udp \
   -v scouter_data:/app/data \
