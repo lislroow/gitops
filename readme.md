@@ -22,6 +22,8 @@ firewall-cmd --permanent \
 firewall-cmd --permanent \
   --add-rich-rule='rule family="ipv4" port protocol="tcp" port="8081" drop'
 
+firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="172.28.200.0/24" port protocol="tcp" port="80" accept'
+
 firewall-cmd --reload
 
 firewall-cmd --list-rich-rules
@@ -79,3 +81,4 @@ Debian 버전
 - bullseye  11  (이전 안정버전)
 - bookworm  12  stable 버전
 - trixie  13  (테스트 중, unstable/sid)
+
