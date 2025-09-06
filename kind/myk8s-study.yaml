@@ -1,0 +1,10 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080 # kind 내부 포트
+        hostPort: 8800       # 호스트에서 접근할 포트
+        protocol: TCP
+  - role: worker
+  - role: worker
