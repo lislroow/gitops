@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+  labels:
+    app: nexus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      containers:
+      - name: nexus
+        image: sonatype/nexus3:3.82.0-java17-alpine
+        ports:
+        - containerPort: 8081   # Nexus UI
+        - containerPort: 5000   # Docker registry port
+        env:
+        - name: INSTALL4J_ADD_VM_PARAMS
+          valueFrom:
+            configMapKeyRef:
+              name: nexus-config
+              key: INSTALL4J_ADD_VM_PARAMS
+        volumeMounts:
+        - name: nexus-data
+          mountPath: /nexus-data
+      volumes:
+      - name: nexus-data
+        persistentVolumeClaim:
+          claimName: nexus-pvc
