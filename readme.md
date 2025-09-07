@@ -37,6 +37,8 @@ firewall-cmd --permanent \
 
 firewall-cmd --permanent \
   --remove-rich-rule='rule family="ipv4" port protocol="tcp" port="8081" drop'
+firewall-cmd --permanent \
+  --remove-rich-rule='rule family="ipv4" port protocol="tcp" port="30080" drop'
 
 ```
 
