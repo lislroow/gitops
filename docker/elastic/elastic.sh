@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
+BASEDIR=$(cd $(dirname $0) && pwd -P)
 SCRIPT_NM="${0##*/}"
+
+up="\033[A"
+clean="\033[K"
 
 # variable
 wd=`pwd -P`
 group="${wd##*/}"
-project_nm="${group}"
 
 # usage
 function USAGE {
@@ -20,9 +23,10 @@ Commands:
   logs      Fetch the logs of containers
 
 Options:
-  --ssl     Using 'elastic-ssl.yml' (default elastic.yml)
-  --v       Remove anonymous volums attached to containers
-            'docker-compose down --v', 'docker-compose stop --v'
+  --ssl     'docker-compose up --ssl' : Using 'elastic-ssl.yml' 
+            'docker-compose up'       : Using 'elastic.yml'
+  --v       'docker-compose down --v' : down container and remove associate volumes
+            'docker-compose stop --v' : stop container and remove associate volumes
 EOF
   exit 1
 }
@@ -30,9 +34,10 @@ EOF
 
 
 # options
-declare remove_volumes_yn
+declare o_rm_vols
+declare o_ssl
 OPTIONS="a"
-LONGOPTIONS="ssl,v,force-recreate"
+LONGOPTIONS="ssl,v"
 SetOptions() {
   opts=$(getopt --options "${OPTIONS}" \
                 --longoptions "${LONGOPTIONS}" \
@@ -46,10 +51,10 @@ SetOptions() {
         status_all_yn="y"
         ;;
       --ssl)
-        config_file="${group}-ssl.yml"
+        o_ssl="y"
         ;;
       --v)
-        remove_volumes_yn="y"
+        o_rm_vols="y"
         ;;
       *)
         argv+=($1)
@@ -59,12 +64,19 @@ SetOptions() {
   done
 
   [ "${#argv[@]}" -eq 0 ] && USAGE
-  [ -z "${config_file}" ] && config_file="${group}.yml"
   [ -z "${healthy_yn}" ] && healthy_yn="y"
 }
 SetOptions "$@"
 # -- options
 
+infer_project() {
+  for project in elastic elastic-ssl; do
+    if [ $(docker-compose -p ${project} ps -a | tail -n +2 | wc -l) -gt 0 ]; then
+      echo ${project}
+      break
+    fi
+  done
+}
 
 get_status() {
   local service=$1
@@ -73,19 +85,25 @@ get_status() {
 }
 
 start() {
-  docker-compose -f ${config_file} start ${service_entry[@]}
+  project=$(infer_project)
+  file="${project}.yml"
+  docker-compose -p ${project} -f ${file} start ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
-    local services=($(docker-compose -f ${config_file} config --services))
+    local services=($(docker-compose -p ${project} -f ${file} config --services))
     healthy 60 ${services[@]}
   fi
 }
 
 stop() {
-  docker-compose -f ${config_file} stop ${remove_volumes_yn:+-v} ${service_entry[@]}
+  project=$(infer_project)
+  file="${project}.yml"
+  docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+-v} ${service_entry[@]}
 }
 
 up() {
-  docker-compose -f ${config_file} up -d ${service_entry[@]}
+  project="elastic${o_ssl:+-ssl}"
+  file="elastic${o_ssl:+-ssl}.yml"
+  docker-compose -p ${project} -f ${file} up -d ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
     local services=($(docker-compose -f ${config_file} config --services))
     healthy 60 ${services[@]}
@@ -93,97 +111,130 @@ up() {
 }
 
 down() {
-  docker-compose -f ${config_file} down ${remove_volumes_yn:+-v}
+  project=$(infer_project)
+  file="${project}.yml"
+  docker-compose -p ${project} -f ${file} down ${o_rm_vols:+-v}
 }
 
 volume() {
-  declare volume_list=$(awk '/^volumes:/ {flag=1; next}
+  project=$(infer_project)
+  file="${project}.yml"
+  local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
       if ($1 == "") next
       sub(":$", "", $1)
       print $1
-    }' "${config_file}")
-  for volume in ${volume_list[@]}; do
-    vol_nm="${project_nm}_${volume}"
-    docker volume inspect ${vol_nm} --format '{{.Mountpoint}}' 2> /dev/null | \
-      awk -v vol_nm="${vol_nm}" '{
-        mountpoint = $1
-        if (mountpoint == "") {
-          mountpoint = "X (not exist)"
+    }' "${file}"))
+  declare -i max_len=0
+  for item in ${volume_list[@]}; do
+    volume="${project}_${item}"
+    [ ${max_len} -lt ${#volume} ] && max_len=${#volume}
+  done
+  for item in ${volume_list[@]}; do
+    volume="${project}_${item}"
+    docker volume inspect ${volume} --format '{{.Mountpoint}}' 2> /dev/null | \
+      awk -v volume="${volume}" -v max_len="${max_len}" '{
+        if ($1 == "") {
+          $1 = "X (not exist)"
         }
-        printf "%-20s : %s\n", vol_nm, mountpoint
+        fmt = "   %-" max_len "s   %s\n"
+        printf fmt, volume, $1
       }'
   done
 }
 
 print_status() {
-  local list=($@)
-  echo "## container status"
-  if [ $(docker ps ${status_all_yn:+-a} $(printf ' --filter name=%s' ${list[@]}) | tail -n +2 | wc -l) -eq 0 ]; then
-    printf "no containers running\n"
-    return 1
-  else
-    docker ps ${status_all_yn:+-a} $(printf ' --filter name=%s' ${list[@]}) | tail -n +2
+  project=$(infer_project)
+  if [ -z "${project}"]; then
+    echo "no containers"
+    exit
   fi
-
-  echo "## project info"
-  docker inspect ${list[1]} --format '{{ index .Config.Labels "com.docker.compose.project" }}' \
-    | awk '{
-      printf "\033[A\033[15C: %s\n", $0
-    }'
-
-  echo "## volume info"
+  file="${project}.yml"
+  list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
+  echo "## containers"
+  echo " * project: ${project}"
+  declare -i max_len=0
+  declare -a running=()
   for service in ${list[@]}; do
-    docker inspect ${service} --format '{{range .Mounts}}{{.Name}}|{{.Source}}{{"\n"}}{{end}}' \
-      | awk -v service="${service}" -F'|' '
-      {
-        if ($0 == "") next
-        idx++
-        result[idx] = $1 "|" $2
-      }
-      END {
-        if (idx > 0) {
-          printf "%s:\n", service
-        }
-        for (i=1; i<=idx; i++) {
-          split(result[i], arr, "|")
-          printf "  - %-20s: %s\n", arr[1], arr[2]
-        }
-      }
-      '
+    [ $max_len -lt ${#service} ] && max_len=${#service}
   done
+  
+  for service in ${list[@]}; do
+    status=$(docker inspect ${service} --format '{{.State.Status}}' 2> /dev/null)
+    case "${status}" in
+      running)
+        printf "   %-${max_len}s   %s\n" "${service}" "${status}"
+        running+=(${service})
+        ;;
+      exited)
+        printf "   %-${max_len}s   %s\n" "${service}" "${status}"
+        ;;
+      *)
+        printf "   %-${max_len}s   unknown status '%s'\n" "${service}" "${status}"
+        ;;
+    esac
+  done
+  
+  echo ""
+  echo "## volumes"
+  volume
   if [ ${#list[@]} -gt 0 ]; then
     printf "\n"
   fi
+  [ ${#running[@]} -gt 0 ] && healthy 5 ${running[@]}
 }
 
 healthy() {
   echo "## check healthy"
+  project=$(infer_project)
   local max_iter=$1
   shift
   local list=($@)
+  declare -i max_len=0
+  for item in ${list[@]}; do
+    [ ${max_len} -lt ${#item} ] && max_len=${#item}
+  done
   
-  local up="\033[A"
-  local clean="\033[K"
   for item in ${list[@]}; do
     case "$item" in
       elastic)
+        for ((i=1; i<=${max_iter}; i++)); do
+          crt_file="/var/lib/docker/volumes/${project}_elastic_certs/_data/ca/ca.crt"
+          test -f "${BASEDIR}/.env" && \
+            export $(grep -v '^#' "${BASEDIR}/.env" | xargs)
+          
+          curl -s --cacert $crt_file -u "elastic:${ELASTIC_PASSWORD}" https://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
+          if [ $? -eq 0 ]; then
+            printf "   %-${max_len}s   O (healthy)\n" "${item}"
+            break
+          else
+            if [ $i -eq ${max_iter} ]; then
+              printf "${up}\r${clean}   ${item}: X (unhealthy)\n" "${item}"
+            elif [ $i -eq 1 ]; then
+              printf "   %-${max_len}s   %s%s\n" "${item}" $(printf '%.0s#' $(seq 1 $i)) $(printf '%.0s.' $(seq $((i+1)) $max_iter))
+              sleep 1
+            elif [ $i -gt 1 ]; then
+              printf "${up}\r   %-${max_len}s   %s%s\n" "${item}" $(printf '%.0s#' $(seq 1 $i)) $(printf '%.0s.' $(seq $((i+1)) $max_iter))
+              sleep 1
+            fi
+          fi
+        done
         ;;
       kibana)
         for ((i=1; i<=${max_iter}; i++)); do
           curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'
           if [ $? -eq 0 ]; then
-            echo "${item}: O (healthy)"
+            printf "   %-${max_len}s   O (healthy)\n" "${item}"
             break
           else
             if [ $i -eq ${max_iter} ]; then
-              printf "${up}\r${clean}${item}: X (unhealthy)\n"
+              printf "${up}\r${clean}   %-${max_len}s   (unhealthy)\n" "${item}"
             elif [ $i -eq 1 ]; then
-              printf "${item}: %s%s\n" $(printf '%.0s#' $(seq 1 $i)) $(printf '%.0s.' $(seq $((i+1)) $max_iter))
+              printf "   %-${max_len}s   %s%s\n" "${item}" $(printf '%.0s#' $(seq 1 $i)) $(printf '%.0s.' $(seq $((i+1)) $max_iter))
               sleep 1
             elif [ $i -gt 1 ]; then
-              printf "${up}\r${item}: %s%s\n" $(printf '%.0s#' $(seq 1 $i)) $(printf '%.0s.' $(seq $((i+1)) $max_iter))
+              printf "${up}\r   %-${max_len}s   %s%s\n" "${item}" $(printf '%.0s#' $(seq 1 $i)) $(printf '%.0s.' $(seq $((i+1)) $max_iter))
               sleep 1
             fi
           fi
@@ -201,7 +252,9 @@ service_entry=("${argv[@]:2}")
 
 case "${command}" in
   start)
-    declare services=($(docker-compose -f ${config_file} config --services))
+    project=$(infer_project)
+    file="${project}.yml"
+    services=($(docker-compose -p ${project} -f ${file} config --services))
     declare -i insufficient_cnt=0
     for service in ${services[@]}; do
       if [[ "${#service_entry[@]}" -gt 0 ]] && [[ " ${service_entry[@]} " != *" $service "* ]]; then
@@ -235,15 +288,16 @@ case "${command}" in
     down
     ;;
   status)
-    declare services=($(docker-compose -f ${config_file} config --services))
-    print_status ${services[@]}
-    [ $? -eq 0 ] && healthy 5 ${services[@]}
+    print_status
     ;;
   logs)
     docker-compose -f ${config_file} logs -f
     ;;
   volume)
     volume
+    ;;
+  project)
+    get_project_name
     ;;
   *)
     USAGE
