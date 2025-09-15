@@ -105,7 +105,7 @@ up() {
   file="elastic${o_ssl:+-ssl}.yml"
   docker-compose -p ${project} -f ${file} up -d ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
-    local services=($(docker-compose -f ${config_file} config --services))
+    local services=($(docker-compose -p ${project} -f ${file} config --services))
     healthy 60 ${services[@]}
   fi
 }
@@ -146,7 +146,7 @@ volume() {
 
 print_status() {
   project=$(infer_project)
-  if [ -z "${project}"]; then
+  if [ -z "${project}" ]; then
     echo "no containers"
     exit
   fi
@@ -200,11 +200,15 @@ healthy() {
     case "$item" in
       elastic)
         for ((i=1; i<=${max_iter}; i++)); do
-          crt_file="/var/lib/docker/volumes/${project}_elastic_certs/_data/ca/ca.crt"
           test -f "${BASEDIR}/.env" && \
             export $(grep -v '^#' "${BASEDIR}/.env" | xargs)
+          if [ "${o_ssl:+y}" == "y" ]; then
+            crt_file="/var/lib/docker/volumes/${project}_elastic_certs/_data/ca/ca.crt"
+            curl -s -u "elastic:${ELASTIC_PASSWORD}" --cacert $crt_file https://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
+          else
+            curl -s -u "elastic:${ELASTIC_PASSWORD}" http://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
+          fi
           
-          curl -s --cacert $crt_file -u "elastic:${ELASTIC_PASSWORD}" https://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
           if [ $? -eq 0 ]; then
             printf "   %-${max_len}s   O (healthy)\n" "${item}"
             break
@@ -291,7 +295,13 @@ case "${command}" in
     print_status
     ;;
   logs)
-    docker-compose -f ${config_file} logs -f
+    project=$(infer_project)
+    if [ -z "${project}"]; then
+      echo "no containers"
+      exit
+    fi
+    file="${project}.yml"
+    docker-compose -p ${project} -f ${file} logs -f
     ;;
   volume)
     volume
