@@ -77,15 +77,15 @@ infer_project() {
   done
 }
 
-get_status() {
+get_running() {
   local service=$1
   local running=$(docker inspect --format '{{.State.Running}}' ${service} 2>/dev/null)
   echo "${running}"
 }
 
 start() {
-  project=$(infer_project)
-  file="${project}.yml"
+  local project=$(infer_project)
+  local file="${project}.yml"
   docker-compose -p ${project} -f ${file} start ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
     local services=($(docker-compose -p ${project} -f ${file} config --services))
@@ -94,14 +94,14 @@ start() {
 }
 
 stop() {
-  project=$(infer_project)
-  file="${project}.yml"
+  local roject=$(infer_project)
+  local file="${project}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+-v} ${service_entry[@]}
 }
 
 up() {
-  project="elastic${o_ssl:+-ssl}"
-  file="elastic${o_ssl:+-ssl}.yml"
+  local project="elastic${o_ssl:+-ssl}"
+  local file="elastic${o_ssl:+-ssl}.yml"
   docker-compose -p ${project} -f ${file} up -d ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
     local services=($(docker-compose -p ${project} -f ${file} config --services))
@@ -110,14 +110,14 @@ up() {
 }
 
 down() {
-  project=$(infer_project)
-  file="${project}.yml"
+  local project=$(infer_project)
+  local file="${project}.yml"
   docker-compose -p ${project} -f ${file} down ${o_rm_vols:+-v}
 }
 
 volume() {
-  project=$(infer_project)
-  file="${project}.yml"
+  local project=$(infer_project)
+  local file="${project}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -127,11 +127,11 @@ volume() {
     }' "${file}"))
   declare -i max_len=0
   for item in ${volume_list[@]}; do
-    volume="${project}_${item}"
+    local volume="${project}_${item}"
     [ ${max_len} -lt ${#volume} ] && max_len=${#volume}
   done
   for item in ${volume_list[@]}; do
-    volume="${project}_${item}"
+    local volume="${project}_${item}"
     docker volume inspect ${volume} --format '{{.Mountpoint}}' 2> /dev/null | \
       awk -v volume="${volume}" -v max_len="${max_len}" '{
         if ($1 == "") {
@@ -143,14 +143,14 @@ volume() {
   done
 }
 
-print_status() {
-  project=$(infer_project)
+status() {
+  local project=$(infer_project)
   if [ -z "${project}" ]; then
     echo "no containers"
     exit
   fi
-  file="${project}.yml"
-  list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
+  local file="${project}.yml"
+  local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
   declare -i max_len=0
@@ -160,7 +160,7 @@ print_status() {
   done
   
   for service in ${list[@]}; do
-    status=$(docker inspect ${service} --format '{{.State.Status}}' 2> /dev/null)
+    local status=$(docker inspect ${service} --format '{{.State.Status}}' 2> /dev/null)
     case "${status}" in
       running)
         printf "   %-${max_len}s   %s\n" "${service}" "${status}"
@@ -186,7 +186,7 @@ print_status() {
 
 healthy() {
   echo "## check healthy"
-  project=$(infer_project)
+  local project=$(infer_project)
   local max_iter=$1
   shift
   local list=($@)
@@ -263,7 +263,7 @@ case "${command}" in
       if [[ "${#service_entry[@]}" -gt 0 ]] && [[ " ${service_entry[@]} " != *" $service "* ]]; then
         continue
       fi
-      running=$(get_status "${service}")
+      running=$(get_running "${service}")
       case "${running}" in
         true|false)
           ;;
@@ -291,7 +291,7 @@ case "${command}" in
     down
     ;;
   status)
-    print_status
+    status
     ;;
   logs)
     project=$(infer_project)

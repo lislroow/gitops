@@ -1,0 +1,18 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:14.18
+    ports:
+      - 5432:5432
+    restart: none
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts:/docker-entrypoint-initdb.d
+    network_mode: host
+
+volumes:
+  postgres_data:
