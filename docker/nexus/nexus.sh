@@ -19,7 +19,7 @@ Commands:
   restart   Stop and Start containers
   up        Create containers
   down      Remove containers
-  status    'docker ps' command and curl health check.
+  status    'docker ps' command
   logs      Fetch the logs of containers
 
 Options:
@@ -152,7 +152,6 @@ status() {
   if [ ${#list[@]} -gt 0 ]; then
     printf "\n"
   fi
-  [ ${#running[@]} -gt 0 ] && healthy 5 ${running[@]}
 }
 
 logs() {
