@@ -38,36 +38,35 @@ declare o_rm_vols
 declare o_ssl
 OPTIONS="a"
 LONGOPTIONS="ssl,v"
-SetOptions() {
-  opts=$(getopt --options "${OPTIONS}" \
-                --longoptions "${LONGOPTIONS}" \
-                -- "$@" )
-  eval set -- "${opts}"
-  while true; do
-    [ -z "$1" ] && break
-    
-    case "$1" in
-      -a)
-        status_all_yn="y"
-        ;;
-      --ssl)
-        o_ssl="y"
-        ;;
-      --v)
-        o_rm_vols="y"
-        ;;
-      *)
-        argv+=($1)
-        ;;
-    esac
-    shift
-  done
-
-  [ "${#argv[@]}" -eq 0 ] && USAGE
-  [ -z "${healthy_yn}" ] && healthy_yn="y"
-}
-SetOptions "$@"
+opts=$(getopt --options "${OPTIONS}" \
+              --longoptions "${LONGOPTIONS}" \
+              -- "$@" )
+eval set -- "${opts}"
+while true; do
+  [ -z "$1" ] && break
+  
+  case "$1" in
+    -a)
+      status_all_yn="y"
+      ;;
+    --ssl)
+      o_ssl="y"
+      ;;
+    --v)
+      o_rm_vols="y"
+      ;;
+    *)
+      argv+=($1)
+      ;;
+  esac
+  shift
+done
 # -- options
+
+# validate
+[ "${#argv[@]}" -eq 0 ] && USAGE
+[ -z "${healthy_yn}" ] && healthy_yn="y"
+# -- validate
 
 infer_project() {
   for project in elastic elastic-ssl; do
