@@ -1,9 +1,9 @@
 #### .env
 
 ```
-POSTGRES_DB=postgres
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=skdi,,123
+postgres_db=postgres
+postgres_user=postgres
+postgres_password=skdi,,123
 ```
 
 

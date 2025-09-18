@@ -9,7 +9,6 @@ services:
       POSTGRES_PASSWORD: ${postgres_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts:/docker-entrypoint-initdb.d
 
   mattermost:
     container_name: mattermost
