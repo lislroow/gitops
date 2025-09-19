@@ -1,0 +1,33 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:14.18
+    restart: none
+    environment:
+      POSTGRES_DB: ${postgres_db}
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRES_HOST=postgres
+      - DB_POSTGRES_PORT=5432
+      - DB_POSTGRES_DATABASE=${postgres_db}
+      - DB_POSTGRES_USER=${postgres_non_root_user}
+      - DB_POSTGRES_PASSWORD=${postgres_non_root_password}
+      - N8N_SECURE_COOKIE=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+    container_name: n8n
+    ports:
+      - 5678:5678
+    restart: always
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  postgres_data:
+  n8n_data:
