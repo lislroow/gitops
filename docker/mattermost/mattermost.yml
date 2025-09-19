@@ -17,7 +17,7 @@ services:
       - postgres
     ports:
       - 8065:8065
-    restart: none
+    restart: no
     environment:
       - TZ=UTC
       - MM_SQLSETTINGS_DRIVERNAME=postgres
