@@ -9,19 +9,12 @@ services:
       - TZ=Asia/Seoul
       - MYSQL_HOST=localhost
       - MYSQL_PORT=3306
-      - MYSQL_ROOT_PASSWORD=1
       - MYSQL_DATABASE=maria
-      - MYSQL_USER=maria
-      - MYSQL_PASSWORD=1
+      - MYSQL_ROOT_PASSWORD=${mysql_root_password}
+      - MYSQL_USER=${mysql_user}
+      - MYSQL_PASSWORD=${mysql_password}
     volumes:
       - mariadb_data:/var/lib/mysql
-    network_mode: host
-    #networks:
-    #  - local-default
 
 volumes:
   mariadb_data:
-
-networks:
-  local-default:
-    external: true
