@@ -12,6 +12,3 @@ mysql_password=
 
 #### mariadb.yml
 
-
-#### mariadb-ssl.yml
-
