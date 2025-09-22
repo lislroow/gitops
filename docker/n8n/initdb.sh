@@ -2,15 +2,15 @@
 
 set -e
 
-if ! psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -tAc "SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = '${postgres_n8n_user}'" | grep -q 1; then
-  psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "CREATE ROLE ${postgres_n8n_user} LOGIN PASSWORD '${postgres_n8n_password}';"
+if ! psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -tAc "SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = '${n8n_postgres_user}'" | grep -q 1; then
+  psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "CREATE ROLE ${n8n_postgres_user} LOGIN PASSWORD '${n8n_postgres_password}';"
 fi
 
-if ! psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -tAc "SELECT 1 FROM pg_database WHERE datname = '${postgres_n8n_db}'" | grep -q 1; then
-  psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "CREATE DATABASE ${postgres_n8n_db} OWNER ${postgres_n8n_user};"
+if ! psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -tAc "SELECT 1 FROM pg_database WHERE datname = '${n8n_postgres_db}'" | grep -q 1; then
+  psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "CREATE DATABASE ${n8n_postgres_db} OWNER ${n8n_postgres_user};"
 fi
 
-psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "GRANT ALL PRIVILEGES ON DATABASE ${postgres_n8n_db} TO ${postgres_n8n_user};"
+psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "GRANT ALL PRIVILEGES ON DATABASE ${n8n_postgres_db} TO ${n8n_postgres_user};"
 
 
 # psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER}" <<-EOSQL
@@ -18,8 +18,8 @@ psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "GRANT ALL PRIVILEGES ON DATAB
 # DO
 # \$do\$
 # BEGIN
-#   IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = '${postgres_n8n_user}') THEN
-#     CREATE ROLE ${postgres_n8n_user} LOGIN PASSWORD '${postgres_n8n_password}';
+#   IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = '${n8n_postgres_user}') THEN
+#     CREATE ROLE ${n8n_postgres_user} LOGIN PASSWORD '${n8n_postgres_password}';
 #   END IF;
 # END
 # \$do\$;
@@ -27,18 +27,18 @@ psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -c "GRANT ALL PRIVILEGES ON DATAB
 # DO
 # \$do\$
 # BEGIN
-#   IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = '${postgres_n8n_db}') THEN
-#     CREATE DATABASE ${postgres_n8n_db} OWNER ${postgres_n8n_user};
+#   IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = '${n8n_postgres_db}') THEN
+#     CREATE DATABASE ${n8n_postgres_db} OWNER ${n8n_postgres_user};
 #   END IF;
 # END
 # \$do\$;
 # -- 3. n8n DB에 모든 권한 부여 (OWNER 가 이미 모든 권한을 가지지만, 명시적으로 부여)
-# GRANT ALL PRIVILEGES ON DATABASE ${postgres_n8n_db} TO ${postgres_n8n_user};
+# GRANT ALL PRIVILEGES ON DATABASE ${n8n_postgres_db} TO ${n8n_postgres_user};
 # EOSQL
 
 
 # psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER}" <<-EOSQL
-# CREATE ROLE ${postgres_n8n_user} LOGIN PASSWORD '${postgres_n8n_password}';
-# CREATE DATABASE ${postgres_n8n_db} OWNER ${postgres_n8n_user};
-# GRANT ALL PRIVILEGES ON DATABASE ${postgres_n8n_db} TO ${postgres_n8n_user};
+# CREATE ROLE ${n8n_postgres_user} LOGIN PASSWORD '${n8n_postgres_password}';
+# CREATE DATABASE ${n8n_postgres_db} OWNER ${n8n_postgres_user};
+# GRANT ALL PRIVILEGES ON DATABASE ${n8n_postgres_db} TO ${n8n_postgres_user};
 # EOSQL
