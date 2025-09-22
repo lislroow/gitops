@@ -1,21 +1,31 @@
 services:
-  postgres:
-    container_name: postgres
+  sonarqube-postgres:
+    container_name: sonarqube-postgres
     image: postgres:14.18
     restart: unless-stopped
     volumes:
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
+      sonarqube_postgres_db: ${sonarqube_postgres_db}
+      sonarqube_postgres_user: ${sonarqube_postgres_user}
+      sonarqube_postgres_password: ${sonarqube_postgres_password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonarqube"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   sonarqube:
     container_name: sonarqube
     image: sonarqube:2025-lta-developer
     restart: unless-stopped
     depends_on:
-      - postgres
+      sonarqube-postgres:
+        condition: service_healthy
     ports:
       - 9000:9000
     volumes:
@@ -24,15 +34,16 @@ services:
       - sonarqube_conf:/opt/sonarqube/conf
       - sonarqube_temp:/opt/sonarqube/temp
       - sonarqube_extensions:/opt/sonarqube/extensions
+      # - ./conf/sonar.properties:/opt/sonarqube/conf/sonar.properties:ro # 비밀번호 정책 완화 설정 포함 (동작 안함)
     environment:
-      - SONAR_JDBC_URL=jdbc:postgresql://postgres:5432/${postgres_db}
-      - SONAR_JDBC_USERNAME=${postgres_user}
-      - SONAR_JDBC_PASSWORD=${postgres_password}
+      - SONAR_JDBC_URL=jdbc:postgresql://sonarqube-postgres:5432/${sonarqube_postgres_db}
+      - SONAR_JDBC_USERNAME=${sonarqube_postgres_user}
+      - SONAR_JDBC_PASSWORD=${sonarqube_postgres_password}
       - SONAR_EMBEDDED_DATABASE_PORT=-1  # H2 비활성화
     ulimits:
-     nofiles:
-       soft: 65536
-       hard: 65536
+      nofile:
+        soft: 65536
+        hard: 65536
     mem_limit: 3g
 
 volumes:
@@ -42,3 +53,6 @@ volumes:
   sonarqube_conf:
   sonarqube_temp:
   sonarqube_extensions:
+
+networks:
+  sonarqube_net:

@@ -1,9 +1,13 @@
 #### .env
 
 ```
-mysql_root_password=
-mysql_user=
-mysql_password=
+postgres_db=postgres
+postgres_user=
+postgres_password=
+
+sonarqube_postgres_db=
+sonarqube_postgres_user=
+sonarqube_postgres_password=
 ```
 
 
