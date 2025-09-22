@@ -107,7 +107,7 @@ up() {
     local services=($(docker-compose -p ${project} -f ${file} config --services))
     healthy 60 ${services[@]}
   fi
-  prune_container()
+  prune_container
 }
 
 prune_container() {
