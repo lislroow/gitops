@@ -35,13 +35,15 @@ done
 
 # check
 container="nexus"
+passwd_file=/nexus-data/admin.password
 r_running=$(docker inspect --format '{{.State.Running}}' ${container})
 [ "${r_running}" == "true" ] && echo "not running '${container}'" | exit 1
 # -- check
 
 
 # main
-r_password=$(docker exec -it ${container} cat /nexus-data/admin.password)
+echo "check: ${container}:${passwd_file}"
+r_password=$(docker exec -it ${container} cat ${passwd_file})
 [ $? -ne 0 ] && { echo "It's wrong. ${r_password}"; exit 1; }
 echo "user: admin, initial-password: ${r_password}"
 # -- main
