@@ -3,21 +3,21 @@ services:
     container_name: n8n-postgres
     image: postgres:14.18
     restart: unless-stopped
+    volumes:
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
-      postgres_n8n_db: ${postgres_n8n_db}
-      postgres_n8n_user: ${postgres_n8n_user}
-      postgres_n8n_password: ${postgres_n8n_password}
+      n8n_postgres_db: ${n8n_postgres_db}
+      n8n_postgres_user: ${n8n_postgres_user}
+      n8n_postgres_password: ${n8n_postgres_password}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U n8n"]
       interval: 5s
       timeout: 3s
       retries: 5
-    volumes:
-      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
-      - postgres_data:/var/lib/postgresql/data
 
   n8n:
     container_name: n8n
@@ -34,9 +34,9 @@ services:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=n8n-postgres
       - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=${postgres_n8n_db}
-      - DB_POSTGRESDB_USER=${postgres_n8n_user}
-      - DB_POSTGRESDB_PASSWORD=${postgres_n8n_password}
+      - DB_POSTGRESDB_DATABASE=${n8n_postgres_db}
+      - DB_POSTGRESDB_USER=${n8n_postgres_user}
+      - DB_POSTGRESDB_PASSWORD=${n8n_postgres_password}
       - N8N_SECURE_COOKIE=false
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
 
