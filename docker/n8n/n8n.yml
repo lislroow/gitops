@@ -7,6 +7,14 @@ services:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
+      postgres_n8n_db: ${postgres_n8n_db}
+      postgres_n8n_user: ${postgres_n8n_user}
+      postgres_n8n_password: ${postgres_n8n_password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     volumes:
       - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - postgres_data:/var/lib/postgresql/data
@@ -16,18 +24,19 @@ services:
     image: docker.n8n.io/n8nio/n8n
     restart: unless-stopped
     depends_on:
-      - n8n-postgres
+      n8n-postgres:
+        condition: service_healthy
     ports:
       - 5678:5678
     volumes:
       - n8n_data:/home/node/.n8n
     environment:
       - DB_TYPE=postgresdb
-      - DB_POSTGRES_HOST=n8n-postgres
-      - DB_POSTGRES_PORT=5432
-      - DB_POSTGRES_DATABASE=${postgres_db}
-      - DB_POSTGRES_USER=${postgres_non_root_user}
-      - DB_POSTGRES_PASSWORD=${postgres_non_root_password}
+      - DB_POSTGRESDB_HOST=n8n-postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${postgres_n8n_db}
+      - DB_POSTGRESDB_USER=${postgres_n8n_user}
+      - DB_POSTGRESDB_PASSWORD=${postgres_n8n_password}
       - N8N_SECURE_COOKIE=false
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
 
