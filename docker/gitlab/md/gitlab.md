@@ -1,4 +1,25 @@
-#### pipline
+#### .env
+
+```
+external_url=https://gitlab.develop
+external_url=https://gitlab.mgkim.net
+```
+
+
+#### gitlab.sh
+
+
+#### gitlab.yml
+
+
+#### gitlab-runner.yml
+
+
+#### check-initial-password.sh
+
+#### managed
+
+##### pipline
 
 ```yml
 stages:
@@ -71,12 +92,4 @@ deploy_develop_story-app:
     - echo "check packages ..."
     - echo "from branch $CI_COMMIT_BRANCH"
     - echo "deploy $PROFILE"
-```
-
-#### root, 관리자 계정 초기 패스워드
-
-```
-# /etc/gitlab/initial_root_password
-
-docker exec -it gitlab cat /etc/gitlab/initial_root_password
 ```
