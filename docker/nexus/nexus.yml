@@ -1,15 +1,12 @@
 services:
   nexus:
+    container_name: nexus
     image: sonatype/nexus3:3.82.0-java17-alpine
     restart: unless-stopped
-    container_name: nexus
     ports:
       - 8081:8081
       - 5000:5000
-    environment:
-      - INSTALL4J_ADD_VM_PARAMS=-Xms256m -Xmx768m -XX:MaxDirectMemorySize=256m -Djava.util.prefs.userRoot=/nexus-data/javaprefs
     volumes:
       - nexus_data:/nexus-data
-
-volumes:
-  nexus_data:
+    environment:
+      - INSTALL4J_ADD_VM_PARAMS=-Xms256m -Xmx768m -XX:MaxDirectMemorySize=256m -Djava.util.prefs.userRoot=/nexus-data/javaprefs

@@ -2,9 +2,18 @@ services:
   nginx:
     container_name: nginx
     image: nginx:1.29
+    restart: unless-stopped
     # ports:
     #   - 8888:80
-    restart: no
+    volumes:
+      - ./conf.d/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./conf.d/dhparams4096.pem:/dhparams4096.pem:ro
+      #- /etc/letsencrypt/live/mm.mgkim.net/fullchain.pem:/cert_mm.mgkim.net.pem:ro
+      #- /etc/letsencrypt/live/mm.mgkim.net/privkey.pem:/key_mm.mgkim.net.pem:ro
+      #- /etc/letsencrypt/live/nexus.mgkim.net/fullchain.pem:/cert_nexus.mgkim.net.pem:ro
+      #- /etc/letsencrypt/live/nexus.mgkim.net/privkey.pem:/key_nexus.mgkim.net.pem:ro
+      #- /etc/letsencrypt/live/gitlab.mgkim.net/fullchain.pem:/cert_gitlab.mgkim.net.pem:ro
+      #- /etc/letsencrypt/live/gitlab.mgkim.net/privkey.pem:/key_gitlab.mgkim.net.pem:ro
     environment:
       - TZ=UTC
     security_opt:
@@ -15,12 +24,3 @@ services:
       - /var/run
       - /var/log/nginx
       - /var/cache/nginx
-    volumes:
-      - ./conf.d/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./conf.d/dhparams4096.pem:/dhparams4096.pem:ro
-      #- /etc/letsencrypt/live/mm.mgkim.net/fullchain.pem:/cert_mm.mgkim.net.pem:ro
-      #- /etc/letsencrypt/live/mm.mgkim.net/privkey.pem:/key_mm.mgkim.net.pem:ro
-      #- /etc/letsencrypt/live/nexus.mgkim.net/fullchain.pem:/cert_nexus.mgkim.net.pem:ro
-      #- /etc/letsencrypt/live/nexus.mgkim.net/privkey.pem:/key_nexus.mgkim.net.pem:ro
-      #- /etc/letsencrypt/live/gitlab.mgkim.net/fullchain.pem:/cert_gitlab.mgkim.net.pem:ro
-      #- /etc/letsencrypt/live/gitlab.mgkim.net/privkey.pem:/key_gitlab.mgkim.net.pem:ro

@@ -4,7 +4,7 @@ services:
     container_name: redis
     ports:
       - 6310:6310
-    restart: always
+    restart: unless-stopped
     labels:
       - "name=redis"
       - "mode=standalone"

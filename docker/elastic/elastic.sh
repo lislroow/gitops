@@ -25,8 +25,8 @@ Commands:
 Options:
   --ssl     'docker-compose up --ssl' : Using 'elastic-ssl.yml' 
             'docker-compose up'       : Using 'elastic.yml'
-  --v       'docker-compose down --v' : down container and remove associate volumes
-            'docker-compose stop --v' : stop container and remove associate volumes
+  --v       'docker-compose down --volumes' : down container and remove associate volumes
+            'docker-compose stop --volumes' : stop container and remove associate volumes
 EOF
   exit 1
 }
@@ -96,7 +96,7 @@ start() {
 stop() {
   local roject=$(infer_project)
   local file="${project}.yml"
-  docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+-v} ${service_entry[@]}
+  docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes} ${service_entry[@]}
 }
 
 up() {
@@ -107,12 +107,22 @@ up() {
     local services=($(docker-compose -p ${project} -f ${file} config --services))
     healthy 60 ${services[@]}
   fi
+  prune_container()
+}
+
+prune_container() {
+  local project="elastic${o_ssl:+-ssl}"
+  local file="elastic${o_ssl:+-ssl}.yml"
+  if [ "${o_ssl}" == "y" ]; then
+    docker rm -f elastic-certs
+  fi
+  docker rm -f elastic-users
 }
 
 down() {
   local project=$(infer_project)
   local file="${project}.yml"
-  docker-compose -p ${project} -f ${file} down ${o_rm_vols:+-v}
+  docker-compose -p ${project} -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {

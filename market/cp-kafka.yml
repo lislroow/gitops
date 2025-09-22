@@ -14,7 +14,7 @@ services:
       - cp-zookeeper_secrets:/etc/zookeeper/secrets
       - cp-zookeeper_data:/var/lib/zookeeper/data
       - cp-zookeeper_log:/var/lib/zookeeper/log
-    restart: always
+    restart: unless-stopped
     networks:
       - local-default
 
@@ -23,7 +23,7 @@ services:
     container_name: cp-kafka
     ports:
       - 59092:59092
-    restart: always
+    restart: unless-stopped
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: cp-zookeeper:2181
@@ -45,7 +45,7 @@ services:
     container_name: cp-kafka-connect
     ports:
       - 8083:8083
-    restart: always
+    restart: unless-stopped
     environment:
       CONNECT_BOOTSTRAP_SERVERS: cp-kafka:9092
       CONNECT_REST_PORT: 8083

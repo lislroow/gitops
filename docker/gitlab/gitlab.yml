@@ -1,15 +1,15 @@
 services:
   gitlab:
     container_name: gitlab
-    restart: no
     image: gitlab/gitlab-ce:17.4.5-ce.0
-    shm_size: '256m'
-    hostname: gitlab.mgkim.net
+    restart: unless-stopped
     volumes:
       - gitlab_data:/var/opt/gitlab
       - gitlab_conf:/etc/gitlab
       - ./gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
       - gitlab_logs:/var/log/gitlab
+    shm_size: 256m
+    hostname: gitlab.mgkim.net
 
 volumes:
   gitlab_data:

@@ -75,7 +75,7 @@ start() {
 stop() {
   local project="postgres"
   local file="${project}.yml"
-  docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+-v}
+  docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes}
 }
 
 up() {
@@ -87,7 +87,7 @@ up() {
 down() {
   local project="postgres"
   local file="${project}.yml"
-  docker-compose -f ${file} down ${o_rm_vols:+-v}
+  docker-compose -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {

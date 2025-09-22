@@ -1,7 +1,7 @@
 services:
   es-setup:
     container_name: es-setup
-    restart: none
+    restart: unless-stopped
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     volumes:
       - elastic_certs:/usr/share/elasticsearch/config/certs
@@ -47,7 +47,7 @@ services:
   
   elastic:
     container_name: elastic
-    restart: always
+    restart: unless-stopped
     depends_on:
       es-setup:
         condition: service_healthy
@@ -93,7 +93,7 @@ services:
   
   kibana:
     container_name: kibana
-    restart: always
+    restart: unless-stopped
     image: docker.elastic.co/kibana/kibana:8.14.3
     depends_on:
       elastic:
@@ -124,7 +124,7 @@ services:
   
   grafana:
     container_name: grafana
-    restart: always
+    restart: unless-stopped
     image: grafana/grafana:11.5.0
     depends_on:
       - prometheus
@@ -137,7 +137,7 @@ services:
   
   prometheus:
     container_name: prometheus
-    restart: always
+    restart: unless-stopped
     image: prom/prometheus:v3.1.0
     volumes:
       - ./elastic/prometheus.yaml:/etc/prometheus/prometheus.yml
@@ -148,7 +148,7 @@ services:
   
   otel-collector:
     container_name: otel-collector
-    restart: always
+    restart: unless-stopped
     image: otel/opentelemetry-collector-contrib:0.118.0
     volumes:
       - ./output:/etc/output:rw
@@ -168,7 +168,7 @@ services:
   
   apm-server:
     container_name: apm-server
-    restart: always
+    restart: unless-stopped
     image: docker.elastic.co/apm/apm-server:8.14.3
     ports:
       - 8200:8200

@@ -2,26 +2,32 @@ services:
   postgres:
     container_name: postgres
     image: postgres:14.18
-    restart: none
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
   mattermost:
     container_name: mattermost
     image: mattermost/mattermost-team-edition:release-10.11
+    restart: unless-stopped
     depends_on:
       - postgres
     ports:
       - 8065:8065
-    restart: no
+    volumes:
+      - mattermost_config:/mattermost/config:rw
+      - mattermost_data:/mattermost/data:rw
+      - mattermost_logs:/mattermost/logs:rw
+      - mattermost_plugins:/mattermost/plugins:rw
+      - mattermost_client-plugins:/mattermost/client/plugins:rw
     environment:
       - TZ=UTC
       - MM_SQLSETTINGS_DRIVERNAME=postgres
-      - MM_SQLSETTINGS_DATASOURCE=postgres://${postgres_user}:${postgres_password}@postgres:5432/${postgres_db}?sslmode=disable&connect_timeout=10
+      - MM_SQLSETTINGS_DATASOURCE=postgres://mattermost:${postgres_password}@postgres:5432/${postgres_db}?sslmode=disable&connect_timeout=10
       - MM_SERVICESETTINGS_SITEURL=${mm_servicesettings_siteurl}
     security_opt:
       - no-new-privileges:true
@@ -29,12 +35,6 @@ services:
     read_only: false
     tmpfs:
       - /tmp
-    volumes:
-      - mattermost_config:/mattermost/config:rw
-      - mattermost_data:/mattermost/data:rw
-      - mattermost_logs:/mattermost/logs:rw
-      - mattermost_plugins:/mattermost/plugins:rw
-      - mattermost_client-plugins:/mattermost/client/plugins:rw
 
 volumes:
   postgres_data:

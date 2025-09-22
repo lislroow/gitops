@@ -2,22 +2,22 @@ services:
   postgres:
     container_name: postgres
     image: postgres:14.18
-    restart: none
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
   sonarqube:
-    image: sonarqube:2025-lta-developer
     container_name: sonarqube
-    restart: no
-    ports:
-      - 9000:9000
+    image: sonarqube:2025-lta-developer
+    restart: unless-stopped
     depends_on:
       - postgres
+    ports:
+      - 9000:9000
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_logs:/opt/sonarqube/logs
@@ -34,7 +34,7 @@ services:
        soft: 65536
        hard: 65536
     mem_limit: 3g
-  
+
 volumes:
   postgres_data:
   sonarqube_data:

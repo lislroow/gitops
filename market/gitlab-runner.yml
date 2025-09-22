@@ -1,7 +1,7 @@
 services:
   gitlab-runner:
     image: gitlab/gitlab-runner:alpine-v17.4.2
-    restart: always
+    restart: unless-stopped
     container_name: gitlab-runner
     ports:
       - 8093:8093

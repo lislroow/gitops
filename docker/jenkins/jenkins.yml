@@ -1,8 +1,8 @@
 services:
   jenkins:
+    container_name: jenkins
     image: jenkins/jenkins:2.528-jdk17
     restart: unless-stopped
-    container_name: jenkins
     ports:
       - 8080:8080
       - 50000:50000
@@ -10,12 +10,12 @@ services:
       - jenkins_data:/var/jenkins_home
   
   jenkins-agent:
+    container_name: jenkins-agent
     image: jenkins/ssh-agent:jdk17
     restart: unless-stopped
-    container_name: jenkins-agent
-    privileged: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
 
 volumes:
   jenkins_data:

@@ -1,22 +1,16 @@
 services:
   gitlab-runner:
-    image: gitlab/gitlab-runner:alpine-v17.4.2
-    restart: always
     container_name: gitlab-runner
+    image: gitlab/gitlab-runner:alpine-v17.4.2
+    restart: unless-stopped
     ports:
       - 8093:8093
     volumes:
       - gitlab-runner_conf:/etc/gitlab-runner
       - /root/.docker/config.json:/root/.docker/config.json
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - local-default
     extra_hosts:
-      - rocky8-devops:172.28.200.30
+      - rocky10-develop:172.28.200.101
 
 volumes:
   gitlab-runner_conf:
-
-networks:
-  local-default:
-    external: true
