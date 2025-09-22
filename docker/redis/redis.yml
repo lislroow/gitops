@@ -1,0 +1,16 @@
+services:
+  redis:
+    container_name: redis
+    image: redis:8.0.3
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    command: redis-server --port 6379 --appendonly yes
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+
+volumes:
+  redis_data:
