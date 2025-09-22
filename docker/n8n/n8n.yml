@@ -1,6 +1,6 @@
 services:
-  postgres:
-    container_name: postgres
+  n8n-postgres:
+    container_name: n8n-postgres
     image: postgres:14.18
     restart: unless-stopped
     environment:
@@ -8,6 +8,7 @@ services:
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
     volumes:
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - postgres_data:/var/lib/postgresql/data
 
   n8n:
@@ -15,14 +16,14 @@ services:
     image: docker.n8n.io/n8nio/n8n
     restart: unless-stopped
     depends_on:
-      - postgres
+      - n8n-postgres
     ports:
       - 5678:5678
     volumes:
       - n8n_data:/home/node/.n8n
     environment:
       - DB_TYPE=postgresdb
-      - DB_POSTGRES_HOST=postgres
+      - DB_POSTGRES_HOST=n8n-postgres
       - DB_POSTGRES_PORT=5432
       - DB_POSTGRES_DATABASE=${postgres_db}
       - DB_POSTGRES_USER=${postgres_non_root_user}
