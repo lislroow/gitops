@@ -10,3 +10,6 @@ services:
       - nexus_data:/nexus-data
     environment:
       - INSTALL4J_ADD_VM_PARAMS=-Xms256m -Xmx768m -XX:MaxDirectMemorySize=256m -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+
+volumes:
+  nexus_data:
