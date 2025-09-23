@@ -1,0 +1,25 @@
+services:
+  scouter-server:
+    container_name: scouter-server
+    image: docker.mgkim.net/scouter-server:1.0
+    restart: unless-stopped
+    ports:
+      - 6100:6100
+      - 6100:6100/udp
+    volumes:
+      - /data/scouter-server:/data
+      - /logs/scouter-server:/logs
+    environment:
+      SC_SERVER_ID: "SCCOUTER-COLLECTOR"
+      NET_HTTP_SERVER_ENABLED: true
+      NET_HTTP_API_SWAGGER_ENABLED: true
+      NET_HTTP_API_ENABLED: true
+      MGR_PURGE_PROFILE_KEEP_DAYS: 2
+      MGR_PURGE_XLOG_KEEP_DAYS: 2
+      MGR_PURGE_COUNTER_KEEP_DAYS: 2
+      JAVA_OPT: "-Xms512m -Xmx512m"
+      net_udp_listen_port: 6100
+      net_tcp_listen_port: 6100
+      db_dir: /data
+      log_dir: /logs
+    mem_limit: 1g
