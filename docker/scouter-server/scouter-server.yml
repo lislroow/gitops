@@ -22,4 +22,5 @@ services:
       net_tcp_listen_port: 6100
       db_dir: /data
       log_dir: /logs
+    hostname: ${hostname}
     mem_limit: 1g
