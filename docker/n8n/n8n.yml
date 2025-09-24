@@ -14,7 +14,9 @@ services:
       n8n_postgres_user: ${n8n_postgres_user}
       n8n_postgres_password: ${n8n_postgres_password}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U n8n"]
+      test: >
+        pg_isready -U ${postgres_user} -d ${postgres_db} && 
+        pg_isready -U ${n8n_postgres_user} -d ${n8n_postgres_db}
       interval: 5s
       timeout: 3s
       retries: 5
