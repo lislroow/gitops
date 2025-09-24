@@ -8,11 +8,11 @@ PRIVATE_REGISTRY="docker.mgkim.net"
 function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM COMMAND
-Commands:
+COMMAND:
   build     build image
   deploy    build & deploy image
 
-Options:
+OPTIONS:
   --registry  docker registry domain
               e.g '$SCRIPT_NM [build | deploy] --registry ${PRIVATE_REGISTRY}'
 

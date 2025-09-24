@@ -6,14 +6,14 @@ SCRIPT_NM="${0##*/}"
 function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM COMMAND
-Commands:
+COMMAND:
   start     Start scouter-server
   stop      Stop scouter-server
   restart   Stop and Start scouter-server
   status    'ps -ef ...' command
   logs      'tail -f ... log' command
 
-Options:
+OPTIONS:
   -d        startup daemon mode (nohup ... > /dev/null 2>&1 &)
             e.g '$SCRIPT_NM start -d'
   -v        verbose

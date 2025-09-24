@@ -8,7 +8,7 @@ function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM username1 [username2 ...]
 
-Options:
+OPTIONS:
   --confirm       delete no confirm
 
 EOF

@@ -8,7 +8,7 @@ function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM OPTIONS
 
-Options:          (*) required
+OPTIONS:          (*) required
   --email         (*) email
   --username      (*) username
   --password      (*) password

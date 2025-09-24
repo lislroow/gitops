@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 BASEDIR=$(cd $(dirname $0) && pwd -P)
 SCRIPT_NM="${0##*/}"
-network_nm='cicd_net'
+
+# variable
+declare network_nm='app_net'
+declare env_file="${BASEDIR}/../yml/.env"
 
 # usage
 function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM [OPTIONS] [COMMAND]
-Commands:
+COMMAND:
   status    status volume, network
 
-Options:
+OPTIONS:
   --clear   clear all
 
 EOF
@@ -60,12 +63,6 @@ clear() {
     echo "   does not exist: '${network_nm}'"
   fi
   echo ""
-
-  echo "## users"
-  userdel -r jenkins
-  userdel -r nexus
-  userdel -r postgres
-  userdel -r sonarqube
 }
 
 create() {
@@ -78,31 +75,8 @@ create() {
     echo "   already exist: '${network_nm}'"
   fi
   echo ""
-
-  export $(grep -v '^#' ${BASEDIR}/.env | xargs)
-  echo "## users"
   
-  user_nm='jenkins'
-  groupadd -g ${jenkins_uid} ${user_nm}
-  useradd -u ${jenkins_gid} -g ${user_nm} -s /sbin/nologin ${user_nm}
-  id jenkins
-
-  user_nm='nexus'
-  groupadd -g ${nexus_uid} ${user_nm}
-  useradd -u ${nexus_gid} -g ${user_nm} -s /sbin/nologin ${user_nm}
-  id nexus
-
-  user_nm='postgres'
-  groupadd -g ${postgres_uid} ${user_nm}
-  useradd -u ${postgres_gid} -g ${user_nm} -s /sbin/nologin ${user_nm}
-  id postgres
-
-  user_nm='sonarqube'
-  groupadd -g ${sonarqube_uid} ${user_nm}
-  useradd -u ${sonarqube_gid} -g ${user_nm} -s /sbin/nologin ${user_nm}
-  id sonarqube
-
-  
+  export $(grep -v '^#' "${env_file}" | xargs)
 }
 
 status() {
@@ -112,11 +86,6 @@ status() {
   echo " * status volume"
   docker volume ls
   echo ""
-  echo " * status user"
-  id jenkins
-  id nexus
-  id postgres
-  id sonarqube
 }
 
 # main

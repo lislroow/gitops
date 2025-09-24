@@ -6,14 +6,16 @@ up="\033[A"
 clean="\033[K"
 
 # variable
-declare wd=`pwd -P`
-declare project="${wd##*/}"
+declare project="app"
+declare service="redis"
+declare file="${BASEDIR}/yml/${service}.yml"
+declare env_file="${BASEDIR}/yml/.env"
 
 # usage
 function USAGE {
   cat << EOF
-- Usage  $SCRIPT_NM [OPTIONS] COMMAND [SERVICES]
-Commands:
+- Usage  $SCRIPT_NM [OPTIONS] COMMAND [container]
+COMMAND:
   start     Start containers
   stop      Stop containers
   restart   Stop and Start containers
@@ -22,9 +24,10 @@ Commands:
   status    'docker ps' command
   logs      Fetch the logs of containers
 
-Options:
+OPTIONS:
   --v       'docker-compose down --v' : down container and remove associate volumes
             'docker-compose stop --v' : stop container and remove associate volumes
+  --logs    start command and 'logs -f'
 EOF
   exit 1
 }
@@ -33,8 +36,9 @@ EOF
 
 # options
 declare o_rm_vols
+declare o_logs
 OPTIONS=""
-LONGOPTIONS="v"
+LONGOPTIONS="v,logs"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -43,6 +47,9 @@ while true; do
   [ -z "$1" ] && break
   
   case "$1" in
+    --logs)
+      o_logs="y"
+      ;;
     --v)
       o_rm_vols="y"
       ;;
@@ -67,32 +74,22 @@ get_running() {
 }
 
 start() {
-  local service="redis"
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} start
 }
 
 stop() {
-  local service="redis"
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes}
 }
 
 up() {
-  local service="redis"
-  local file="${BASEDIR}/${service}.yml"
-  docker-compose -f ${file} up -d
+  docker-compose -p ${project} -f ${file} up -d
 }
 
 down() {
-  local service="redis"
-  local file="${BASEDIR}/${service}.yml"
-  docker-compose -f ${file} down ${o_rm_vols:+--volumes}
+  docker-compose -p ${project} -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {
-  local service="redis"
-  local file="${BASEDIR}/${service}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -119,8 +116,6 @@ volume() {
 }
 
 status() {
-  local service="redis"
-  local file="${BASEDIR}/${service}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
@@ -155,8 +150,6 @@ status() {
 }
 
 logs() {
-  local service="redis"
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} logs -f
 }
 
@@ -166,6 +159,7 @@ command=${argv[1]}
 case "${command}" in
   start)
     start
+    [ "${o_logs}" == "y" ] && logs
     ;;
   stop)
     stop
@@ -173,9 +167,11 @@ case "${command}" in
   restart)
     stop
     start
+    [ "${o_logs}" == "y" ] && logs
     ;;
   up)
     up
+    [ "${o_logs}" == "y" ] && logs
     ;;
   down)
     down

@@ -6,11 +6,14 @@ services:
     ports:
       - 9200:9200
     volumes:
-      - elastic_data:/usr/share/elasticsearch/data
+      - /data/apm/elastic-data:/usr/share/elasticsearch/data
+    networks:
+      - apm_net
+    user: "${elastic_uid}:${elastic_gid}"
     environment:
       - discovery.type=single-node
       - node.name=elastic
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_PASSWORD=${elastic_password}
       - bootstrap.memory_lock=true
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=false
@@ -20,8 +23,10 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -s -u \"elastic:${ELASTIC_PASSWORD}\" http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'",
+          "curl -s -u \"elastic:${elastic_password}\" http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'",
         ]
+        # curl -s -u "elastic:${elastic_password}" http://localhost:9200/_cluster/health | \
+        #   grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'
       interval: 10s
       timeout: 10s
       retries: 120
@@ -38,12 +43,14 @@ services:
     depends_on:
       elastic:
         condition: service_healthy
+    networks:
+      - apm_net
     command: >
       bash -c '
         echo "Waiting for Elasticsearch availability";
-        until curl -s -u "elastic:${ELASTIC_PASSWORD}" http://elastic:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""; do echo "Waiting for Elasticsearch availability -> " $((idx++)); sleep 1; done;
+        until curl -s -u "elastic:${elastic_password}" http://elastic:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""; do echo "Waiting for Elasticsearch availability -> " $((idx++)); sleep 1; done;
         echo "Setting kibana_system password";
-        until curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" http://elastic:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 3; done;
+        until curl -s -X POST -u "elastic:${elastic_password}" -H "Content-Type: application/json" http://elastic:9200/_security/user/kibana_system/_password -d "{\"password\":\"${kibana_password}\"}" | grep -q "^{}"; do sleep 3; done;
         echo "All done!";
       '
     user: "0"
@@ -59,12 +66,15 @@ services:
     ports:
       - 5601:5601
     volumes:
-      - kibana_data:/usr/share/kibana/data
+      - /data/apm/kibana-data:/usr/share/kibana/data
+    networks:
+      - apm_net
+    user: "${kibana_uid}:${kibana_gid}"
     environment:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS=http://elastic:9200
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_PASSWORD=${kibana_password}
     healthcheck:
       test:
         [
@@ -75,7 +85,6 @@ services:
       timeout: 10s
       retries: 120
 
-volumes:
-  elastic_data:
-  kibana_data:
-
+networks:
+  apm_net:
+    external: true

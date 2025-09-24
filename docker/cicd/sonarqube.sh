@@ -6,14 +6,17 @@ up="\033[A"
 clean="\033[K"
 
 # variable
-declare wd=`pwd -P`
-declare project="${wd##*/}"
+declare project="cicd"
+declare service="sonarqube"
+declare file="${BASEDIR}/yml/${service}.yml"
+declare file_depends="${BASEDIR}/yml/postgres.yml"
+declare env_file="${BASEDIR}/yml/.env"
 
 # usage
 function USAGE {
   cat << EOF
-- Usage  $SCRIPT_NM [OPTIONS] COMMAND [SERVICES]
-Commands:
+- Usage  $SCRIPT_NM [OPTIONS] COMMAND [container]
+COMMAND:
   start     Start containers
   stop      Stop containers
   restart   Stop and Start containers
@@ -22,9 +25,10 @@ Commands:
   status    'docker ps' command
   logs      Fetch the logs of containers
 
-Options:
+OPTIONS:
   --v       'docker-compose down --v' : down container and remove associate volumes
             'docker-compose stop --v' : stop container and remove associate volumes
+  --logs    start command and 'logs -f'
 EOF
   exit 1
 }
@@ -34,7 +38,7 @@ EOF
 # options
 declare o_rm_vols
 OPTIONS=""
-LONGOPTIONS="v"
+LONGOPTIONS="v,logs"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -43,6 +47,9 @@ while true; do
   [ -z "$1" ] && break
   
   case "$1" in
+    --logs)
+      o_logs="y"
+      ;;
     --v)
       o_rm_vols="y"
       ;;
@@ -67,36 +74,22 @@ get_running() {
 }
 
 start() {
-  local service="sonarqube"
-  local file="${BASEDIR}/${service}.yml"
-  local file_depends="${BASEDIR}/postgres.yml"
   docker-compose -p ${project} -f ${file_depends} -f ${file} start ${service}
 }
 
 stop() {
-  local service="sonarqube"
-  local file="${BASEDIR}/${service}.yml"
-  local file_depends="${BASEDIR}/postgres.yml"
   docker-compose -p ${project} -f ${file_depends} -f ${file} stop ${o_rm_vols:+--volumes} ${service}
 }
 
 up() {
-  local service="sonarqube"
-  local file="${BASEDIR}/${service}.yml"
-  local file_depends="${BASEDIR}/postgres.yml"
-  docker-compose -f ${file_depends} -f ${file} up -d ${service}
+  docker-compose -p ${project} -f ${file_depends} -f ${file} up -d ${service}
 }
 
 down() {
-  local service="sonarqube"
-  local file="${BASEDIR}/${service}.yml"
-  local file_depends="${BASEDIR}/postgres.yml"
-  docker-compose -f ${file_depends} -f ${file} down ${o_rm_vols:+--volumes} ${service}
+  docker-compose -p ${project} -f ${file_depends} -f ${file} down ${o_rm_vols:+--volumes} ${service}
 }
 
 volume() {
-  local service="sonarqube"
-  local file="${BASEDIR}/${service}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -123,8 +116,6 @@ volume() {
 }
 
 status() {
-  local service="sonarqube"
-  local file="${BASEDIR}/${service}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
@@ -159,9 +150,6 @@ status() {
 }
 
 logs() {
-  local service="sonarqube"
-  local file="${BASEDIR}/${service}.yml"
-  local file_depends="${BASEDIR}/postgres.yml"
   docker-compose -p ${project} -f ${file_depends} -f ${file} logs -f
 }
 
@@ -171,7 +159,7 @@ command=${argv[1]}
 case "${command}" in
   start)
     start
-    logs
+    [ "${o_logs}" == "y" ] && logs
     ;;
   stop)
     stop
@@ -179,11 +167,11 @@ case "${command}" in
   restart)
     stop
     start
-    logs
+    [ "${o_logs}" == "y" ] && logs
     ;;
   up)
     up
-    logs
+    [ "${o_logs}" == "y" ] && logs
     ;;
   down)
     down

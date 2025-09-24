@@ -12,8 +12,8 @@ KIBANA_PASSWORD=
 # usage
 function USAGE {
   cat << EOF
-- Usage  $SCRIPT_NM [OPTIONS] COMMAND [SERVICES]
-Commands:
+- Usage  $SCRIPT_NM [OPTIONS] COMMAND [container]
+COMMAND:
   start     Start containers
   stop      Stop containers
   restart   Stop and Start containers
@@ -22,7 +22,7 @@ Commands:
   status    'docker ps' command and curl health check.
   logs      Fetch the logs of containers
 
-Options:
+OPTIONS:
   --ssl     'docker-compose up --ssl' : Using 'elastic-ssl.yml' 
             'docker-compose up'       : Using 'elastic.yml'
   --v       'docker-compose down --v' : down container and remove associate volumes

@@ -6,14 +6,16 @@ up="\033[A"
 clean="\033[K"
 
 # variable
-declare wd=`pwd -P`
-declare project="${wd##*/}"
+declare project="apm"
+declare service="elastic"
+declare file="${BASEDIR}/yml/${service}.yml"
+declare env_file="${BASEDIR}/yml/.env"
 
 # usage
 function USAGE {
   cat << EOF
-- Usage  $SCRIPT_NM [OPTIONS] COMMAND [SERVICES]
-Commands:
+- Usage  $SCRIPT_NM [OPTIONS] COMMAND [container]
+COMMAND:
   start     Start containers
   stop      Stop containers
   restart   Stop and Start containers
@@ -22,11 +24,12 @@ Commands:
   status    'docker ps' command and curl health check.
   logs      Fetch the logs of containers
 
-Options:
+OPTIONS:
   --ssl     'docker-compose up --ssl' : Using 'elastic-ssl.yml' 
             'docker-compose up'       : Using 'elastic.yml'
   --v       'docker-compose down --volumes' : down container and remove associate volumes
             'docker-compose stop --volumes' : stop container and remove associate volumes
+  --logs    start command and 'logs -f'
 EOF
   exit 1
 }
@@ -34,10 +37,12 @@ EOF
 
 
 # options
-declare o_rm_vols
 declare o_ssl
+declare o_rm_vols
+declare o_logs
 OPTIONS="a"
-LONGOPTIONS="ssl,v"
+# LONGOPTIONS="ssl,v,logs"
+LONGOPTIONS="v,logs"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -49,8 +54,11 @@ while true; do
     -a)
       status_all_yn="y"
       ;;
-    --ssl)
-      o_ssl="y"
+    # --ssl)
+    #   o_ssl="y"
+    #   ;;
+    --logs)
+      o_logs="y"
       ;;
     --v)
       o_rm_vols="y"
@@ -68,14 +76,14 @@ done
 [ -z "${healthy_yn}" ] && healthy_yn="y"
 # -- validate
 
-infer_project() {
-  for project in elastic elastic-ssl; do
-    if [ $(docker-compose -p ${project} ps -a | tail -n +2 | wc -l) -gt 0 ]; then
-      echo ${project}
-      break
-    fi
-  done
-}
+# infer_project() {
+#   for project in elastic elastic-ssl; do
+#     if [ $(docker-compose -p ${project} ps -a | tail -n +2 | wc -l) -gt 0 ]; then
+#       echo ${project}
+#       break
+#     fi
+#   done
+# }
 
 get_running() {
   local container=$1
@@ -84,8 +92,6 @@ get_running() {
 }
 
 start() {
-  local project=$(infer_project)
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} start ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
     local services=($(docker-compose -p ${project} -f ${file} config --services))
@@ -94,14 +100,10 @@ start() {
 }
 
 stop() {
-  local roject=$(infer_project)
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes} ${service_entry[@]}
 }
 
 up() {
-  local service="elastic${o_ssl:+-ssl}"
-  local file="elastic${o_ssl:+-ssl}.yml"
   docker-compose -p ${project} -f ${file} up -d ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
     local services=($(docker-compose -p ${project} -f ${file} config --services))
@@ -120,14 +122,10 @@ prune_container() {
 }
 
 down() {
-  local project=$(infer_project)
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {
-  local project=$(infer_project)
-  local file="${BASEDIR}/${service}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -154,12 +152,6 @@ volume() {
 }
 
 status() {
-  local project=$(infer_project)
-  if [ -z "${project}" ]; then
-    echo "no containers"
-    exit
-  fi
-  local file="${BASEDIR}/${service}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
@@ -194,9 +186,12 @@ status() {
   [ ${#running[@]} -gt 0 ] && healthy 5 ${running[@]}
 }
 
+logs() {
+  docker-compose -p ${project} -f ${file} logs -f
+}
+
 healthy() {
   echo "## check healthy"
-  local project=$(infer_project)
   local max_iter=$1
   shift
   local list=($@)
@@ -209,13 +204,13 @@ healthy() {
     case "$item" in
       elastic)
         for ((i=1; i<=${max_iter}; i++)); do
-          test -f "${BASEDIR}/.env" && \
-            export $(grep -v '^#' "${BASEDIR}/.env" | xargs)
+          test -f "${env_file}" && \
+            export $(grep -v '^#' "${env_file}" | xargs)
           if [ "${o_ssl:+y}" == "y" ]; then
             crt_file="/var/lib/docker/volumes/${project}_elastic_certs/_data/ca/ca.crt"
-            curl -s -u "elastic:${ELASTIC_PASSWORD}" --cacert $crt_file https://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
+            curl -s -u "elastic:${elastic_password}" --cacert $crt_file https://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
           else
-            curl -s -u "elastic:${ELASTIC_PASSWORD}" http://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
+            curl -s -u "elastic:${elastic_password}" http://localhost:9200/_cluster/health | grep -q "\"status\":\"green\"\\|\"status\":\"yellow\""
           fi
           
           if [ $? -eq 0 ]; then
@@ -265,8 +260,6 @@ service_entry=("${argv[@]:2}")
 
 case "${command}" in
   start)
-    project=$(infer_project)
-    file="${project}.yml"
     services=($(docker-compose -p ${project} -f ${file} config --services))
     declare -i insufficient_cnt=0
     for service in ${services[@]}; do
@@ -286,6 +279,7 @@ case "${command}" in
     [ ${insufficient_cnt} -gt 0 ] && exit 1
 
     start
+    [ "${o_logs}" == "y" ] && logs
     ;;
   stop)
     stop
@@ -293,9 +287,11 @@ case "${command}" in
   restart)
     stop
     start
+    [ "${o_logs}" == "y" ] && logs
     ;;
   up)
     up
+    [ "${o_logs}" == "y" ] && logs
     ;;
   down)
     down
@@ -304,13 +300,7 @@ case "${command}" in
     status
     ;;
   logs)
-    project=$(infer_project)
-    if [ -z "${project}"]; then
-      echo "no containers"
-      exit
-    fi
-    file="${project}.yml"
-    docker-compose -p ${project} -f ${file} logs -f
+    logs
     ;;
   volume)
     volume

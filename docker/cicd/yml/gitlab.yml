@@ -17,7 +17,7 @@ services:
         external_url '${gitlab_external_url}'
     logging:
       driver: "json-file"
-      options:
+      OPTIONS:
         max-size: "50m"
         max-file: "3"
     shm_size: 256m
