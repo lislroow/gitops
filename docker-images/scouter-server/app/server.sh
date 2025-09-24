@@ -71,7 +71,7 @@ start() {
   net_tcp_listen_port="${net_tcp_listen_port:-6101}"
   net_udp_listen_port="${net_udp_listen_port:-6101}"
   db_dir="${db_dir:-./data}"
-  log_dir="${db_dir:-./logs}"
+  log_dir="${log_dir:-./logs}"
   cat <<-EOF | sed 's/^[[:space:]]*//' > ${BASEDIR}/conf/scouter.conf
     net_tcp_listen_port=${net_tcp_listen_port}
     net_udp_listen_port=${net_udp_listen_port}
