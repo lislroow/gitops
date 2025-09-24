@@ -27,8 +27,9 @@ EOF
 # options
 declare o_daemon
 declare o_verbose
+declare o_local
 OPTIONS="vd"
-LONGOPTIONS=""
+LONGOPTIONS="local"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -42,6 +43,9 @@ while true; do
       ;;
     -v)
       o_verbose="y"
+      ;;
+    --local)
+      o_local="y"
       ;;
     *)
       argv+=($1)
@@ -68,13 +72,23 @@ start() {
   echo "## start scouter-host"
 
   # default
-  log_dir="/logs/scouter-host"
-  lib_dir="/data/scouter-host"
-
-  net_collector_ip="mgkim.net"
-  net_tcp_listen_port="${net_tcp_listen_port:-6100}"
-  net_udp_listen_port="${net_udp_listen_port:-6100}"
+  local log_dir="/logs/scouter-host"
+  local server_host
+  case "${o_local}" in
+    y)
+      server_host="localhost"
+      ;;
+    *)
+      server_host="mgkim.net"
+      ;;
+  esac
+  
+  [ ! -d "${BASEDIR}/conf" ] && { echo "create directory: '${BASEDIR}/conf'"; mkdir ${BASEDIR}/conf; }
+  local net_collector_ip="${server_host}"
+  local net_tcp_listen_port="${net_tcp_listen_port:-6100}"
+  local net_udp_listen_port="${net_udp_listen_port:-6100}"
   cat <<-EOF | sed 's/^[[:space:]]*//' > ${BASEDIR}/conf/scouter.conf
+    log_dir=${log_dir}
     net_collector_ip=${net_collector_ip}
     net_collector_udp_port=${net_tcp_listen_port}
     net_collector_tcp_port=${net_udp_listen_port}
@@ -85,32 +99,14 @@ start() {
     cpu_alert_interval_ms=300000
     disk_warning_pct=88
     disk_fatal_pct=92
-    log_dir=${log_dir}
 
 EOF
 
-  # -- default
-
-  ## classpath
-  # [ style 1 ]
-  # CLASSPATH="${BASEDIR}"
-  # for file in $BASEDIR/lib/*.jar; do
-  #   CLASSPATH="${CLASSPATH}:${file}"
-  # done
-
-  # [ style 2 ]
-  CLASSPATH="$BASEDIR:$(printf '%s:' "$BASEDIR"/lib/*.jar)"
-  CLASSPATH="${CLASSPATH%:}"
-
-  # [ style 3 ]
-  # CLASSPATH="$BASEDIR:$(find "$BASEDIR/lib" -name '*.jar' -printf '%p:' | tr -d '\n')"
-  # CLASSPATH="${CLASSPATH%:}"
-  ## -- classpath
-
-  CLASSPATH="${CLASSPATH}:${BASEDIR}/scouter-host.jar"
-  pid_files=(${BASEDIR}/*.scouter)
+  local CLASSPATH="${BASEDIR}/scouter-host.jar"
+  local pid_files=(${BASEDIR}/*.scouter)
   [ ${#pid_files[@]} -gt 0 ] && { echo "remove pid files: ${pid_files[@]}"; rm -rf ${pid_files[@]}; }
 
+  local lib_dir="/data/scouter-host"
   if [ "${o_daemon}" == "y" ]; then
     nohup ${JAVA_HOME}/bin/java -DSCOUTER_HOST \
       -Dscouter.config=${BASEDIR}/conf/scouter.conf \
@@ -133,7 +129,10 @@ stop() {
 }
 
 status() {
+  echo "## status scouter-host"
   pid=$(ps -ef | grep -v grep | grep SCOUTER_HOST | awk '{ print $2 }')
+  [ -z "${pid}" ] && { echo "scouter-host is not running."; exit; }
+  
   elapsed=$(ps -p ${pid} -o etime | tail -n +2 | awk '{ print $1 }')
   process=$(ps -ef | grep -v grep | grep SCOUTER_HOST | awk '{ for (i=1; i<=NF; i++) { if ($i ~ /java$/) { print $i; break; } }}')
   
@@ -149,9 +148,9 @@ $(cat ${BASEDIR}/conf/scouter.conf)
 EOF
 }
 
-# logs() {
-
-# }
+logs() {
+  tail -f /logs/scouter-host/agent-$(date +%Y%m%d).log
+}
 
 # main
 command=${argv[1]}
