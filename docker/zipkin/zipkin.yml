@@ -1,0 +1,9 @@
+services:
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin:3.4.2
+    restart: unless-stopped
+    ports:
+      - 9411:9411
+    environment:
+      - STORAGE_TYPE=mem
