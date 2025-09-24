@@ -7,7 +7,7 @@ services:
       - 8081:8081
       - 5000:5000
     volumes:
-      - /data/cicd-nexus-data:/nexus-data
+      - /data/cicd/nexus-data:/nexus-data
     networks:
       - cicd_net
     user: "${nexus_uid}:${nexus_gid}"

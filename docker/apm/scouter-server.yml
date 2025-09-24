@@ -7,8 +7,8 @@ services:
       - 6100:6100
       - 6100:6100/udp
     volumes:
-      - /data/apm-scouter-server-data:/data
-      - /logs/apm-scouter-server:/logs
+      - /data/apm/scouter-server-data:/data
+      - /logs/apm/scouter-server:/logs
     networks:
       - apm_net
     environment:

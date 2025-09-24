@@ -6,16 +6,12 @@ services:
     ports:
       - 8443:443
     volumes:
-      - /data/cicd-gitlab-data:/var/opt/gitlab
-      - /logs/cicd-gitlab:/var/log/gitlab
-      - /conf/cicd-gitlab-conf:/etc/gitlab
-      # - gitlab_data:/var/opt/gitlab
-      # - gitlab_logs:/var/log/gitlab
-      # - gitlab_conf:/etc/gitlab
+      - /data/cicd/gitlab-data:/var/opt/gitlab
+      - /logs/cicd/gitlab:/var/log/gitlab
+      - /conf/cicd/gitlab:/etc/gitlab
       - ./conf/gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
     networks:
       - cicd_net
-    # user: "${gitlab_uid}:${gitlab_gid}"
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url '${gitlab_external_url}'
@@ -25,11 +21,6 @@ services:
         max-size: "50m"
         max-file: "3"
     shm_size: 256m
-
-# volumes:
-#   gitlab_data:
-#   gitlab_conf:
-#   gitlab_logs:
 
 networks:
   cicd_net:

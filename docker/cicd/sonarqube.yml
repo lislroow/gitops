@@ -9,19 +9,14 @@ services:
     ports:
       - 9000:9000
     volumes:
-      # - sonarqube_data:/opt/sonarqube/data
-      # - sonarqube_extensions:/opt/sonarqube/extensions
-      # - sonarqube_conf:/opt/sonarqube/conf
-      # - sonarqube_logs:/opt/sonarqube/logs
-      - /data/cicd-sonarqube-data:/opt/sonarqube/data
-      - /data/cicd-sonarqube-extensions:/opt/sonarqube/extensions
-      - /conf/cicd-sonarqube-conf:/opt/sonarqube/conf
-      - /logs/cicd-sonarqube-logs:/opt/sonarqube/logs
+      - /data/cicd/sonarqube-data:/opt/sonarqube/data
+      - /data/cicd/sonarqube-extensions:/opt/sonarqube/extensions
+      - /conf/cicd/sonarqube:/opt/sonarqube/conf
+      - /logs/cicd/sonarqube:/opt/sonarqube/logs
       - sonarqube_temp:/opt/sonarqube/temp
       # - ./conf/sonarqube/sonar.properties:/opt/sonarqube/conf/sonar.properties:ro # 비밀번호 정책 완화 설정 포함 (동작 안함)
     networks:
       - cicd_net
-    # user: "${sonarqube_uid}:${sonarqube_gid}"
     environment:
       - SONAR_JDBC_URL=jdbc:postgresql://postgres-cicd:5432/${postgres_sonarqube_db}
       - SONAR_JDBC_USERNAME=${postgres_sonarqube_user}
@@ -34,10 +29,6 @@ services:
     # mem_limit: 3g
 
 volumes:
-  # sonarqube_data:
-  # sonarqube_extensions:
-  # sonarqube_conf:
-  # sonarqube_logs:
   sonarqube_temp:
 
 networks:
