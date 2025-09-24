@@ -1,21 +1,33 @@
 services:
-  postgres:
-    container_name: postgres
+  mattermost-postgres:
+    container_name: mattermost-postgres
     image: postgres:14.18
     restart: unless-stopped
     volumes:
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
       - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
+      mattermost_postgres_db: ${mattermost_postgres_db}
+      mattermost_postgres_user: ${mattermost_postgres_user}
+      mattermost_postgres_password: ${mattermost_postgres_password}
+    healthcheck:
+      test: >
+        pg_isready -U ${postgres_user} -d ${postgres_db} && 
+        pg_isready -U ${mattermost_postgres_user} -d ${mattermost_postgres_db}
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   mattermost:
     container_name: mattermost
     image: mattermost/mattermost-team-edition:release-10.11
     restart: unless-stopped
     depends_on:
-      - postgres
+      mattermost-postgres:
+        condition: service_healthy
     ports:
       - 8065:8065
     volumes:
@@ -27,7 +39,7 @@ services:
     environment:
       - TZ=UTC
       - MM_SQLSETTINGS_DRIVERNAME=postgres
-      - MM_SQLSETTINGS_DATASOURCE=postgres://mattermost:${postgres_password}@postgres:5432/${postgres_db}?sslmode=disable&connect_timeout=10
+      - MM_SQLSETTINGS_DATASOURCE=postgres://${mattermost_postgres_user}:${mattermost_postgres_password}@mattermost-postgres:5432/${mattermost_postgres_db}?sslmode=disable&connect_timeout=10
       - MM_SERVICESETTINGS_SITEURL=${mm_servicesettings_siteurl}
     security_opt:
       - no-new-privileges:true

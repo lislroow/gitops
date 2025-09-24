@@ -5,13 +5,26 @@ postgres_db=
 postgres_user=
 postgres_password=
 
+mattermost_postgres_db=
+mattermost_postgres_user=
+mattermost_postgres_password=
+
 mm_servicesettings_siteurl=https://
 ```
+
+#### initdb.sh
+
 
 #### mattermost.sh
 
 
 #### mattermost.yml
+
+
+#### user-create.sh
+
+
+#### user-delete.sh
 
 
 #### docs
