@@ -68,31 +68,31 @@ get_running() {
 
 start() {
   local project="keycloak"
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -p ${project} -f ${file} start
 }
 
 stop() {
   local project="keycloak"
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes}
 }
 
 up() {
   local project="keycloak"
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -f ${file} up -d
 }
 
 down() {
   local project="keycloak"
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {
   local project="keycloak"
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -120,7 +120,7 @@ volume() {
 
 status() {
   local project="keycloak"
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
@@ -156,7 +156,7 @@ status() {
 
 logs() {
   local project="keycloak"
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -p ${project} -f ${file} logs -f
 }
 

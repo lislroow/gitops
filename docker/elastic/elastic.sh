@@ -85,7 +85,7 @@ get_running() {
 
 start() {
   local project=$(infer_project)
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -p ${project} -f ${file} start ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
     local services=($(docker-compose -p ${project} -f ${file} config --services))
@@ -95,7 +95,7 @@ start() {
 
 stop() {
   local roject=$(infer_project)
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes} ${service_entry[@]}
 }
 
@@ -121,13 +121,13 @@ prune_container() {
 
 down() {
   local project=$(infer_project)
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   docker-compose -p ${project} -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {
   local project=$(infer_project)
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -159,7 +159,7 @@ status() {
     echo "no containers"
     exit
   fi
-  local file="${project}.yml"
+  local file="${BASEDIR}/${project}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
