@@ -35,9 +35,43 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
+
+  cp-kafka-connect:
+    container_name: cp-kafka-connect
+    image: docker.mgkim.net/cp-kafka-connect:7.6.1
+    restart: unless-stopped
+    depends_on:
+      - cp-kafka
+    # ports:
+    #   - 8085:8083
+    volumes:
+      - cp-kafka_secrets:/etc/kafka/secrets
+      - cp-kafka_data:/var/lib/kafka/data
+      - cp-kafka-connect_secrets:/etc/kafka-connect/secrets
+      - cp-kafka-connect_jars:/etc/kafka-connect/jars
+    environment:
+      # CONNECT_BOOTSTRAP_SERVERS: cp-kafka:9092
+      # CONNECT_REST_PORT: 8083
+      # CONNECT_GROUP_ID: "study-"
+      # CONNECT_CONFIG_STORAGE_TOPIC: "study-config"
+      # CONNECT_OFFSET_STORAGE_TOPIC: "study-offsets"
+      # CONNECT_STATUS_STORAGE_TOPIC: "study-status"
+      # CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      # CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      # CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      # CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      # CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      # CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      # CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      # CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
+      # CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      # CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib,/etc/kafka-connect/jars"
+
 volumes:
   cp-zookeeper_secrets:
   cp-zookeeper_data:
   cp-zookeeper_log:
   cp-kafka_secrets:
   cp-kafka_data:
+  cp-kafka-connect_secrets:
+  cp-kafka-connect_jars:
