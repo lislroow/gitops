@@ -6,8 +6,8 @@ up="\033[A"
 clean="\033[K"
 
 # variable
-wd=`pwd -P`
-group="${wd##*/}"
+declare wd=`pwd -P`
+declare project="${wd##*/}"
 
 # usage
 function USAGE {
@@ -61,38 +61,38 @@ done
 
 
 get_running() {
-  local service=$1
-  local running=$(docker inspect --format '{{.State.Running}}' ${service} 2>/dev/null)
+  local container=$1
+  local running=$(docker inspect --format '{{.State.Running}}' ${container} 2>/dev/null)
   echo "${running}"
 }
 
 start() {
-  local project="nexus"
-  local file="${BASEDIR}/${project}.yml"
+  local service="nexus"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} start
 }
 
 stop() {
-  local project="nexus"
-  local file="${BASEDIR}/${project}.yml"
+  local service="nexus"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes}
 }
 
 up() {
-  local project="nexus"
-  local file="${BASEDIR}/${project}.yml"
+  local service="nexus"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -f ${file} up -d
 }
 
 down() {
-  local project="nexus"
-  local file="${BASEDIR}/${project}.yml"
+  local service="nexus"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {
-  local project="nexus"
-  local file="${BASEDIR}/${project}.yml"
+  local service="nexus"
+  local file="${BASEDIR}/${service}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -119,8 +119,8 @@ volume() {
 }
 
 status() {
-  local project="nexus"
-  local file="${BASEDIR}/${project}.yml"
+  local service="nexus"
+  local file="${BASEDIR}/${service}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
@@ -155,8 +155,8 @@ status() {
 }
 
 logs() {
-  local project="nexus"
-  local file="${BASEDIR}/${project}.yml"
+  local service="nexus"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} logs -f
 }
 
@@ -166,6 +166,7 @@ command=${argv[1]}
 case "${command}" in
   start)
     start
+    logs
     ;;
   stop)
     stop
@@ -173,9 +174,11 @@ case "${command}" in
   restart)
     stop
     start
+    logs
     ;;
   up)
     up
+    logs
     ;;
   down)
     down

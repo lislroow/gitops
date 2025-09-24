@@ -7,9 +7,13 @@ services:
       - 8081:8081
       - 5000:5000
     volumes:
-      - nexus_data:/nexus-data
+      - /data/nexus-data:/nexus-data
+    networks:
+      - cicd_net
+    user: "${nexus_uid}:${nexus_gid}"
     environment:
       - INSTALL4J_ADD_VM_PARAMS=-Xms256m -Xmx768m -XX:MaxDirectMemorySize=256m -Djava.util.prefs.userRoot=/nexus-data/javaprefs
 
-volumes:
-  nexus_data:
+networks:
+  cicd_net:
+    external: true

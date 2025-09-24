@@ -1,0 +1,36 @@
+services:
+  gitlab:
+    container_name: gitlab
+    image: gitlab/gitlab-ce:17.4.5-ce.0
+    restart: unless-stopped
+    ports:
+      - 8443:443
+    volumes:
+      - /data/gitlab-data:/var/opt/gitlab
+      - /conf/gitlab-conf:/etc/gitlab
+      - /logs/gitlab:/var/log/gitlab
+      # - gitlab_data:/var/opt/gitlab
+      # - gitlab_conf:/etc/gitlab
+      # - gitlab_logs:/var/log/gitlab
+      - ./conf/gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
+    networks:
+      - cicd_net
+    # user: "${gitlab_uid}:${gitlab_gid}"
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '${gitlab_external_url}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    shm_size: 256m
+
+# volumes:
+#   gitlab_data:
+#   gitlab_conf:
+#   gitlab_logs:
+
+networks:
+  cicd_net:
+    external: true

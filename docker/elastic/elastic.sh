@@ -6,8 +6,8 @@ up="\033[A"
 clean="\033[K"
 
 # variable
-wd=`pwd -P`
-group="${wd##*/}"
+declare wd=`pwd -P`
+declare project="${wd##*/}"
 
 # usage
 function USAGE {
@@ -78,14 +78,14 @@ infer_project() {
 }
 
 get_running() {
-  local service=$1
-  local running=$(docker inspect --format '{{.State.Running}}' ${service} 2>/dev/null)
+  local container=$1
+  local running=$(docker inspect --format '{{.State.Running}}' ${container} 2>/dev/null)
   echo "${running}"
 }
 
 start() {
   local project=$(infer_project)
-  local file="${BASEDIR}/${project}.yml"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} start ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
     local services=($(docker-compose -p ${project} -f ${file} config --services))
@@ -95,12 +95,12 @@ start() {
 
 stop() {
   local roject=$(infer_project)
-  local file="${BASEDIR}/${project}.yml"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes} ${service_entry[@]}
 }
 
 up() {
-  local project="elastic${o_ssl:+-ssl}"
+  local service="elastic${o_ssl:+-ssl}"
   local file="elastic${o_ssl:+-ssl}.yml"
   docker-compose -p ${project} -f ${file} up -d ${service_entry[@]}
   if test "${healthy_yn}" == "y"; then
@@ -111,7 +111,7 @@ up() {
 }
 
 prune_container() {
-  local project="elastic${o_ssl:+-ssl}"
+  local service="elastic${o_ssl:+-ssl}"
   local file="elastic${o_ssl:+-ssl}.yml"
   if [ "${o_ssl}" == "y" ]; then
     docker rm -f elastic-certs
@@ -121,13 +121,13 @@ prune_container() {
 
 down() {
   local project=$(infer_project)
-  local file="${BASEDIR}/${project}.yml"
+  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {
   local project=$(infer_project)
-  local file="${BASEDIR}/${project}.yml"
+  local file="${BASEDIR}/${service}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -159,7 +159,7 @@ status() {
     echo "no containers"
     exit
   fi
-  local file="${BASEDIR}/${project}.yml"
+  local file="${BASEDIR}/${service}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
