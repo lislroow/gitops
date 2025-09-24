@@ -4,7 +4,7 @@ services:
     image: postgres:14.18
     restart: unless-stopped
     volumes:
-      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      - ./n8n-initdb.sh:/docker-entrypoint-initdb.d/n8n-initdb.sh
       - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${postgres_db}
