@@ -7,8 +7,10 @@ services:
       - 6100:6100
       - 6100:6100/udp
     volumes:
-      - /data/scouter-server:/data
-      - /logs/scouter-server:/logs
+      - /data/apm-scouter-server-data:/data
+      - /logs/apm-scouter-server:/logs
+    networks:
+      - apm_net
     environment:
       SC_SERVER_ID: "SCCOUTER-COLLECTOR"
       NET_HTTP_SERVER_ENABLED: true
@@ -22,5 +24,8 @@ services:
       net_tcp_listen_port: 6100
       db_dir: /data
       log_dir: /logs
-    hostname: ${hostname}
-    mem_limit: 1g
+    hostname: ${scouter_hostname}
+
+networks:
+  apm_net:
+    external: true

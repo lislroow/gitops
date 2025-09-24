@@ -72,7 +72,7 @@ start() {
   echo "## start scouter-host"
 
   # default
-  local log_dir="/logs/scouter-host"
+  local log_dir="/logs/apm-scouter-host"
   local server_host
   case "${o_local}" in
     y)
@@ -106,7 +106,7 @@ EOF
   local pid_files=(${BASEDIR}/*.scouter)
   [ ${#pid_files[@]} -gt 0 ] && { echo "remove pid files: ${pid_files[@]}"; rm -rf ${pid_files[@]}; }
 
-  local lib_dir="/data/scouter-host"
+  local lib_dir="/data/apm-scouter-host-lib"
   if [ "${o_daemon}" == "y" ]; then
     nohup ${JAVA_HOME}/bin/java -DSCOUTER_HOST \
       -Dscouter.config=${BASEDIR}/conf/scouter.conf \
@@ -149,7 +149,7 @@ EOF
 }
 
 logs() {
-  tail -f /logs/scouter-host/agent-$(date +%Y%m%d).log
+  tail -f /logs/apm-scouter-host/agent-$(date +%Y%m%d).log
 }
 
 # main
