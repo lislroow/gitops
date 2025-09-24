@@ -10,7 +10,7 @@ services:
       - /data/cicd/jenkins-data:/var/jenkins_home
     networks:
       - cicd_net
-    user: "${jenkins_uid}:${jenkins_gid}"
+    user: "${jenkins_gid}:${jenkins_uid}"
   
   # jenkins-agent:
   #   container_name: jenkins-agent

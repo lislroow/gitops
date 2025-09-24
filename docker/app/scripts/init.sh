@@ -63,6 +63,10 @@ clear() {
     echo "   does not exist: '${network_nm}'"
   fi
   echo ""
+
+  echo "## users"
+  userdel -r zookeeper
+  userdel -r kafka
 }
 
 create() {
@@ -77,6 +81,17 @@ create() {
   echo ""
   
   export $(grep -v '^#' "${env_file}" | xargs)
+  echo "## users"
+  
+  user_nm='zookeeper'
+  groupadd -g ${zookeeper_gid} ${user_nm}
+  useradd -u ${zookeeper_uid} -g ${user_nm} -s /sbin/nologin ${user_nm}
+  id zookeeper
+
+  user_nm='kafka'
+  groupadd -g ${kafka_gid} ${user_nm}
+  useradd -u ${kafka_uid} -g ${user_nm} -s /sbin/nologin ${user_nm}
+  id kafka
 }
 
 status() {
@@ -86,6 +101,9 @@ status() {
   echo " * status volume"
   docker volume ls
   echo ""
+  echo " * status user"
+  id zookeeper
+  id kafka
 }
 
 # main

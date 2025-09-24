@@ -80,7 +80,7 @@ create() {
   fi
   echo ""
 
-  export $(grep -v '^#' ${BASEDIR}/../yml/.env | xargs)
+  export $(grep -v '^#' "${env_file}" | xargs)
   echo "## users"
   
   user_nm='elastic'

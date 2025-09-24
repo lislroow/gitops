@@ -9,7 +9,7 @@ services:
       - /data/apm/elastic-data:/usr/share/elasticsearch/data
     networks:
       - apm_net
-    user: "${elastic_uid}:${elastic_gid}"
+    user: "${elastic_gid}:${elastic_uid}"
     environment:
       - discovery.type=single-node
       - node.name=elastic
@@ -69,7 +69,7 @@ services:
       - /data/apm/kibana-data:/usr/share/kibana/data
     networks:
       - apm_net
-    user: "${kibana_uid}:${kibana_gid}"
+    user: "${kibana_gid}:${kibana_uid}"
     environment:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS=http://elastic:9200
