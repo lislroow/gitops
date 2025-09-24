@@ -7,7 +7,7 @@ services:
       - 8082:8080
       - 50000:50000
     volumes:
-      - /data/jenkins-data:/var/jenkins_home
+      - /data/cicd-jenkins-data:/var/jenkins_home
     networks:
       - cicd_net
     user: "${jenkins_uid}:${jenkins_gid}"

@@ -6,12 +6,12 @@ services:
     ports:
       - 8443:443
     volumes:
-      - /data/gitlab-data:/var/opt/gitlab
-      - /conf/gitlab-conf:/etc/gitlab
-      - /logs/gitlab:/var/log/gitlab
+      - /data/cicd-gitlab-data:/var/opt/gitlab
+      - /logs/cicd-gitlab:/var/log/gitlab
+      - /conf/cicd-gitlab-conf:/etc/gitlab
       # - gitlab_data:/var/opt/gitlab
-      # - gitlab_conf:/etc/gitlab
       # - gitlab_logs:/var/log/gitlab
+      # - gitlab_conf:/etc/gitlab
       - ./conf/gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
     networks:
       - cicd_net

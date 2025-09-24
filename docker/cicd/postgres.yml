@@ -1,0 +1,29 @@
+services:
+  postgres-cicd:
+    container_name: postgres-cicd
+    image: postgres:14.18
+    restart: unless-stopped
+    volumes:
+      - ./initdb/initdb-sonarqube.sh:/docker-entrypoint-initdb.d/initdb-sonarqube.sh
+      - /data/cicd-postgres-data:/var/lib/postgresql/data
+    networks:
+      - cicd_net
+    user: "${postgres_uid}:${postgres_gid}"
+    environment:
+      POSTGRES_DB: ${postgres_db}
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_password}
+      postgres_sonarqube_db: ${postgres_sonarqube_db}
+      postgres_sonarqube_user: ${postgres_sonarqube_user}
+      postgres_sonarqube_password: ${postgres_sonarqube_password}
+    healthcheck:
+      test: >
+        pg_isready -U ${postgres_user} -d ${postgres_db} && 
+        pg_isready -U ${postgres_sonarqube_user} -d ${postgres_sonarqube_db}
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  cicd_net:
+    external: true

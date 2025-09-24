@@ -64,6 +64,8 @@ clear() {
   echo "## users"
   userdel -r jenkins
   userdel -r nexus
+  userdel -r postgres
+  userdel -r sonarqube
 }
 
 create() {
@@ -89,6 +91,18 @@ create() {
   groupadd -g ${nexus_uid} ${user_nm}
   useradd -u ${nexus_gid} -g ${user_nm} -s /sbin/nologin ${user_nm}
   id nexus
+
+  user_nm='postgres'
+  groupadd -g ${postgres_uid} ${user_nm}
+  useradd -u ${postgres_gid} -g ${user_nm} -s /sbin/nologin ${user_nm}
+  id postgres
+
+  user_nm='sonarqube'
+  groupadd -g ${sonarqube_uid} ${user_nm}
+  useradd -u ${sonarqube_gid} -g ${user_nm} -s /sbin/nologin ${user_nm}
+  id sonarqube
+
+  
 }
 
 status() {
@@ -101,6 +115,8 @@ status() {
   echo " * status user"
   id jenkins
   id nexus
+  id postgres
+  id sonarqube
 }
 
 # main

@@ -1,0 +1,45 @@
+services:
+  sonarqube:
+    container_name: sonarqube
+    image: sonarqube:2025-lta-developer
+    restart: unless-stopped
+    depends_on:
+      postgres-cicd:
+        condition: service_healthy
+    ports:
+      - 9000:9000
+    volumes:
+      # - sonarqube_data:/opt/sonarqube/data
+      # - sonarqube_extensions:/opt/sonarqube/extensions
+      # - sonarqube_conf:/opt/sonarqube/conf
+      # - sonarqube_logs:/opt/sonarqube/logs
+      - /data/cicd-sonarqube-data:/opt/sonarqube/data
+      - /data/cicd-sonarqube-extensions:/opt/sonarqube/extensions
+      - /conf/cicd-sonarqube-conf:/opt/sonarqube/conf
+      - /logs/cicd-sonarqube-logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/temp
+      # - ./conf/sonarqube/sonar.properties:/opt/sonarqube/conf/sonar.properties:ro # 비밀번호 정책 완화 설정 포함 (동작 안함)
+    networks:
+      - cicd_net
+    # user: "${sonarqube_uid}:${sonarqube_gid}"
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://postgres-cicd:5432/${postgres_sonarqube_db}
+      - SONAR_JDBC_USERNAME=${postgres_sonarqube_user}
+      - SONAR_JDBC_PASSWORD=${postgres_sonarqube_password}
+      - SONAR_EMBEDDED_DATABASE_PORT=-1  # H2 비활성화
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    # mem_limit: 3g
+
+volumes:
+  # sonarqube_data:
+  # sonarqube_extensions:
+  # sonarqube_conf:
+  # sonarqube_logs:
+  sonarqube_temp:
+
+networks:
+  cicd_net:
+    external: true

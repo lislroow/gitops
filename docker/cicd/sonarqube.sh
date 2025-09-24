@@ -69,25 +69,29 @@ get_running() {
 start() {
   local service="sonarqube"
   local file="${BASEDIR}/${service}.yml"
-  docker-compose -p ${project} -f ${file} start
+  local file_depends="${BASEDIR}/postgres.yml"
+  docker-compose -p ${project} -f ${file_depends} -f ${file} start ${service}
 }
 
 stop() {
   local service="sonarqube"
   local file="${BASEDIR}/${service}.yml"
-  docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes}
+  local file_depends="${BASEDIR}/postgres.yml"
+  docker-compose -p ${project} -f ${file_depends} -f ${file} stop ${o_rm_vols:+--volumes} ${service}
 }
 
 up() {
   local service="sonarqube"
   local file="${BASEDIR}/${service}.yml"
-  docker-compose -f ${file} up -d
+  local file_depends="${BASEDIR}/postgres.yml"
+  docker-compose -f ${file_depends} -f ${file} up -d ${service}
 }
 
 down() {
   local service="sonarqube"
   local file="${BASEDIR}/${service}.yml"
-  docker-compose -f ${file} down ${o_rm_vols:+--volumes}
+  local file_depends="${BASEDIR}/postgres.yml"
+  docker-compose -f ${file_depends} -f ${file} down ${o_rm_vols:+--volumes} ${service}
 }
 
 volume() {
@@ -157,7 +161,8 @@ status() {
 logs() {
   local service="sonarqube"
   local file="${BASEDIR}/${service}.yml"
-  docker-compose -p ${project} -f ${file} logs -f
+  local file_depends="${BASEDIR}/postgres.yml"
+  docker-compose -p ${project} -f ${file_depends} -f ${file} logs -f
 }
 
 # main
@@ -166,6 +171,7 @@ command=${argv[1]}
 case "${command}" in
   start)
     start
+    logs
     ;;
   stop)
     stop
@@ -173,9 +179,11 @@ case "${command}" in
   restart)
     stop
     start
+    logs
     ;;
   up)
     up
+    logs
     ;;
   down)
     down
