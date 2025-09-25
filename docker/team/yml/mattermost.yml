@@ -1,0 +1,33 @@
+services:
+  mattermost:
+    container_name: mattermost
+    image: mattermost/mattermost-team-edition:release-10.11
+    restart: unless-stopped
+    depends_on:
+      postgres-team:
+        condition: service_healthy
+    ports:
+      - 8065:8065
+    volumes:
+      - /conf/team/mattermost:/mattermost/config
+      - /data/team/mattermost-data:/mattermost/data
+      - /logs/team/mattermost:/mattermost/logs
+      - /data/team/mattermost-plugins:/mattermost/plugins
+      - /data/team/mattermost-client-plugins:/mattermost/client/plugins
+    networks:
+      - team_net
+    environment:
+      TZ: UTC
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: postgres://${postgres_mattermost_user}:${postgres_mattermost_password}@postgres-team:5432/${postgres_mattermost_db}?sslmode=disable&connect_timeout=10
+      MM_SERVICESETTINGS_SITEURL: ${mm_servicesettings_siteurl}
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 200
+    read_only: false
+    tmpfs:
+      - /tmp
+
+networks:
+  team_net:
+    external: true
