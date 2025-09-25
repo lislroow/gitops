@@ -1,0 +1,28 @@
+services:
+  keycloak:
+    container_name: keycloak
+    image: keycloak/keycloak:26.0
+    restart: unless-stopped
+    depends_on:
+      postgres-sec:
+        condition: service_healthy
+    ports:
+      - 9443:8443
+    volumes:
+      - /data/sec/keycloak-data:/opt/keycloak/data
+      - ./conf/keycloak:/opt/keycloak/conf
+    networks:
+      - sec_net
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${kc_bootstrap_admin_username}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${kc_bootstrap_admin_password}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-sec:5432/${postgres_keycloak_db}
+      KC_DB_USERNAME: ${postgres_keycloak_user}
+      KC_DB_PASSWORD: ${postgres_keycloak_password}
+    command: ["start"]
+      
+
+networks:
+  sec_net:
+    external: true
