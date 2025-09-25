@@ -8,7 +8,6 @@ services:
       - /data/cicd/postgres-data:/var/lib/postgresql/data
     networks:
       - cicd_net
-    user: "${postgres_gid}:${postgres_uid}"
     environment:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_USER: ${postgres_user}

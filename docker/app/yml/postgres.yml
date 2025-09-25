@@ -8,7 +8,6 @@ services:
       - /data/app/postgres-data:/var/lib/postgresql/data
     networks:
       - app_net
-    user: "${postgres_gid}:${postgres_uid}"
     ports:
       - 5432:5432
     environment:
