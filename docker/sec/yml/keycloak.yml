@@ -10,8 +10,8 @@ services:
       - 9443:8443
     volumes:
       - /data/sec/keycloak-data:/opt/keycloak/data
-      - ./certs/keycloak.crt:/opt/keycloak/conf/keycloak.crt
-      - ./certs/keycloak.key:/opt/keycloak/conf/keycloak.key
+      - ${kc_certs_publickey}:/opt/keycloak/conf/keycloak.crt
+      - ${kc_certs_privatekey}:/opt/keycloak/conf/keycloak.key
     networks:
       - sec_net
     environment:
