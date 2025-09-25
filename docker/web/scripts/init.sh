@@ -76,7 +76,7 @@ create() {
   fi
   echo ""
 
-  export $(grep -v '^#' "${env_file}" | xargs)
+  # export $(grep -v '^#' "${env_file}" | xargs)
 }
 
 status() {
