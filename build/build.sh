@@ -10,11 +10,9 @@ end="\033[E"
 # usage
 function USAGE {
   cat << EOF
-- Usage  $SCRIPT_NM [OPTIONS]
+- Usage  $SCRIPT_NM [Dockerfile(s)]
 
 OPTIONS:
-  -f          Name of the Dockerfile
-              e.g '$SCRIPT_NM -f Dockerfile_scouter-server_1.0'
   --registry  docker registry domain
               e.g '$SCRIPT_NM --registry ${PRIVATE_REGISTRY}'
 EOF
@@ -25,8 +23,7 @@ EOF
 
 # options
 declare o_registry
-declare o_dockerfile
-OPTIONS="f:"
+OPTIONS=""
 LONGOPTIONS="registry:"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
@@ -40,10 +37,6 @@ while true; do
       o_registry="$2"
       shift
       ;;
-    -f)
-      o_dockerfile="$2"
-      shift
-      ;;
     --) ;;
     *)
       argv+=($1)
@@ -54,58 +47,63 @@ done
 # -- options
 
 declare registry="${o_registry:-$PRIVATE_REGISTRY}"
-declare image=""
-declare tag=""
 
 [ -z "${registry}" ] && { echo "registry must not empty."; exit 1; }
 
-dockerfile_list=(Dockerfile_*)
-declare -i idx=0
-for f in ${dockerfile_list[@]}; do
-  if [ "${o_dockerfile}" == "${f}" ]; then
-    printf "(*) %s. %-s\n" "${idx}" "${f}"
-  else
-    printf "    %s. %-s\n" "${idx}" "${f}"
-  fi
-  ((idx++))
-done
 
-if [ -z "${o_dockerfile}" ]; then
-  while true; do
-    echo -n "choose (number or filename): "
-    read input
-    if [ $input -le ${#dockerfile_list[@]} ]; then
-      o_dockerfile=${dockerfile_list[$input]}
-      break
+declare all_list=(Dockerfile_*)
+
+list() {
+  echo "## choose"
+  declare dockerfile_list=()
+  declare -i idx=0
+  for f in ${all_list[@]}; do
+    if [[ " ${argv[@]} " =~ " ${f} " ]]; then
+      printf "(*) %s. %-s\n" $((idx+1)) "${f}"
+      dockerfile_list+=("$f")
     else
-      for f in ${dockerfile_list[@]}; do
+      printf "    %s. %-s\n" $((idx+1)) "${f}"
+    fi
+    ((idx++))
+  done
+}
+
+execute() {
+  local dockerfile="$1"
+
+  local _tmp=${dockerfile#*_}
+  local image=${_tmp%_*}
+  local tag=${_tmp#*_}
+
+  printf "## build: ${dockerfile}\n"
+  docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
+  docker push ${registry}/${image}:${tag}
+  docker rmi ${registry}/${image}:${tag}
+  echo ""
+}
+
+if [[ -z "${dockerfile_list[@]}" ]]; then
+  while true; do
+    list
+    echo -n "(number or filename): "
+    read input
+    if [ $input -le ${#all_list[@]} ]; then
+      declare -i idx=$((input-1))
+      execute "${all_list[$idx]}"
+    else
+      for f in "${all_list[@]}"; do
         case "$f" in
           *$input)
-            o_dockerfile="$f"
+            execute "${all_list[$idx]}"
             ;;
         esac
         break
       done
     fi
   done
+else
+  list
+  for dockerfile in "${dockerfile_list[@]}"; do
+    execute "${dockerfile}"
+  done
 fi
-
-_tmp=${o_dockerfile#*_}
-image=${_tmp%_*}
-tag=${_tmp#*_}
-
-
-
-# main
-printf "## build\n"
-docker build -f ${o_dockerfile} -t ${registry}/${image}:${tag} .
-
-echo ""
-
-printf "## deploy\n"
-printf "### deploy: push image \n"
-docker push ${registry}/${image}:${tag}
-printf "### deploy: remove image \n"
-docker rmi ${registry}/${image}:${tag}
-echo ""
-# -- main
