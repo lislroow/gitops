@@ -6,7 +6,8 @@ EXPOSE 6100/tcp
 EXPOSE 6100/udp
 WORKDIR /app
 USER root
-COPY ./app /app
+COPY ./scouter-server/app /app
+RUN rm -rf /app/conf/scouter.conf /app/data /app/logs
 RUN mkdir /data
 RUN mkdir /logs
 USER root
