@@ -6,8 +6,9 @@ up="\033[A"
 clean="\033[K"
 
 # variable
-declare wd=`pwd -P`
-declare project="${wd##*/}"
+declare project="apm"
+declare service="zipkin"
+declare file="${BASEDIR}/yml/${service}.yml"
 
 # usage
 function USAGE {
@@ -25,6 +26,7 @@ COMMAND:
 OPTIONS:
   --v       'docker-compose down --v' : down container and remove associate volumes
             'docker-compose stop --v' : stop container and remove associate volumes
+  --logs    start command and 'logs -f'
 EOF
   exit 1
 }
@@ -34,7 +36,7 @@ EOF
 # options
 declare o_rm_vols
 OPTIONS=""
-LONGOPTIONS="v"
+LONGOPTIONS="v,logs"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -43,6 +45,9 @@ while true; do
   [ -z "$1" ] && break
   
   case "$1" in
+    --logs)
+      o_logs="y"
+      ;;
     --v)
       o_rm_vols="y"
       ;;
@@ -67,32 +72,22 @@ get_running() {
 }
 
 start() {
-  local service="zipkin"
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} start
 }
 
 stop() {
-  local service="zipkin"
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} stop ${o_rm_vols:+--volumes}
 }
 
 up() {
-  local service="zipkin"
-  local file="${BASEDIR}/${service}.yml"
-  docker-compose -f ${file} up -d
+  docker-compose -p ${project} -f ${file} up -d
 }
 
 down() {
-  local service="zipkin"
-  local file="${BASEDIR}/${service}.yml"
-  docker-compose -f ${file} down ${o_rm_vols:+--volumes}
+  docker-compose -p ${project} -f ${file} down ${o_rm_vols:+--volumes}
 }
 
 volume() {
-  local service="zipkin"
-  local file="${BASEDIR}/${service}.yml"
   local volume_list=($(awk '/^volumes:/ {flag=1; next}
     /^[^[:space:]]/ {flag=0}
     flag {
@@ -119,8 +114,6 @@ volume() {
 }
 
 status() {
-  local service="zipkin"
-  local file="${BASEDIR}/${service}.yml"
   local list=($(docker-compose -p ${project} -f ${file} ps -a | tail -n +2 | awk '{ print $1 }'))
   echo "## containers"
   echo " * project: ${project}"
@@ -155,8 +148,6 @@ status() {
 }
 
 logs() {
-  local service="zipkin"
-  local file="${BASEDIR}/${service}.yml"
   docker-compose -p ${project} -f ${file} logs -f
 }
 
@@ -166,6 +157,7 @@ command=${argv[1]}
 case "${command}" in
   start)
     start
+    [ "${o_logs}" == "y" ] && logs
     ;;
   stop)
     stop
@@ -173,9 +165,11 @@ case "${command}" in
   restart)
     stop
     start
+    [ "${o_logs}" == "y" ] && logs
     ;;
   up)
     up
+    [ "${o_logs}" == "y" ] && logs
     ;;
   down)
     down

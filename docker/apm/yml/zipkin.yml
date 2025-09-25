@@ -5,5 +5,11 @@ services:
     restart: unless-stopped
     ports:
       - 9411:9411
+    networks:
+      - apm_net
     environment:
       - STORAGE_TYPE=mem
+
+networks:
+  apm_net:
+    external: true
