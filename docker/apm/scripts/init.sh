@@ -63,10 +63,6 @@ clear() {
     echo "   does not exist: '${network_nm}'"
   fi
   echo ""
-
-  echo "## users"
-  userdel -r elastic
-  userdel -r kibana
 }
 
 create() {
@@ -81,15 +77,6 @@ create() {
   echo ""
 
   export $(grep -v '^#' "${env_file}" | xargs)
-  echo "## users"
-  
-  user_nm='elastic'
-  useradd -u ${elastic_uid} -g root -s /sbin/nologin ${user_nm}
-  id elastic
-
-  user_nm='kibana'
-  useradd -u ${kibana_uid} -g root -s /sbin/nologin ${user_nm}
-  id kibana
 }
 
 status() {
@@ -99,9 +86,6 @@ status() {
   echo " * status volume"
   docker volume ls
   echo ""
-  echo " * status user"
-  id elastic
-  id kibana
 }
 
 # main

@@ -149,6 +149,10 @@ volume() {
         printf fmt, volume, $1
       }'
   done
+
+  # 개선 필요
+  ls -ld /data/apm/kibana-data
+  ls -ld /data/apm/elastic-data
 }
 
 status() {
