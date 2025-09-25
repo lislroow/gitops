@@ -10,12 +10,16 @@ services:
       - 9443:8443
     volumes:
       - /data/sec/keycloak-data:/opt/keycloak/data
-      - ./conf/keycloak:/opt/keycloak/conf
+      - ./certs/keycloak.crt:/opt/keycloak/conf/keycloak.crt
+      - ./certs/keycloak.key:/opt/keycloak/conf/keycloak.key
     networks:
       - sec_net
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${kc_bootstrap_admin_username}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${kc_bootstrap_admin_password}
+      KC_HOSTNAME: ${kc_hostname}
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak.key
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres-sec:5432/${postgres_keycloak_db}
       KC_DB_USERNAME: ${postgres_keycloak_user}
