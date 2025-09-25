@@ -1,0 +1,23 @@
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:11.8.2-ubi9
+    restart: unless-stopped
+    volumes:
+      - /data/app/mariadb-data:/var/lib/mysql
+    networks:
+      - app_net
+    ports:
+      - 3306:3306
+    environment:
+      TZ: Asia/Seoul
+      MYSQL_HOST: localhost
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${mariadb_db}
+      MYSQL_ROOT_PASSWORD: ${mariadb_root_password}
+      MYSQL_USER: ${mariadb_user}
+      MYSQL_PASSWORD: ${mariadb_password}
+
+networks:
+  app_net:
+    external: true

@@ -113,6 +113,13 @@ volume() {
         printf fmt, volume, $1
       }'
   done
+
+  ## 개선 필요
+  ls -ld /conf/app/zookeeper-secrets
+  ls -ld /data/app/zookeeper-data
+  ls -ld /logs/app/zookeeper
+  ls -ld /conf/app/kafka-secrets
+  ls -ld /data/app/kafka-data
 }
 
 status() {

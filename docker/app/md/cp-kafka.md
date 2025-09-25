@@ -173,3 +173,33 @@ market-status
 ls -al /usr/bin | grep kafka
 ```
 
+#### cp-kafka 디렉토리
+
+아래 코드를 개선하고, cp-kafka.sh 에 반영 필요
+
+```
+rm -rf /conf/app/zookeeper-secrets/*
+rm -rf /data/app/zookeeper-data/*
+rm -rf /logs/app/zookeeper/*
+rm -rf /conf/app/kafka-secrets/*
+rm -rf /data/app/kafka-data/* /data/app/kafka-data/\.*
+
+chmod 755 /conf/app/zookeeper-secrets
+chmod 755 /data/app/zookeeper-data
+chmod 755 /logs/app/zookeeper
+chmod 755 /conf/app/kafka-secrets
+chmod 755 /data/app/kafka-data
+
+chown 1000:1000 /conf/app/zookeeper-secrets
+chown 1000:1000 /data/app/zookeeper-data
+chown 1000:1000 /logs/app/zookeeper
+chown 1000:1000 /conf/app/kafka-secrets
+chown 1000:1000 /data/app/kafka-data
+
+
+ls -al /conf/app/zookeeper-secrets
+ls -al /data/app/zookeeper-data
+ls -al /logs/app/zookeeper
+ls -al /conf/app/kafka-secrets
+ls -al /data/app/kafka-data
+```

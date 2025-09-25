@@ -9,7 +9,6 @@ services:
       - /logs/app/zookeeper:/var/lib/zookeeper/log
     networks:
       - app_net
-    user: "${zookeeper_gid}:${zookeeper_uid}"
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -31,7 +30,6 @@ services:
       - /data/app/kafka-data:/var/lib/kafka/data
     networks:
       - app_net
-    user: "${kafka_gid}:${kafka_uid}"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: cp-zookeeper:2181
