@@ -1,0 +1,27 @@
+services:
+  n8n:
+    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n
+    restart: unless-stopped
+    depends_on:
+      postgres-work:
+        condition: service_healthy
+    ports:
+      - 5678:5678
+    volumes:
+      - /data/work/n8n-data:/home/node/.n8n
+    networks:
+      - work_net
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres-work
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${postgres_n8n_db}
+      - DB_POSTGRESDB_USER=${postgres_n8n_user}
+      - DB_POSTGRESDB_PASSWORD=${postgres_n8n_password}
+      - N8N_SECURE_COOKIE=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+
+networks:
+  work_net:
+    external: true

@@ -1,0 +1,28 @@
+services:
+  postgres-work:
+    container_name: postgres-work
+    image: postgres:14.18
+    restart: unless-stopped
+    volumes:
+      - ./initdb/initdb-n8n.sh:/docker-entrypoint-initdb.d/initdb-n8n.sh
+      - /data/work/postgres-data:/var/lib/postgresql/data
+    networks:
+      - work_net
+    environment:
+      POSTGRES_DB: ${postgres_db}
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_password}
+      postgres_n8n_db: ${postgres_n8n_db}
+      postgres_n8n_user: ${postgres_n8n_user}
+      postgres_n8n_password: ${postgres_n8n_password}
+    healthcheck:
+      test: >
+        pg_isready -U ${postgres_user} -d ${postgres_db} &&
+        pg_isready -U ${postgres_n8n_user} -d ${postgres_n8n_db}
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  work_net:
+    external: true
