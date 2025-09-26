@@ -23,8 +23,10 @@ EOF
 
 # options
 declare o_registry
+declare o_build_only
+declare o_rmi
 OPTIONS=""
-LONGOPTIONS="registry:"
+LONGOPTIONS="registry:,build-only,rmi"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -36,6 +38,12 @@ while true; do
     --registry)
       o_registry="$2"
       shift
+      ;;
+    --build-only)
+      o_build_only="y"
+      ;;
+    --rmi)
+      o_rmi="y"
       ;;
     --) ;;
     *)
@@ -77,27 +85,34 @@ execute() {
 
   printf "## build: ${dockerfile}\n"
   docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
-  docker push ${registry}/${image}:${tag}
-  docker rmi ${registry}/${image}:${tag}
+  if [ "${o_build_only}" != "y" ]; then
+    docker push ${registry}/${image}:${tag}
+  fi
+  if [ "${o_rmi}" == "y" ]; then
+    docker rmi ${registry}/${image}:${tag}
+  fi
   echo ""
 }
 
 if [[ -z "${dockerfile_list[@]}" ]]; then
   while true; do
     list
-    echo -n "(number or filename): "
+    echo -n "(number or filename, a=all): "
     read input
-    if [ $input -le ${#all_list[@]} ]; then
+    if [ "${input}" == "a" ]; then
+      echo "* build all"
+      for f in "${all_list[@]}"; do
+        execute "$f"
+      done
+    elif [ "${input}" == "${#all_list[@]}" ]; then
       declare -i idx=$((input-1))
       execute "${all_list[$idx]}"
     else
       for f in "${all_list[@]}"; do
-        case "$f" in
-          *$input)
-            execute "${all_list[$idx]}"
-            ;;
-        esac
-        break
+        if [[ "$f" == *"${input}" ]]; then
+          execute "$f"
+          break
+        fi
       done
     fi
   done
