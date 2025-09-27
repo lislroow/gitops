@@ -71,7 +71,7 @@ done
 # -- options
 
 # init
-declare -a m_all_entries=($(ls **/*.yml 2> /dev/null | awk '{ origin=$0; sub("\\.yml", "", $0); sub("/yml", "", $0); printf "%s,%s\n", origin, $0 }'))
+declare -a m_all_entries=($(ls **/*.yml 2> /dev/null | awk '{ origin=$0; sub("\\.yml", "", $0); sub("", "", $0); printf "%s,%s\n", origin, $0 }'))
 # echo "m_all_entries=(${m_all_entries[@]})"
 if [ "${show_y}" == "y" ]; then
   printf "* available service list\n"
@@ -123,11 +123,11 @@ get_compose() {
   local project_nm="$1"
   local service_nm="$2"
   [ -z "${project_nm}" ] && { echo "'${project_nm}' is required" 1>&2; return; }
-  [ ! -e "${BASEDIR}/${project_nm}/yml" ] && { echo "'${BASEDIR}/${project_nm}/yml' does not exist." 1>&2; return; }
-  [ ! -d "${BASEDIR}/${project_nm}/yml" ] && { echo "'${BASEDIR}/${project_nm}/yml' is not directory." 1>&2; return; }
+  [ ! -e "${BASEDIR}/${project_nm}" ] && { echo "'${BASEDIR}/${project_nm}' does not exist." 1>&2; return; }
+  [ ! -d "${BASEDIR}/${project_nm}" ] && { echo "'${BASEDIR}/${project_nm}' is not directory." 1>&2; return; }
   [ -z "${service_nm}" ] && { echo "'${service_nm}' is required" 1>&2; return; }
 
-  for yml_file in ${BASEDIR}/${project_nm}/yml/*.yml; do
+  for yml_file in ${BASEDIR}/${project_nm}/*.yml; do
     local cnt=$(yq '.services | keys | .[]' $yml_file | grep -E '^('$service_nm')$' | wc -l)
     # echo "cnt: ${cnt}, yml_file: ${yml_file}" 1>&2
     if [ $cnt -gt 0 ]; then
