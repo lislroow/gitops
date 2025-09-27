@@ -71,7 +71,14 @@ done
 # -- options
 
 # init
-declare -a m_all_entries=($(ls **/*.yml 2> /dev/null | awk '{ origin=$0; sub("\\.yml", "", $0); sub("", "", $0); printf "%s,%s\n", origin, $0 }'))
+declare -a m_all_entries=($(cd ${BASEDIR} && \
+  ls **/*.yml 2> /dev/null | \
+  awk '{
+    origin=$0
+    sub("\\.yml", "", $0)
+    sub("", "", $0)
+    printf "%s,%s\n", origin, $0
+  }'))
 # echo "m_all_entries=(${m_all_entries[@]})"
 if [ "${show_y}" == "y" ]; then
   printf "* available service list\n"
