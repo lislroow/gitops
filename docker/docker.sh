@@ -74,15 +74,17 @@ done
 # -- options
 
 # init
-declare o_target=${argv[0]}
-# echo "o_target: ${o_target}"
 declare all_entries=($(ls **/*.yml 2> /dev/null | awk '{ origin=$0; sub("\\.yml", "", $0); sub("/yml", "", $0); printf "%s,%s\n", origin, $0 }'))
-# echo "all_entries: ${all_entries[@]}"
+# echo "all_entries=(${all_entries[@]})"
+declare -a o_target=("${argv[@]:0:${#argv[@]}-1}")
+# echo "o_target=(${o_target[@]})"
+
 declare entries
 if [ -n "${o_project}" ]; then
   entries=($(printf "%s\n" "${all_entries[@]}" | grep "^${o_target}/"))
 else
-  entries=($(printf "%s\n" "${all_entries[@]}" | grep "${o_target}$"))
+  o_target_grep=$(IFS='|'; echo "(${o_target[*]})") # caution
+  entries=($(printf "%s\n" "${all_entries[@]}" | grep -E "${o_target_grep}$"))
 fi
 if [ "${o_list}" == "y" ]; then
   printf "* available service list\n"
@@ -90,7 +92,7 @@ if [ "${o_list}" == "y" ]; then
   exit
 fi
 
-declare command=${argv[1]}
+declare command=${argv[-1]}
 if [ -z "${command}" ]; then
   printf "[%-5s] %s\n\n" "ERROR" "COMMAND is required"
   USAGE
@@ -106,15 +108,7 @@ if [ ${#entries[@]} -eq 0 ]; then
   done
   echo ""
   exit
-elif [ ${#entries[@]} -ge 2 ] && [ -z "${o_project}" ]; then
-  printf "[%-5s] %s\n" "ERROR" "ambiguous service. use '--project' or choose one"
-  for e in ${all_entries[@]}; do
-    echo -n " '${e#*,}'"
-  done
-  echo ""
-  exit
 fi
-# echo "command: ${command}, o_target: ${o_target}"
 # -- init
 
 # functions
@@ -177,15 +171,15 @@ exec_compose() {
       cmd+=" -d"
       ;;
     logs)
-      cmd+=" -f"
+      cmd+=" -f -n 10"
       ;;
     *)
       printf "[%-5s] %s\n\n" "ERROR" "invalid docker-compose command. (avaiable: start, stop, up, down, logs)" 1>&2
       return
       ;;
   esac
-  [ -z "${service}" ] && { printf "[%-5s] %s\n\n" "ERROR" "service is required" 1>&2; return; }
-  [ ${#compose_files[@]} -eq 0 ] && [ "${cmd}" != "logs" ] && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
+  [ -z "${service}" ] && [[ "${cmd}" != "logs"* ]] && { printf "[%-5s] %s\n\n" "ERROR" "service is required." 1>&2; return; }
+  [ ${#compose_files[@]} -eq 0 ] && [[ "${cmd}" != "logs"* ]] && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
 
   local compose_opts
   for item in ${compose_files[@]}; do
@@ -261,16 +255,16 @@ status() {
 declare project
 declare -a compose_files
 declare env_file
+declare -a service_list=()
 # -- variables
 
-
 # main
-declare -a service_list=()
+## process each service individually
 for entry in "${entries[@]}"; do
   declare target="${entry#*,}"
   project="${target%/*}"
   declare service="${target#*/}"
-  service_list+=(${service})
+  service_list+=("${service}")
   env_file="${BASEDIR}/${project}/.env"
   declare compose_file="${BASEDIR}/${entry%,*}"
 
@@ -309,22 +303,28 @@ EOF
       exec_compose "down" "${service}" "${compose_files}"
       exec_compose "up" "${service}" "${compose_files}"
       ;;
-    status)
-      status ;;
-    logs)
-      exec_compose "logs" "${service}" "${compose_files}"
-      ;;
-    volume)
-      volume ;;
   esac
 done
 
+## process all services together
 case "${command}" in
-  start|up|restart|recreate)
+  logs)
+    sleep 0.3
+    exec_compose "logs" "${service_list[*]}"
+    ;;
+  start|restart|up|recreate)
     if [ "${o_logs}" == "y" ]; then
       sleep 0.5
-      exec_compose "logs" "${service_list}"
+      exec_compose "logs" "${service_list[*]}"
     fi
+    ;;
+  status)
+    sleep 0.3
+    # exec_compose "status" "${service_list[*]}"
+    ;;
+  volume)
+    sleep 0.3
+    # exec_compose "volume" "${service_list[*]}"
     ;;
 esac
 # -- main
