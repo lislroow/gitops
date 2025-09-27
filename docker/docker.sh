@@ -168,6 +168,8 @@ get_running() {
 
 exec_compose() {
   local cmd="$1"
+  local service="$2"
+  local compose_files=("$3")
   case "${cmd}" in
     start|stop|down)
       ;;
@@ -178,18 +180,19 @@ exec_compose() {
       cmd+=" -f"
       ;;
     *)
-      printf "[%-5s] %s\n\n" "ERROR" "invalid docker-compose command. (avaiable: start, stop, up, down, logs)"
+      printf "[%-5s] %s\n\n" "ERROR" "invalid docker-compose command. (avaiable: start, stop, up, down, logs)" 1>&2
       return
       ;;
   esac
-  local service="$2"
-  local compose_files=("$3")
-  [ -z "${service}" ] && { printf "[%-5s] %s\n\n" "ERROR" "service is required"; return; }
-  [ ${#compose_files[@]} -eq 0 ] && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
+  [ -z "${service}" ] && { printf "[%-5s] %s\n\n" "ERROR" "service is required" 1>&2; return; }
+  [ ${#compose_files[@]} -eq 0 ] && [ "${cmd}" != "logs" ] && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
+
   local compose_opts
   for item in ${compose_files[@]}; do
     compose_opts="${compose_opts} -f ${item}"
   done
+  
+  echo "docker-compose -p ${project} ${compose_opts:1} ${cmd} ${service}"
   docker-compose -p ${project} ${compose_opts:1} ${cmd} ${service}
 }
 
@@ -262,10 +265,12 @@ declare env_file
 
 
 # main
+declare -a service_list=()
 for entry in "${entries[@]}"; do
   declare target="${entry#*,}"
   project="${target%/*}"
   declare service="${target#*/}"
+  service_list+=(${service})
   env_file="${BASEDIR}/${project}/.env"
   declare compose_file="${BASEDIR}/${entry%,*}"
 
@@ -293,29 +298,16 @@ EOF
   
   compose_files="${compose_files[@]}" # joined
   case "${command}" in
-    start)
-      exec_compose "start" "${service}" "${compose_files}"
-      [ "${o_logs}" == "y" ] && logs
-      ;;
-    stop)
-      exec_compose "stop" "${service}" "${compose_files}"
+    start|stop|up|down)
+      exec_compose "${command}" "${service}" "${compose_files}"
       ;;
     restart)
       exec_compose "stop" "${service}" "${compose_files}"
       exec_compose "start" "${service}" "${compose_files}"
-      [ "${o_logs}" == "y" ] && logs
-      ;;
-    up)
-      exec_compose "up" "${service}" "${compose_files}"
-      [ "${o_logs}" == "y" ] && logs
-      ;;
-    down)
-      exec_compose "down" "${service}" "${compose_files}"
       ;;
     recreate)
       exec_compose "down" "${service}" "${compose_files}"
       exec_compose "up" "${service}" "${compose_files}"
-      [ "${o_logs}" == "y" ] && logs
       ;;
     status)
       status ;;
@@ -326,4 +318,13 @@ EOF
       volume ;;
   esac
 done
+
+case "${command}" in
+  start|up|restart|recreate)
+    if [ "${o_logs}" == "y" ]; then
+      sleep 0.5
+      exec_compose "logs" "${service_list}"
+    fi
+    ;;
+esac
 # -- main
