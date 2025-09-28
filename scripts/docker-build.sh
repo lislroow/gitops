@@ -23,10 +23,11 @@ EOF
 
 # options
 declare p_registry
+declare p_name
 declare p_build_only
 declare p_rmi
 OPTIONS=""
-LONGOPTIONS="registry:,build-only,rmi"
+LONGOPTIONS="registry:,name:,build-only,rmi"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -37,6 +38,10 @@ while true; do
   case "$1" in
     --registry)
       p_registry="$2"
+      shift
+      ;;
+    --name)
+      p_name="$2"
       shift
       ;;
     --build-only)
@@ -59,8 +64,6 @@ declare registry="${p_registry:-$PRIVATE_REGISTRY}"
 [ -z "${registry}" ] && { echo "registry must not empty."; exit 1; }
 
 
-declare m_all_entries=($(cd ${BASEDIR} && ls Dockerfile_*))
-
 list_entries() {
   echo "## choose"
   declare dockerfile_list=()
@@ -78,10 +81,8 @@ list_entries() {
 
 build() {
   local dockerfile="$1"
-
-  local _tmp=${dockerfile#*_}
-  local image=${_tmp%_*}
-  local tag=${_tmp#*_}
+  local image="$2"
+  local tag="$3"
 
   printf "## build: ${dockerfile}\n"
   docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
@@ -91,6 +92,7 @@ build() {
   if [ "${p_rmi}" == "y" ]; then
     docker rmi ${registry}/${image}:${tag}
   fi
+  docker image prune -f
   echo ""
 }
 
@@ -100,27 +102,49 @@ build_entries() {
 
   declare -i tot=${#m_entries[@]}
   declare -i idx
-  for target in ${m_entries[@]}; do
-    local _tmp=${target#*_}
+  for dockerfile in ${m_entries[@]}; do
+    local _tmp=${dockerfile#*_}
     local image=${_tmp%_*}
     local tag=${_tmp#*_}
 
     ((idx++))
     cat <<-EOF
-  * [${idx}/${tot}] target '${target}'
+  * [${idx}/${tot}] dockerfile '${dockerfile}'
     image     : ${p_registry:-docker.mgkim.net}/${image}:${tag}
 
 EOF
-    build "${target}"
+    build "${dockerfile}" "${image}" "${tag}"
   done
 }
 
+declare m_all_entries=($(ls Dockerfile*))
 declare -a p_targets=("${argv[@]}")
 declare -a m_entries=($(printf "%s\n" "${m_all_entries[@]}" | \
   grep -E $(IFS='|'; echo "^(${p_targets[*]})$")
 ))
 
 if [ ${#m_entries[@]} -eq 0 ]; then
+  if [ ${#m_all_entries[@]} -eq 1 ]; then
+    dockerfile=${m_all_entries[0]}
+    if [ -n "${p_name}" ]; then
+      if [ $(echo "${p_name}" | grep -o '_' | wc -l) -ne 1 ]; then
+        echo "invalid --name value. '${p_name}', e.g) {image}_{tag}"
+        exit
+      fi
+      image=${p_name%_*}
+      tag=${p_name#*_}
+    else
+      if [ $(echo "${dockerfile}" | grep -o '_' | wc -l) -ne 2 ]; then
+        echo "invalid Dockerfile name. '${dockerfile}', e.g) Dockerfile_{image}_{tag}"
+        exit
+      fi
+      _tmp=${dockerfile#*_}
+      image=${_tmp%_*}
+      tag=${_tmp#*_}
+    fi
+    build "${dockerfile}" "${image}" "${tag}"
+    exit
+  fi
   while true; do
     m_entries=()
     
