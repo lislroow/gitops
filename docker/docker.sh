@@ -9,6 +9,7 @@ function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM COMMAND service [OPTIONS]
 COMMAND:
+  list      'list' available services
   up        'create' and 'start'
   down      'stop' and 'remove'
   recreate  'down' and 'up'
@@ -19,7 +20,6 @@ COMMAND:
   status    service status
 
 OPTIONS:
-  --show    show available service list
   --logs    logs after 'start|restart|up|recreate'
   --v       remove associate volumes 
             'docker-compose [down|stop] --v service'
@@ -30,12 +30,10 @@ EOF
 # //usage
 
 # options
-declare show_y
-declare logs_y
-declare project_y
-declare rm_vols_y
-OPTIONS=""
-LONGOPTIONS="show,logs,project,v"
+declare p_logs_y
+declare p_rm_vols_y
+OPTIONS="h"
+LONGOPTIONS="help,logs,v"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -44,17 +42,14 @@ while true; do
   [ -z "$1" ] && break
   
   case "$1" in
-    --show)
-      show_y="y"
+    -h|--help)
+      USAGE
       ;;
     --logs)
-      logs_y="y"
-      ;;
-    --project)
-      project_y="y"
+      p_logs_y="y"
       ;;
     --v)
-      rm_vols_y="y"
+      p_rm_vols_y="y"
       ;;
     --)
       ;;
@@ -71,20 +66,14 @@ done
 # -- options
 
 # init
-declare -a m_all_entries=($(cd ${BASEDIR} && \
-  ls **/*.yml 2> /dev/null | \
+declare -a m_all_entries=($(ls **/*.yml 2> /dev/null | \
   awk '{
     origin=$0
     sub("\\.yml", "", $0)
     sub("", "", $0)
     printf "%s,%s\n", origin, $0
   }'))
-# echo "m_all_entries=(${m_all_entries[@]})"
-if [ "${show_y}" == "y" ]; then
-  printf "* available service list\n"
-  printf "  %s\n" "${m_all_entries[@]#*\,}"
-  exit
-fi
+# echo "m_all_entries=(${m_all_entries[@]})
 
 declare p_command=${argv[0]}
 if [ -z "${p_command}" ]; then
@@ -92,28 +81,26 @@ if [ -z "${p_command}" ]; then
   USAGE
 fi
 
+case "${p_command}" in
+  list)
+    printf "* available service list (${#m_all_entries[@]})\n"
+    declare -i f1_mx=0; for i in "${m_all_entries[@]#*,}"; do (( ${#i} > f1_mx )) && f1_mx=${#i}; done
+    declare -i f2_mx=0; for i in "${m_all_entries[@]%,*}"; do (( ${#i} > f2_mx )) && f2_mx=${#i}; done
+    declare -i idx
+    for entry in ${m_all_entries[@]}; do
+      ((idx++))
+      printf "  %2s) %-$((f1_mx+2))s: %-$((f1_mx+2))s\n" "${idx}" "${entry#*,}" "${entry[@]%,*}"
+    done
+    exit
+    ;;
+esac
+
 # declare -a p_targets=("${argv[@]:0:${#argv[@]}-1}")
 declare -a p_targets=("${argv[@]:1}")
 # echo "p_targets=(${p_targets[@]})"
 if [ ${#p_targets[@]} -eq 0 ]; then
   printf "[%-5s] %s\n\n" "ERROR" "service or project is required"
   USAGE
-fi
-
-declare -a m_entries
-if [ "${project_y}" == "y" ]; then
-  m_entries=($(printf "%s\n" "${m_all_entries[@]}" | grep "^${p_targets}/"))
-else
-  _grep_str=$(IFS='|'; echo "(${p_targets[*]})") # caution
-  m_entries=($(printf "%s\n" "${m_all_entries[@]}" | grep -E "${_grep_str}$"))
-fi
-if [ ${#m_entries[@]} -eq 0 ]; then
-  printf "[%-5s] %s\n" "ERROR" " use '--project' or choose one"
-  for e in ${m_all_entries[@]}; do
-    echo -n " '${e#*,}'"
-  done
-  echo ""
-  exit
 fi
 # -- init
 
@@ -258,6 +245,19 @@ declare -a m_services=()
 # -- variables
 
 # main
+declare -a m_entries=()
+m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "^(${p_targets[*]})/")))
+m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "[/,]+(${p_targets[*]})$")))
+m_entries=($(printf "%s\n" "${m_entries[@]}" | uniq))
+if [ ${#m_entries[@]} -eq 0 ]; then
+  printf "[%-5s] %s\n" "ERROR" " use '--project' or choose one"
+  for e in ${m_all_entries[@]}; do
+    echo -n " '${e#*,}'"
+  done
+  echo ""
+  exit
+fi
+
 ## process each service individually
 declare -i tot=${#m_entries[@]}
 declare -i idx
@@ -315,7 +315,7 @@ case "${p_command}" in
     exec_compose "logs" "${project}" "${m_services[*]}"
     ;;
   start|restart|up|recreate)
-    if [ "${logs_y}" == "y" ]; then
+    if [ "${p_logs_y}" == "y" ]; then
       sleep 0.5
       exec_compose "logs" "${project}" "${m_services[*]}"
     fi
