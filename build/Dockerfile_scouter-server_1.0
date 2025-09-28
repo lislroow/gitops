@@ -1,12 +1,16 @@
 FROM amazoncorretto:8u462-al2023
-ENV LANG=ko_KR.UTF-8 \
-    LC_ALL=ko_KR.UTF-8 \
-    TZ=Asia/Seoul
+RUN yum install -y unzip iputils nmap-ncat net-tools && yum clean all
 EXPOSE 6100/tcp
 EXPOSE 6100/udp
+EXPOSE 6188/tcp
 WORKDIR /app
 USER root
+RUN echo 'PS1="[\u@\h \w]\\$ "' >> /root/.bashrc
 COPY ./scouter-server/app /app
+RUN unzip /app/scouter-server-2.22.0.zip -d /app/ \
+    && rm /app/scouter-server-2.22.0.zip
+RUN unzip /app/extweb/scouter-paper-v2.6.4.zip -d /app/extweb/ \
+    && rm /app/extweb/scouter-paper-v2.6.4.zip
 RUN rm -rf /app/conf/scouter.conf /app/data /app/logs
 RUN mkdir /data
 RUN mkdir /logs

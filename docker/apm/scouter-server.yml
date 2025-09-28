@@ -6,6 +6,7 @@ services:
     ports:
       - 6100:6100
       - 6100:6100/udp
+      - 6188:6188
     volumes:
       - /data/apm/scouter-server-data:/data
       - /logs/apm/scouter-server:/logs
