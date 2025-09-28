@@ -23,11 +23,12 @@ EOF
 
 # options
 declare p_registry
+declare p_list_y
 declare p_name
-declare p_build_only
-declare p_rmi
-OPTIONS=""
-LONGOPTIONS="registry:,name:,build-only,rmi"
+declare p_build_only_y
+declare p_rmi_y
+OPTIONS="l"
+LONGOPTIONS="registry:,list,name:,build-only,rmi"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -40,15 +41,18 @@ while true; do
       p_registry="$2"
       shift
       ;;
+    -l|--list)
+      p_list_y="y"
+      ;;
     --name)
       p_name="$2"
       shift
       ;;
     --build-only)
-      p_build_only="y"
+      p_build_only_y="y"
       ;;
     --rmi)
-      p_rmi="y"
+      p_rmi_y="y"
       ;;
     --) ;;
     *)
@@ -59,13 +63,16 @@ while true; do
 done
 # -- options
 
+# init
 declare registry="${p_registry:-$PRIVATE_REGISTRY}"
-
 [ -z "${registry}" ] && { echo "registry must not empty."; exit 1; }
 
+declare m_all_entries=($(ls Dockerfile*))
+# -- init
 
+# functions
 list_entries() {
-  echo "## choose"
+  echo "## available dockerfiles"
   declare dockerfile_list=()
   declare -i idx=0
   for entry in ${m_all_entries[@]}; do
@@ -86,10 +93,10 @@ build() {
 
   printf "## build: ${dockerfile}\n"
   docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
-  if [ "${p_build_only}" != "y" ]; then
+  if [ "${p_build_only_y}" != "y" ]; then
     docker push ${registry}/${image}:${tag}
   fi
-  if [ "${p_rmi}" == "y" ]; then
+  if [ "${p_rmi_y}" == "y" ]; then
     docker rmi ${registry}/${image}:${tag}
   fi
   docker image prune -f
@@ -116,8 +123,12 @@ EOF
     build "${dockerfile}" "${image}" "${tag}"
   done
 }
+# -- functions
 
-declare m_all_entries=($(ls Dockerfile*))
+
+# main
+[ "${p_list_y}" == "y" ] && { list_entries; exit; }
+
 declare -a p_targets=("${argv[@]}")
 declare -a m_entries=($(printf "%s\n" "${m_all_entries[@]}" | \
   grep -E $(IFS='|'; echo "^(${p_targets[*]})$")
@@ -149,6 +160,7 @@ if [ ${#m_entries[@]} -eq 0 ]; then
     m_entries=()
     
     list_entries
+    echo ""
     echo -n "(number or filename, a=all): "
     read input
 
@@ -174,3 +186,4 @@ if [ ${#m_entries[@]} -eq 0 ]; then
 else
   build_entries "${m_entries[*]}" # [caution]
 fi
+# -- main
