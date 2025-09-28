@@ -263,11 +263,22 @@ declare -i tot=${#m_entries[@]}
 declare -i idx
 for entry in ${m_entries[@]}; do
   declare target="${entry#*,}"
-  declare project="${target%/*}"
-  declare service="${target#*/}"
+  declare project
+  declare service
+  declare env_file
+  declare compose_file
+  if [ $(echo "${target}" | grep -o '/' | wc -l) -eq 0 ]; then
+    project="$(basename `pwd`)"
+    service="${target}"
+    env_file=".env"
+    compose_file="${entry%,*}"
+  else
+    project="${target%/*}"
+    service="${target#*/}"
+    env_file="${project}/.env"
+    compose_file="${entry%,*}"
+  fi
   m_services+=("${service}")
-  declare env_file="${BASEDIR}/${project}/.env"
-  declare compose_file="${BASEDIR}/${entry%,*}"
 
   declare -a compose_files=($(get_depends_file "${project}" "${compose_file}"))
   if [[ "${compose_files[@]}" != *" ${compose_file} "* ]]; then
