@@ -68,12 +68,12 @@ list_entries() {
   echo "## choose"
   declare dockerfile_list=()
   declare -i idx=0
-  for f in ${m_all_entries[@]}; do
-    if [[ " ${argv[@]} " =~ " ${f} " ]]; then
-      printf "(*) %s. %-s\n" $((idx+1)) "${f}"
-      dockerfile_list+=("$f")
+  for entry in ${m_all_entries[@]}; do
+    if [[ " ${argv[@]} " =~ " ${entry} " ]]; then
+      printf "(*) %s. %-s\n" $((idx+1)) "${entry}"
+      dockerfile_list+=("$entry")
     else
-      printf "    %s. %-s\n" $((idx+1)) "${f}"
+      printf "    %s. %-s\n" $((idx+1)) "${entry}"
     fi
     ((idx++))
   done

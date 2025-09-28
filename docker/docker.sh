@@ -96,7 +96,7 @@ fi
 declare -a p_targets=("${argv[@]:1}")
 # echo "p_targets=(${p_targets[@]})"
 if [ ${#p_targets[@]} -eq 0 ]; then
-  printf "[%-5s] %s\n\n" "ERROR" "service or project required"
+  printf "[%-5s] %s\n\n" "ERROR" "service or project is required"
   USAGE
 fi
 
