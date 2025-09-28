@@ -22,9 +22,9 @@ EOF
 
 
 # options
-declare o_registry
-declare o_build_only
-declare o_rmi
+declare p_registry
+declare p_build_only
+declare p_rmi
 OPTIONS=""
 LONGOPTIONS="registry:,build-only,rmi"
 opts=$(getopt --options "${OPTIONS}" \
@@ -36,14 +36,14 @@ while true; do
   
   case "$1" in
     --registry)
-      o_registry="$2"
+      p_registry="$2"
       shift
       ;;
     --build-only)
-      o_build_only="y"
+      p_build_only="y"
       ;;
     --rmi)
-      o_rmi="y"
+      p_rmi="y"
       ;;
     --) ;;
     *)
@@ -54,18 +54,18 @@ while true; do
 done
 # -- options
 
-declare registry="${o_registry:-$PRIVATE_REGISTRY}"
+declare registry="${p_registry:-$PRIVATE_REGISTRY}"
 
 [ -z "${registry}" ] && { echo "registry must not empty."; exit 1; }
 
 
-declare all_list=(Dockerfile_*)
+declare m_all_entries=($(cd ${BASEDIR} && ls Dockerfile_*))
 
-list() {
+list_entries() {
   echo "## choose"
   declare dockerfile_list=()
   declare -i idx=0
-  for f in ${all_list[@]}; do
+  for f in ${m_all_entries[@]}; do
     if [[ " ${argv[@]} " =~ " ${f} " ]]; then
       printf "(*) %s. %-s\n" $((idx+1)) "${f}"
       dockerfile_list+=("$f")
@@ -76,7 +76,7 @@ list() {
   done
 }
 
-execute() {
+build() {
   local dockerfile="$1"
 
   local _tmp=${dockerfile#*_}
@@ -85,40 +85,68 @@ execute() {
 
   printf "## build: ${dockerfile}\n"
   docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
-  if [ "${o_build_only}" != "y" ]; then
+  if [ "${p_build_only}" != "y" ]; then
     docker push ${registry}/${image}:${tag}
   fi
-  if [ "${o_rmi}" == "y" ]; then
+  if [ "${p_rmi}" == "y" ]; then
     docker rmi ${registry}/${image}:${tag}
   fi
   echo ""
 }
 
-if [[ -z "${dockerfile_list[@]}" ]]; then
+build_entries() {
+  local dockerfiles=("$1")
+  # printf " > %s\n" ${dockerfiles[@]}
+
+  declare -i tot=${#m_entries[@]}
+  declare -i idx
+  for target in ${m_entries[@]}; do
+    local _tmp=${target#*_}
+    local image=${_tmp%_*}
+    local tag=${_tmp#*_}
+
+    ((idx++))
+    cat <<-EOF
+  * [${idx}/${tot}] target '${target}'
+    image     : ${p_registry:-docker.mgkim.net}/${image}:${tag}
+
+EOF
+    build "${target}"
+  done
+}
+
+declare -a p_targets=("${argv[@]}")
+declare -a m_entries=($(printf "%s\n" "${m_all_entries[@]}" | \
+  grep -E $(IFS='|'; echo "^(${p_targets[*]})$")
+))
+
+if [ ${#m_entries[@]} -eq 0 ]; then
   while true; do
-    list
+    m_entries=()
+    
+    list_entries
     echo -n "(number or filename, a=all): "
     read input
+
     if [ "${input}" == "a" ]; then
-      echo "* build all"
-      for f in "${all_list[@]}"; do
-        execute "$f"
-      done
-    elif [ "${input}" == "${#all_list[@]}" ]; then
-      declare -i idx=$((input-1))
-      execute "${all_list[$idx]}"
-    else
-      for f in "${all_list[@]}"; do
-        if [[ "$f" == *"${input}" ]]; then
-          execute "$f"
-          break
-        fi
-      done
+      m_entries=(${m_all_entries[@]})
+      build_entries "${m_entries[*]}"
+      continue
     fi
+
+    for val in ${input[@]}; do
+      if [[ "${val}" =~ ^[0-9]+$ ]]; then
+        [ ${val} -gt ${#m_all_entries[@]} ] && { echo "'${val}' is out of index."; continue; }
+        m_entries+=("${m_all_entries[$val-1]}")
+      else
+        entry=$(printf "%s\n" "${m_all_entries[@]}" | grep "${val}")
+        [ "${entry}" == "" ] && { echo "'${val}' is not matched."; continue; }
+        m_entries+=(${entry})
+      fi
+    done
+
+    build_entries "${m_entries[*]}"
   done
 else
-  list
-  for dockerfile in "${dockerfile_list[@]}"; do
-    execute "${dockerfile}"
-  done
+  build_entries "${m_entries[*]}" # [caution]
 fi
