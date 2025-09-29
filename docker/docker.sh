@@ -246,8 +246,8 @@ declare -a m_services=()
 
 # main
 declare -a m_entries=()
-m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "^(${p_targets[*]})/")))
-m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "[/,]+(${p_targets[*]})$")))
+m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "^(${p_targets[@]})/")))
+m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "[/,]+(${p_targets[@]})$")))
 m_entries=($(printf "%s\n" "${m_entries[@]}" | uniq))
 if [ ${#m_entries[@]} -eq 0 ]; then
   printf "[%-5s] %s\n" "ERROR" " use '--project' or choose one"
@@ -281,40 +281,29 @@ for entry in ${m_entries[@]}; do
   m_services+=("${service}")
 
   declare -a compose_files=($(get_depends_file "${project}" "${compose_file}"))
-  if [[ "${compose_files[@]}" != *" ${compose_file} "* ]]; then
-    compose_files+=(${compose_file})
-  fi
 
   ((idx++))
   cat <<-EOF
 * [${idx}/${tot}] target '${target}'
-  project   : ${project}
-  service   : ${service}
-  env       : ${env_file}
-  compose   : ${compose_file}
+  project    : ${project}
+  service    : ${service}
+  env        : ${env_file}
+  compose    : ${compose_file}
+  depends on : ${compose_files[@]:-(none)}
 EOF
-  printf "%s" "  list in project : "
-  if [ ${#compose_files[@]} -gt 0 ]; then
-    printf " > \n"
-    printf "    %s\n" "${compose_files[@]}"
-    printf "\n"
-  else
-    printf "(none)\n"
-    printf "\n"
-  fi
-  
-  compose_files="${compose_files[@]}" # joined
+  [ $(echo "${compose_files[@]}" | grep -o "${compose_file}" | wc -l) -eq 0 ] && \
+    compose_files+=(${compose_file})
   case "${p_command}" in
     start|stop|up|down)
-      exec_compose "${p_command}" "${project}" "${service}" "${compose_files}"
+      exec_compose "${p_command}" "${project}" "${service}" "${compose_files[*]}"
       ;;
     restart)
-      exec_compose "stop" "${project}" "${service}" "${compose_files}"
-      exec_compose "start" "${project}" "${service}" "${compose_files}"
+      exec_compose "stop" "${project}" "${service}" "${compose_files[*]}"
+      exec_compose "start" "${project}" "${service}" "${compose_files[*]}"
       ;;
     recreate)
-      exec_compose "down" "${project}" "${service}" "${compose_files}"
-      exec_compose "up" "${project}" "${service}" "${compose_files}"
+      exec_compose "down" "${project}" "${service}" "${compose_files[*]}"
+      exec_compose "up" "${project}" "${service}" "${compose_files[*]}"
       ;;
   esac
 done
@@ -323,7 +312,7 @@ done
 case "${p_command}" in
   logs)
     sleep 0.3
-    exec_compose "logs" "${project}" "${m_services[*]}"
+    exec_compose "logs" "${project}" "${m_services[*]}" # caution: (O) m_services[*], (X) m_services[@]
     ;;
   start|restart|up|recreate)
     if [ "${p_logs_y}" == "y" ]; then
