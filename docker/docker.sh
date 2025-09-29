@@ -66,13 +66,12 @@ done
 # -- options
 
 # init
-declare -a m_all_entries=($(ls **/*.yml 2> /dev/null | \
-  awk '{
-    origin=$0
-    sub("\\.yml", "", $0)
-    sub("", "", $0)
-    printf "%s,%s\n", origin, $0
-  }'))
+declare -A m_all_entries
+for file in $(ls **/*.yml); do
+  key="${file%\.*}"
+  val="${file}"
+  m_all_entries[$key]=$val
+done
 
 declare p_command=${argv[0]}
 if [ -z "${p_command}" ]; then
@@ -82,13 +81,13 @@ fi
 
 case "${p_command}" in
   list)
-    printf "* available service list (${#m_all_entries[@]})\n"
-    declare -i f1_mx=0; for i in "${m_all_entries[@]#*,}"; do (( ${#i} > f1_mx )) && f1_mx=${#i}; done
-    declare -i f2_mx=0; for i in "${m_all_entries[@]%,*}"; do (( ${#i} > f2_mx )) && f2_mx=${#i}; done
+    printf "* available docker-compose files (${#m_all_entries[@]})\n"
+    declare -i max_len=0; for i in "${m_all_entries[@]}"; do (( ${#i} > max_len )) && max_len=${#i}; done
     declare -i idx
-    for entry in ${m_all_entries[@]}; do
+    for key in ${!m_all_entries[@]}; do
       ((idx++))
-      printf "  %2s) %-$((f1_mx+2))s: %-$((f1_mx+2))s\n" "${idx}" "${entry#*,}" "${entry[@]%,*}"
+      val="${m_all_entries[$key]}"
+      printf "  %2s) %-$((key_mx+2))s\n" "${idx}" "${val}"
     done
     exit
     ;;
@@ -234,20 +233,27 @@ status() {
 }
 # -- functions
 
-# variables
-declare -a m_services=()
-# -- variables
-
 # main
-declare -a m_entries=()
-m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "^(${p_targets[@]})/")))
-m_entries+=($(printf "%s\n" "${m_all_entries[@]}" | grep -E $(IFS='|'; echo "[/,]+(${p_targets[@]})$")))
-m_entries=($(printf "%s\n" "${m_entries[@]}" | uniq))
+declare -A m_entries=()
+declare -a m_services=()
+for key in ${!m_all_entries[@]}; do
+  ## match project
+  if [[ " ${p_targets[@]} " == *" $(awk -F/ '{print $(NF-1)}' <<< ${key}) "* ]]; then
+    m_entries[$key]=${m_all_entries[$key]}
+  fi
+  ## match service
+  if [[ " ${p_targets[@]} " == *" $(awk -F/ '{print $(NF)}' <<< ${key}) "* ]]; then
+    m_entries[$key]=${m_all_entries[$key]}
+  fi
+  ## match compose file
+  if [[ " ${p_targets[@]} " == *" ${m_all_entries[$key]} "* ]]; then
+    m_entries[$key]=${m_all_entries[$key]}
+  fi
+done
+
 if [ ${#m_entries[@]} -eq 0 ]; then
-  printf "[%-5s] %s\n" "ERROR" " use '--project' or choose one"
-  for e in ${m_all_entries[@]}; do
-    echo -n " '${e#*,}'"
-  done
+  printf "[%-5s] %s\n" "ERROR" "available files"
+  printf "  %s\n" "${m_all_entries[@]}"
   echo ""
   exit
 fi
@@ -255,36 +261,36 @@ fi
 ## process each service individually
 declare -i tot=${#m_entries[@]}
 declare -i idx
-for entry in ${m_entries[@]}; do
-  declare target="${entry#*,}"
+for key in ${m_entries[@]}; do
   declare project
+  declare compose_file
   declare service
   declare env_file
-  declare compose_file
-  if [ $(echo "${target}" | grep -o '/' | wc -l) -eq 0 ]; then
+  if [ $(echo "${key}" | grep -o '/' | wc -l) -eq 0 ]; then
     project="$(basename `pwd`)"
-    service="${target}"
+    compose_file="${key}"
+    service="${compose_file%.*}"
     env_file=".env"
-    compose_file="${entry%,*}"
   else
-    project="${target%/*}"
-    service="${target#*/}"
+    project=$(awk -F/ '{print $(NF-1)}' <<<"$key")
+    compose_file="${key}"
+    service=$(awk -F/ '{sub(".yml", "", $NF); print $(NF)}' <<<"$key")
     env_file="${project}/.env"
-    compose_file="${entry%,*}"
   fi
-  m_services+=("${service}")
 
+  m_services+=("${service}")
   declare -a compose_files=($(get_depends_file "${project}" "${compose_file}"))
 
   ((idx++))
   cat <<-EOF
-* [${idx}/${tot}] target '${target}'
+* [${idx}/${tot}] ${key}
   project    : ${project}
   service    : ${service}
   env        : ${env_file}
   compose    : ${compose_file}
   depends on : ${compose_files[@]:-(none)}
 EOF
+  
   [ $(echo "${compose_files[@]}" | grep -o "${compose_file}" | wc -l) -eq 0 ] && \
     compose_files+=(${compose_file})
   case "${p_command}" in
