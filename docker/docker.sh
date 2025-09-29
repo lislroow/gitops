@@ -73,7 +73,6 @@ declare -a m_all_entries=($(ls **/*.yml 2> /dev/null | \
     sub("", "", $0)
     printf "%s,%s\n", origin, $0
   }'))
-# echo "m_all_entries=(${m_all_entries[@]})
 
 declare p_command=${argv[0]}
 if [ -z "${p_command}" ]; then
@@ -95,9 +94,7 @@ case "${p_command}" in
     ;;
 esac
 
-# declare -a p_targets=("${argv[@]:0:${#argv[@]}-1}")
 declare -a p_targets=("${argv[@]:1}")
-# echo "p_targets=(${p_targets[@]})"
 if [ ${#p_targets[@]} -eq 0 ]; then
   printf "[%-5s] %s\n\n" "ERROR" "service or project is required"
   USAGE
@@ -123,7 +120,6 @@ get_compose() {
 
   for yml_file in ${BASEDIR}/${project_nm}/*.yml; do
     local cnt=$(yq '.services | keys | .[]' $yml_file | grep -E '^('$service_nm')$' | wc -l)
-    # echo "cnt: ${cnt}, yml_file: ${yml_file}" 1>&2
     if [ $cnt -gt 0 ]; then
       echo "${yml_file}"
       break
@@ -138,8 +134,6 @@ get_depends_file() {
   local depends_service_list=($(get_depends "${yml_file}"))
   [ ${#depends_service_list[@]} -eq 0 ] && return
   
-  # echo "## ${depends_service_list[@]}" 1>&2
-
   local compose_file
   for item in ${depends_service_list[@]}; do
     compose_file+=($(get_compose "${project_nm}" "${item}"))
