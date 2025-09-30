@@ -66,13 +66,6 @@ done
 # -- options
 
 # init
-declare -A m_all_entries
-for file in $(ls **/*.yml); do
-  key="${file%\.*}"
-  val="${file}"
-  m_all_entries[$key]=$val
-done
-
 declare p_command=${argv[0]}
 if [ -z "${p_command}" ]; then
   printf "[%-5s] %s\n\n" "ERROR" "COMMAND is required"
@@ -81,13 +74,11 @@ fi
 
 case "${p_command}" in
   list)
-    printf "* available docker-compose files (${#m_all_entries[@]})\n"
-    declare -i max_len=0; for i in "${m_all_entries[@]}"; do (( ${#i} > max_len )) && max_len=${#i}; done
-    declare -i idx
-    for key in ${!m_all_entries[@]}; do
-      ((idx++))
-      val="${m_all_entries[$key]}"
-      printf "  %2s) %-$((key_mx+2))s\n" "${idx}" "${val}"
+    declare -a list=(**/*.yml)
+    printf "* available docker-compose files (${#list[@]})\n"
+    declare -i max_len=0; for f in ${list[@]}; do (( ${#f} > max_len )) && max_len=${#f}; done
+    for i in $(seq 1 ${#list[@]}); do
+      printf "  %2s) %-$((lax_len+2))s\n" "$i" "${list[$((i-1))]}"
     done
     exit
     ;;
@@ -231,25 +222,106 @@ status() {
     printf "\n"
   fi
 }
+
+get_yml_services() {
+  local file=$1 
+  echo $(yq '.services | keys | .[]' $file)
+}
 # -- functions
 
 # main
-declare -A m_entries=()
-declare -a m_services=()
-for key in ${!m_all_entries[@]}; do
-  ## match project
-  if [[ " ${p_targets[@]} " == *" $(awk -F/ '{print $(NF-1)}' <<< ${key}) "* ]]; then
-    m_entries[$key]=${m_all_entries[$key]}
+declare -a entry_keys=()
+declare -A entries
+for file in **/*.yml; do
+  if [[ "$file" == */* ]]; then
+    project=$(awk -F/ '{print $(NF-1)}' <<< ${file})
+  else
+    project=$(basename `pwd`)
   fi
-  ## match service
-  if [[ " ${p_targets[@]} " == *" $(awk -F/ '{print $(NF)}' <<< ${key}) "* ]]; then
-    m_entries[$key]=${m_all_entries[$key]}
+
+  declare r_project=${project}
+  declare r_file=${file}
+  declare r_key="${project}:${file}"
+
+  declare r_services=""
+  declare -a services=($(get_yml_services "${file}"))
+  if [[ " ${p_targets[@]} " == *" ${project} "* ]]; then  ## 1) 프로젝트명 기준 체크
+    r_services=$(IFS=,; echo "${services[*]}")
+    entries[${r_key}]="${r_services}"
+    # printf "%-9s: %-5s %-15s %s\n" "[project]" "${r_project}" "${r_file}" "${r_services}"
+  else
+    for p_target in ${p_targets[@]}; do
+      if [[ " ${services[@]} " == *" ${p_target} "* ]]; then ## 2) 서비스명 기준 체크
+        r_services=${p_target}
+        entries[${r_key}]="${r_services}${entries[${r_key}]:+,}${entries[${r_key}]}"
+        # printf "%-9s %-5s %-15s %s\n" "[service]" "${r_project}" "${r_file}" "${r_services}"
+      fi
+    done
+    if [[ " ${p_targets[@]} " == *" ${file} "* ]]; then ## 3) 파일명 기준 체크
+      r_services=$(IFS=,; echo "${services[*]}")
+      entries[${r_key}]="${r_services}"
+      # printf "%-9s %-5s %-15s %s\n" "[file]" "${r_project}" "${r_file}" "${r_services}"
+    fi
   fi
-  ## match compose file
-  if [[ " ${p_targets[@]} " == *" ${m_all_entries[$key]} "* ]]; then
-    m_entries[$key]=${m_all_entries[$key]}
+  
+  # 체크 결과 저장
+  # printf "%-9s %-5s %-15s %s\n" "[check!!]" "${r_project}" "${r_file}" "${r_services}"
+  if [ -n "${r_services}" ]; then
+    declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+    entries[${r_key}]=${merged}
+    entry_keys+=(${r_key})
   fi
 done
+
+for s in "${entry_keys[@]}"; do (( ${#s} > max )) && max=${#s}; done
+for key in ${entry_keys[@]}; do
+  printf "%-$((max))s : %s\n" "${key}" "${entries[$key]}"
+done
+exit
+
+# declare -a m_services=()
+declare -a m_entries=()
+for file in **/*.yml; do
+  declare -a services_in_file=($(yq '.services | keys | .[]' $file))
+  ## match project
+  if [[ " ${p_targets[@]} " == *" $(awk -F/ '{print $(NF-1)}' <<< ${file}) "* ]]; then
+    m_entries=("${file}:${services_in_file[*]}")
+    continue
+  fi
+
+  ## match service
+  for svc in ${services_in_file[@]}; do
+    if [[ " ${p_targets[@]} " == *" ${svc} "* ]]; then
+      for entry in ${m_entries[@]}; do
+        _file=${entry%:*}
+        _services_in_file=(IFS=, read -ra arr <<< "${entry#*:}"; echo "${arr[*]}")
+        if (( $(printf "%s\n" ${_services_in_file[@]} | grep -o ${svc} | wc -l) > 0 )); then
+          m_entries="${file}:${svc}"
+        fi
+      done
+    fi
+
+
+    declare -a m_entries_svc=()
+    if [[ " ${p_targets[@]} " == *" ${svc} "* ]]; then
+      if [ $(printf "%s\n" ${m_entries_svc[@]} | grep -oE "^${svc}$" | wc -l) -eq 0 ]; then
+        m_entries_svc+=(${svc})
+        m_entries[$file]=${m_entries_svc[*]}
+      fi
+    fi
+  done
+  ## match compose file
+  if [[ " ${p_targets[@]} " == *" ${file} "* ]]; then
+    declare -a services_in_file=($(yq '.services | keys | .[]' $file))
+    m_entries[$file]=${services_in_file[*]}
+  fi
+done
+
+for file in ${!m_entries[@]}; do
+  echo "compose: ${file}, svc-list: ${m_entries[$file]}"
+done
+
+exit
 
 if [ ${#m_entries[@]} -eq 0 ]; then
   printf "[%-5s] %s\n" "ERROR" "available files"
