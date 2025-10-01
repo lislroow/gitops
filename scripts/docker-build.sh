@@ -14,6 +14,24 @@ OPTIONS:
 EOF
   exit 1
 }
+
+function LIST {
+  local -a dockerfile_list=(Dockerfile*)
+  local -i file_cnt=${#dockerfile_list[@]}
+  local -i idx=0
+
+  local -i f2_len=$(printf "%s\n" ${dockerfile_list[@]} | wc -L)
+  local FORMAT="  %2s  %-$((f2_len+2))s %s\n"
+  local output=$(printf "${FORMAT}" "NO" "FILE" "IMAGE")
+  output+="\n"
+  for i in $(seq 0 $((file_cnt-1))); do
+    local file="${dockerfile_list[$i]}"
+    IFS='_' read -r dfile image tag <<< "${file}"
+    output+=$(printf "${FORMAT}" "$((i+1))" "${file}" "${PRIVATE_REGISTRY}/${image}:${tag}")
+    output+="\n"
+  done
+  echo -e "${output}"
+}
 # //usage
 
 
@@ -64,24 +82,19 @@ declare registry="${p_registry:-$PRIVATE_REGISTRY}"
 [ -z "${registry}" ] && { echo "registry must not empty."; exit 1; }
 
 declare -a g_all_entries=(Dockerfile*)
+
+declare -a p_targets=("${argv[@]}")
+if (( ${#p_targets[@]} > 0)) && [ "${p_targets[0]}" == "list" ]; then
+  LIST
+  exit
+fi
+
+declare -a m_entries=($(printf "%s\n" "${g_all_entries[@]}" | \
+  grep -E $(IFS='|'; echo "^(${p_targets[*]})$")
+))
 # -- init
 
 # functions
-list_entries() {
-  echo "## available dockerfiles"
-  local -a dockerfile_list=()
-  local -i idx=0
-  for entry in ${g_all_entries[@]}; do
-    if [[ " ${argv[@]} " =~ " ${entry} " ]]; then
-      printf "(*) %s. %-s\n" $((idx+1)) "${entry}"
-      dockerfile_list+=("$entry")
-    else
-      printf "    %s. %-s\n" $((idx+1)) "${entry}"
-    fi
-    ((idx++))
-  done
-}
-
 build() {
   local dockerfile="$1"
   local image="$2"
@@ -123,13 +136,6 @@ EOF
 
 
 # main
-[ "${p_list_y}" == "y" ] && { list_entries; exit; }
-
-declare -a p_targets=("${argv[@]}")
-declare -a m_entries=($(printf "%s\n" "${g_all_entries[@]}" | \
-  grep -E $(IFS='|'; echo "^(${p_targets[*]})$")
-))
-
 if [ ${#m_entries[@]} -eq 0 ]; then
   if [ ${#g_all_entries[@]} -eq 1 ]; then
     dockerfile=${g_all_entries[0]}
@@ -155,9 +161,9 @@ if [ ${#m_entries[@]} -eq 0 ]; then
   while true; do
     m_entries=()
     
-    list_entries
+    LIST
     echo ""
-    echo -n "(number or filename, a=all): "
+    echo -n "(NO or FILE, a=all): "
     read input
 
     if [ "${input}" == "a" ]; then
