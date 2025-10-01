@@ -27,12 +27,12 @@ EOF
 }
 
 function LIST {
-  declare -a files=(**/*.yml)
-  declare -i file_cnt=${#files[@]}
+  local -a files=(**/*.yml)
+  local -i file_cnt=${#files[@]}
   # printf "* available list (${file_cnt})\n"
   
   local output=""
-  declare -i f3_len=$(printf "%s\n" ${files[@]} | wc -L)
+  local -i f3_len=$(printf "%s\n" ${files[@]} | wc -L)
   local FORMAT="  %2s  %-7s  %-$((f3_len+2))s  %s\n"
   output+=$(printf "${FORMAT}" "NO" "PROJECT" "FILE" "SERVICES")
   output+="\n"
@@ -43,7 +43,7 @@ function LIST {
     else
       project="$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})"
     fi
-    declare -a services=($(yq '.services | keys | .[]' $yml_file))
+    local -a services=($(yq '.services | keys | .[]' $yml_file))
     service_list="$(IFS=,; echo "${services[*]}")"
     output+=$(printf "${FORMAT}" "$((i+1))" "${project}" "${yml_file}" "${service_list}")
     output+="\n"
@@ -55,11 +55,11 @@ function LIST {
 
 # options
 declare p_logs_y
-OPTIONS="h"
-LONGOPTIONS="help,logs,v"
-opts=$(getopt --options "${OPTIONS}" \
-              --longoptions "${LONGOPTIONS}" \
-              -- "$@" )
+declare OPTIONS="h"
+declare LONGOPTIONS="help,logs,v"
+declare opts=$(getopt --options "${OPTIONS}" \
+                      --longoptions "${LONGOPTIONS}" \
+                      -- "$@" )
 eval set -- "${opts}"
 while true; do
   [ -z "$1" ] && break
@@ -111,12 +111,12 @@ declare -A g_all_entries
 declare -a g_all_entry_keys=()
 
 fn_all_entries() {
-  declare -a all_yml_list=(**/*.yml)
+  local -a all_yml_list=(**/*.yml)
   if (( ${#all_yml_list[@]} > 0 )); then
-    declare r_project=""
-    declare r_file=""
-    declare r_key=""
-    declare r_services=""
+    local r_project=""
+    local r_file=""
+    local r_key=""
+    local r_services=""
     for yml_file in ${all_yml_list[@]}; do
       if [[ "${yml_file}" == */* ]]; then
         r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
@@ -125,7 +125,7 @@ fn_all_entries() {
       fi
       r_file=${yml_file}
       r_key="${r_project}:${r_file}"
-      declare -a services=($(yq '.services | keys | .[]' $yml_file))
+      local -a services=($(yq '.services | keys | .[]' $yml_file))
       r_services=$(IFS=,; echo "${services[*]}")
       g_all_entries[${r_key}]="${r_services}"
       g_all_entry_keys+=(${r_key})
@@ -141,7 +141,7 @@ fn_all_entries
 exec_compose() {
   local command="$1"
   local project="$2"
-  declare -a services=($(IFS=,; read -ra services <<< "$3"; echo ${services[@]}))
+  local -a services=($(IFS=,; read -ra services <<< "$3"; echo ${services[@]}))
   local compose_files=("$4")
 
   local detach_opt_y
@@ -182,24 +182,24 @@ declare -a g_entry_keys=()
 
 fn_entries() {
   for target in ${p_targets[@]}; do
-    declare r_project=""
-    declare r_file=""
-    declare r_key=""
-    declare r_services=""
+    local r_project=""
+    local r_file=""
+    local r_key=""
+    local r_services=""
     
-    declare -a yml_list=(**/${target}/*.yml)
+    local -a yml_list=(**/${target}/*.yml)
     if (( ${#yml_list[@]} > 0 )); then
       logtxt=$(printf "[INFO] filter by %-12s: > " "project-name")
-      declare _services=""
+      local _services=""
       for yml_file in ${yml_list[@]}; do
         r_project=${target}
         r_file=${yml_file}
         r_key="${r_project}:${r_file}"
-        declare -a services=($(yq '.services | keys | .[]' $yml_file))
+        local -a services=($(yq '.services | keys | .[]' $yml_file))
         r_services=$(IFS=,; echo "${services[*]}")
         g_entries[${r_key}]="${r_services}"
 
-        declare merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+        local merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
         g_entries[${r_key}]=${merged}
         g_entry_keys+=(${r_key})
         
@@ -214,11 +214,11 @@ fn_entries() {
       logtxt=$(printf "[INFO] filter by %-12s: > " "service-name")
       for key in ${g_all_entry_keys[@]}; do
         r_key="${key}"
-        declare -a arr=($(IFS=,; read -ra arr <<< ${g_all_entries[$r_key]}; echo "${arr[@]}"))
+        local -a arr=($(IFS=,; read -ra arr <<< ${g_all_entries[$r_key]}; echo "${arr[@]}"))
         if (( $(printf "%s\n" ${arr[@]} | grep -o ^"${target}"$ | wc -l) > 0 )); then
           r_services="${target}"
           g_entries[${r_key}]="${r_services}${g_entries[${r_key}]:+,}${g_entries[${r_key}]}"
-          declare merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+          local merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
           r_services="${merged}"
           g_entries[${r_key}]=${r_services}
           g_entry_keys+=(${r_key})
@@ -240,11 +240,11 @@ fn_entries() {
         fi
         r_file=${yml_file}
         r_key="${r_project}:${r_file}"
-        declare -a services=($(yq '.services | keys | .[]' $yml_file))
+        local -a services=($(yq '.services | keys | .[]' $yml_file))
         r_services=$(IFS=,; echo "${services[*]}")
         g_entries[${r_key}]="${r_services}${g_entries[${r_key}]:+,}${g_entries[${r_key}]}"
 
-        declare merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+        local merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
         r_services="${merged}"
         g_entries[${r_key}]=${r_services}
         g_entry_keys+=(${r_key})
@@ -264,8 +264,8 @@ fn_entries() {
 }
 
 fn_process() {
-  declare -i tot=${#g_entry_keys[@]}
-  declare -i idx
+  local -i tot=${#g_entry_keys[@]}
+  local -i idx
   for idx in $(seq 1 $tot); do
     local key=${g_entry_keys[$((idx-1))]}
     local project="${key%:*}"
@@ -273,8 +273,8 @@ fn_process() {
     local services="${g_entries[$key]}"
     local env_file="${project:+$project/}.env"
 
-    declare -a compose_files=()
-    declare -a dep_compose_files=()
+    local -a compose_files=()
+    local -a dep_compose_files=()
     for dep_service in $(yq '.services[].depends_on | select(. != null) | keys | .[]' ${compose_file}); do
       for key in ${g_all_entry_keys[@]}; do
         if (( $(echo ${g_all_entries[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
