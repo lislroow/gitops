@@ -103,17 +103,37 @@ if [ ${#p_targets[@]} -eq 0 ]; then
   printf "[%-5s] %s\n\n" "ERROR" "service or project is required"
   USAGE
 fi
+
+declare -A all_entries
+declare -a all_entry_keys=()
+fn_all_entries() {
+  declare -a all_yml_list=(**/*.yml)
+  if (( ${#all_yml_list[@]} > 0 )); then
+    declare r_project=""
+    declare r_file=""
+    declare r_key=""
+    declare r_services=""
+    for yml_file in ${all_yml_list[@]}; do
+      if [[ "${yml_file}" == */* ]]; then
+        r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
+      else
+        r_project=$(basename `pwd`)
+      fi
+      r_file=${yml_file}
+      r_key="${r_project}:${r_file}"
+      declare -a services=($(yq '.services | keys | .[]' $yml_file))
+      r_services=$(IFS=,; echo "${services[*]}")
+      all_entries[${r_key}]="${r_services}"
+      all_entry_keys+=(${r_key})
+    done
+  fi
+}
+
+## all entries
+fn_all_entries
 # -- init
 
 # functions
-get_depends() {
-  local yml_file="$1"
-  [ ! -f "${yml_file}" ] && { echo "'${yml_file}' does not exsit" 1>&2; return; }
-
-  local depends=($(yq '.services[].depends_on | select(. != null) | keys | .[]' $yml_file))
-  echo "${depends[@]}"
-}
-
 get_compose() {
   local project_nm="$1"
   local service_nm="$2"
@@ -131,18 +151,24 @@ get_compose() {
   done
 }
 
-get_depends_file() {
+get_dep_compose_files() {
   local project_nm="$1"
   local yml_file="$2"
   [ ! -f "${yml_file}" ] && { echo "'${yml_file}' does not exsit" 1>&2; return; }
-  local depends_service_list=($(get_depends "${yml_file}"))
-  [ ${#depends_service_list[@]} -eq 0 ] && return
   
-  local compose_file
-  for item in ${depends_service_list[@]}; do
-    compose_file+=($(get_compose "${project_nm}" "${item}"))
+  declare -a dep_services=($(yq '.services[].depends_on | select(. != null) | keys | .[]' $yml_file))
+  (( ${#dep_services[@]} == 0 )) && return
+  
+  declare -a compose_files=()
+  for dep_service in ${dep_services[@]}; do
+    for key in ${all_entry_keys[@]}; do
+      if (( $(printf "%s\n" ${all_entry_keys[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
+        compose_files=(${key#*:})
+        break
+      fi
+    done
   done
-  echo "${compose_file[@]}"
+  echo "${compose_files[*]}"
 }
 
 exec_compose() {
@@ -150,11 +176,13 @@ exec_compose() {
   local project="$2"
   declare -a services=($(IFS=,; read -ra services <<< "$3"; echo ${services[@]}))
   local compose_files=("$4")
+
+  local detach_opt_y
   case "${command}" in
     start|stop|down)
       ;;
     up)
-      command+=" -d"
+      detach_opt_y="y"
       ;;
     logs)
       command+=" -f -n 10"
@@ -164,16 +192,18 @@ exec_compose() {
       return
       ;;
   esac
-  [ ${#services[@]} -eq 0 ] && [[ "${command}" != "logs"* ]] && { printf "[%-5s] %s\n\n" "ERROR" "services are required." 1>&2; return; }
-  [ ${#compose_files[@]} -eq 0 ] && [[ "${command}" != "logs"* ]] && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
+  if [[ "${command}" != "logs"* ]]; then
+    (( ${#services[@]} == 0 )) && { printf "[%-5s] %s\n\n" "ERROR" "services are required." 1>&2; return; }
+    (( ${#compose_files[@]} == 0 )) && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
+  fi
 
   local compose_opts
   for item in ${compose_files[@]}; do
     compose_opts="${compose_opts} -f ${item}"
   done
   
-  echo "docker-compose -p ${project} ${compose_opts:1} ${command} ${services[@]}"
-  docker-compose -p ${project} ${compose_opts:1} ${command} ${services[@]}
+  echo "docker-compose -p ${project} ${compose_opts:1} ${command} ${detach_opt_y:+-d} ${services[@]}"
+  docker-compose -p ${project} ${compose_opts:1} ${command} ${detach_opt_y:+-d} ${services[@]}
 }
 
 volume() {
@@ -240,33 +270,8 @@ status() {
 # -- functions
 
 # main
-declare -A all_entries
-declare -a all_entry_keys=()
 declare -A entries
 declare -a entry_keys=()
-
-fn_all_entries() {
-  declare -a all_yml_list=(**/*.yml)
-  if (( ${#all_yml_list[@]} > 0 )); then
-    declare r_project=""
-    declare r_file=""
-    declare r_key=""
-    declare r_services=""
-    for yml_file in ${all_yml_list[@]}; do
-      if [[ "${yml_file}" == */* ]]; then
-        r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
-      else
-        r_project=$(basename `pwd`)
-      fi
-      r_file=${yml_file}
-      r_key="${r_project}:${r_file}"
-      declare -a services=($(yq '.services | keys | .[]' $yml_file))
-      r_services=$(IFS=,; echo "${services[*]}")
-      all_entries[${r_key}]="${r_services}"
-      all_entry_keys+=(${r_key})
-    done
-  fi
-}
 
 fn_entries() {
   for target in ${p_targets[@]}; do
@@ -353,7 +358,6 @@ fn_entries() {
 }
 
 ## setup targets
-fn_all_entries
 fn_entries
 
 ## process each service individually
@@ -365,8 +369,22 @@ for key in ${entry_keys[@]}; do
   declare services="${entries[$key]}"
   declare env_file="${project:+$project/}.env"
 
-  declare -a compose_files=($(get_depends_file "${project}" "${compose_file}"))
-
+  declare -a dep_services=($(yq '.services[].depends_on | select(. != null) | keys | .[]' ${compose_file}))
+  
+  declare -a compose_files=()
+  declare -a dep_compose_files=()
+  for dep_service in ${dep_services[@]}; do
+    for key in ${all_entry_keys[@]}; do
+      if (( $(echo ${all_entries[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
+        echo " > ${key#*:}"
+        if [ "${key#*:}" != "${compose_file}" ]; then
+          dep_compose_files=(${key#*:})
+        fi
+        break
+      fi
+    done
+  done
+  
   ((idx++))
   cat <<-EOF
 * [${idx}/${tot}] ${key}
@@ -374,12 +392,13 @@ for key in ${entry_keys[@]}; do
   services   : ${services}
   env        : ${env_file}
   compose    : ${compose_file}
-  depends on : ${compose_files[@]:-(none)}
+  depends_on : ${dep_compose_files[@]:-(none)}
 EOF
   
-  if (( $(printf "%s\n" "${compose_files[@]}" | grep -o "${compose_file}" | wc -l) == 0 )); then
-    compose_files+=(${compose_file})
-  fi
+  compose_files+=(${compose_file})
+  compose_files+=(${dep_compose_files[@]})
+
+
   case "${p_command}" in
     start|stop|up|down)
       exec_compose "${p_command}" "${project}" "${services}" "${compose_files[*]}"
