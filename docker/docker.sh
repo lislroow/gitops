@@ -263,12 +263,6 @@ if (( ${#all_yml_list[@]} > 0 )); then
   done
 fi
 
-# for s in "${all_entry_keys[@]}"; do (( ${#s} > max )) && max=${#s}; done
-# for key in ${all_entry_keys[@]}; do
-#   printf "%-$((max))s : %s\n" "${key}" "${all_entries[$key]}"
-# done
-# exit
-
 declare -a entry_keys=()
 declare -A entries
 
@@ -354,12 +348,6 @@ if (( ${#entry_keys[@]} == 0 )); then
   exit
 fi
 
-# for s in "${entry_keys[@]}"; do (( ${#s} > max )) && max=${#s}; done
-# for key in ${entry_keys[@]}; do
-#   printf "%-$((max))s : %s\n" "${key}" "${entries[$key]}"
-# done
-# exit
-
 ## process each service individually
 declare -i tot=${#entry_keys[@]}
 declare -i idx
@@ -369,7 +357,6 @@ for key in ${entry_keys[@]}; do
   declare service="${entries[$key]}"
   declare env_file="${project:+$project/}.env"
 
-  # echo "project: ${project}, compose_file: ${compose_file}, service: ${service}, env_file: ${env_file}"
   m_services+=("${service}")
   declare -a compose_files=($(get_depends_file "${project}" "${compose_file}"))
 
