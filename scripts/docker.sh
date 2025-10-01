@@ -134,43 +134,6 @@ fn_all_entries
 # -- init
 
 # functions
-get_compose() {
-  local project_nm="$1"
-  local service_nm="$2"
-  [ -z "${project_nm}" ] && { echo "'${project_nm}' is required" 1>&2; return; }
-  [ ! -e "${project_nm}" ] && { echo "'${project_nm}' does not exist." 1>&2; return; }
-  [ ! -d "${project_nm}" ] && { echo "'${project_nm}' is not directory." 1>&2; return; }
-  [ -z "${service_nm}" ] && { echo "'${service_nm}' is required" 1>&2; return; }
-
-  for yml_file in ${project_nm}/*.yml; do
-    local cnt=$(yq '.services | keys | .[]' $yml_file | grep -E '^('$service_nm')$' | wc -l)
-    if [ $cnt -gt 0 ]; then
-      echo "${yml_file}"
-      break
-    fi
-  done
-}
-
-get_dep_compose_files() {
-  local project_nm="$1"
-  local yml_file="$2"
-  [ ! -f "${yml_file}" ] && { echo "'${yml_file}' does not exsit" 1>&2; return; }
-  
-  declare -a dep_services=($(yq '.services[].depends_on | select(. != null) | keys | .[]' $yml_file))
-  (( ${#dep_services[@]} == 0 )) && return
-  
-  declare -a compose_files=()
-  for dep_service in ${dep_services[@]}; do
-    for key in ${all_entry_keys[@]}; do
-      if (( $(printf "%s\n" ${all_entry_keys[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
-        compose_files=(${key#*:})
-        break
-      fi
-    done
-  done
-  echo "${compose_files[*]}"
-}
-
 exec_compose() {
   local command="$1"
   local project="$2"
@@ -369,11 +332,9 @@ for key in ${entry_keys[@]}; do
   declare services="${entries[$key]}"
   declare env_file="${project:+$project/}.env"
 
-  declare -a dep_services=($(yq '.services[].depends_on | select(. != null) | keys | .[]' ${compose_file}))
-  
   declare -a compose_files=()
   declare -a dep_compose_files=()
-  for dep_service in ${dep_services[@]}; do
+  for dep_service in $(yq '.services[].depends_on | select(. != null) | keys | .[]' ${compose_file}); do
     for key in ${all_entry_keys[@]}; do
       if (( $(echo ${all_entries[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
         echo " > ${key#*:}"
@@ -384,6 +345,8 @@ for key in ${entry_keys[@]}; do
       fi
     done
   done
+  compose_files+=(${compose_file})
+  compose_files+=(${dep_compose_files[@]})
   
   ((idx++))
   cat <<-EOF
@@ -394,9 +357,6 @@ for key in ${entry_keys[@]}; do
   compose    : ${compose_file}
   depends_on : ${dep_compose_files[@]:-(none)}
 EOF
-  
-  compose_files+=(${compose_file})
-  compose_files+=(${dep_compose_files[@]})
 
 
   case "${p_command}" in
