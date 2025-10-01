@@ -148,7 +148,7 @@ get_depends_file() {
 exec_compose() {
   local command="$1"
   local project="$2"
-  local service="$3"
+  declare -a services=($(IFS=,; read -ra services <<< "$3"; echo ${services[@]}))
   local compose_files=("$4")
   case "${command}" in
     start|stop|down)
@@ -164,7 +164,7 @@ exec_compose() {
       return
       ;;
   esac
-  [ -z "${service}" ] && [[ "${command}" != "logs"* ]] && { printf "[%-5s] %s\n\n" "ERROR" "service is required." 1>&2; return; }
+  [ ${#services[@]} -eq 0 ] && [[ "${command}" != "logs"* ]] && { printf "[%-5s] %s\n\n" "ERROR" "services are required." 1>&2; return; }
   [ ${#compose_files[@]} -eq 0 ] && [[ "${command}" != "logs"* ]] && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
 
   local compose_opts
@@ -172,8 +172,8 @@ exec_compose() {
     compose_opts="${compose_opts} -f ${item}"
   done
   
-  echo "docker-compose -p ${project} ${compose_opts:1} ${command} ${service}"
-  docker-compose -p ${project} ${compose_opts:1} ${command} ${service}
+  echo "docker-compose -p ${project} ${compose_opts:1} ${command} ${services[@]}"
+  docker-compose -p ${project} ${compose_opts:1} ${command} ${services[@]}
 }
 
 volume() {
@@ -362,35 +362,35 @@ declare -i idx
 for key in ${entry_keys[@]}; do
   declare project="${key%:*}"
   declare compose_file="${key#*:}"
-  declare service="${entries[$key]}"
+  declare services="${entries[$key]}"
   declare env_file="${project:+$project/}.env"
 
-  m_services+=("${service}")
   declare -a compose_files=($(get_depends_file "${project}" "${compose_file}"))
 
   ((idx++))
   cat <<-EOF
 * [${idx}/${tot}] ${key}
   project    : ${project}
-  service    : ${service}
+  services   : ${services}
   env        : ${env_file}
   compose    : ${compose_file}
   depends on : ${compose_files[@]:-(none)}
 EOF
   
-  [ $(echo "${compose_files[@]}" | grep -o "${compose_file}" | wc -l) -eq 0 ] && \
+  if (( $(printf "%s\n" "${compose_files[@]}" | grep -o "${compose_file}" | wc -l) == 0 )); then
     compose_files+=(${compose_file})
+  fi
   case "${p_command}" in
     start|stop|up|down)
-      exec_compose "${p_command}" "${project}" "${service}" "${compose_files[*]}"
+      exec_compose "${p_command}" "${project}" "${services}" "${compose_files[*]}"
       ;;
     restart)
-      exec_compose "stop" "${project}" "${service}" "${compose_files[*]}"
-      exec_compose "start" "${project}" "${service}" "${compose_files[*]}"
+      exec_compose "stop" "${project}" "${services}" "${compose_files[*]}"
+      exec_compose "start" "${project}" "${services}" "${compose_files[*]}"
       ;;
     recreate)
-      exec_compose "down" "${project}" "${service}" "${compose_files[*]}"
-      exec_compose "up" "${project}" "${service}" "${compose_files[*]}"
+      exec_compose "down" "${project}" "${services}" "${compose_files[*]}"
+      exec_compose "up" "${project}" "${services}" "${compose_files[*]}"
       ;;
   esac
 done
@@ -399,21 +399,21 @@ done
 case "${p_command}" in
   logs)
     sleep 0.3
-    exec_compose "logs" "${project}" "${m_services[*]}" # caution: (O) m_services[*], (X) m_services[@]
+    exec_compose "logs" "${project}" "${services}"
     ;;
   start|restart|up|recreate)
     if [ "${p_logs_y}" == "y" ]; then
       sleep 0.5
-      exec_compose "logs" "${project}" "${m_services[*]}"
+      exec_compose "logs" "${project}" "${services}"
     fi
     ;;
   status)
     sleep 0.3
-    # exec_compose "status" "${m_services[*]}"
+    # exec_compose "status" "${services}"
     ;;
   volume)
     sleep 0.3
-    # exec_compose "volume" "${m_services[*]}"
+    # exec_compose "volume" "${services}"
     ;;
 esac
 # -- main
