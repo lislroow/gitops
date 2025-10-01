@@ -17,7 +17,6 @@ COMMAND:
   stop      'stop'
   restart   'stop' and 'start'
   logs      'logs -f -n 10'
-  status    service status
 
 OPTIONS:
   --logs    logs after 'start|restart|up|recreate'
@@ -27,25 +26,24 @@ EOF
 }
 
 function LIST {
-  local -a files=(**/*.yml)
-  local -i file_cnt=${#files[@]}
+  local -a compose_files=(**/*.yml)
+  local -i file_cnt=${#compose_files[@]}
   # printf "* available list (${file_cnt})\n"
   
-  local output=""
-  local -i f3_len=$(printf "%s\n" ${files[@]} | wc -L)
+  local -i f3_len=$(printf "%s\n" ${compose_files[@]} | wc -L)
   local FORMAT="  %2s  %-7s  %-$((f3_len+2))s  %s\n"
-  output+=$(printf "${FORMAT}" "NO" "PROJECT" "FILE" "SERVICES")
+  local output=$(printf "${FORMAT}" "NO" "PROJECT" "FILE" "SERVICES")
   output+="\n"
   for i in $(seq 0 $((file_cnt-1))); do
-    yml_file=${files[$i]}
-    if [ $(echo "${yml_file}" | grep -o '/' | wc -l) -eq 0 ]; then
+    local file=${compose_files[$i]}
+    if [ $(echo "${file}" | grep -o '/' | wc -l) -eq 0 ]; then
       project="$(basename $PWD)"
     else
-      project="$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})"
+      project="$(awk -F/ '{print $(NF-1)}' <<< ${file})"
     fi
-    local -a services=($(yq '.services | keys | .[]' $yml_file))
+    local -a services=($(yq '.services | keys | .[]' $file))
     service_list="$(IFS=,; echo "${services[*]}")"
-    output+=$(printf "${FORMAT}" "$((i+1))" "${project}" "${yml_file}" "${service_list}")
+    output+=$(printf "${FORMAT}" "$((i+1))" "${project}" "${file}" "${service_list}")
     output+="\n"
   done
   echo -e "${output}"
@@ -56,7 +54,7 @@ function LIST {
 # options
 declare p_logs_y
 declare OPTIONS="h"
-declare LONGOPTIONS="help,logs,v"
+declare LONGOPTIONS="help,logs"
 declare opts=$(getopt --options "${OPTIONS}" \
                       --longoptions "${LONGOPTIONS}" \
                       -- "$@" )
@@ -87,45 +85,56 @@ done
 
 # init
 declare p_command=${argv[0]}
-if [ -z "${p_command}" ]; then
-  printf "[%-5s] %s\n\n" "ERROR" "COMMAND is required"
-  printf " : %s\n" "'${SCRIPT_NM} -h'"
-  exit
-fi
-
-case "${p_command}" in
-  list)
-    LIST
-    exit
-    ;;
-esac
-
 declare -a p_targets=("${argv[@]:1}")
-if [ ${#p_targets[@]} -eq 0 ]; then
-  printf "[%-5s] %s\n" "ERROR" "service or project is required. check available list."
-  printf " : %s\n" "'${SCRIPT_NM} -h' or '${SCRIPT_NM} list'"
-  exit
-fi
+init() {
+  if [ -z "${p_command}" ]; then
+    printf "[%-5s] %s\n\n" "ERROR" "COMMAND is required"
+    printf " : %s\n" "'${SCRIPT_NM} -h'"
+    exit
+  fi
+
+
+  case "${p_command}" in
+    list)
+      LIST
+      exit
+      ;;
+    up|down|recreate|start|stop|restart|logs)
+      ;;
+    *)
+      printf "[%-5s] %s\n" "ERROR" "invalid COMMAND. '${p_command}'"
+      printf " : %s\n" "'${SCRIPT_NM} -h'"
+      exit
+      ;;
+  esac
+
+  if [ ${#p_targets[@]} -eq 0 ]; then
+    printf "[%-5s] %s\n" "ERROR" "service or project is required. check available list."
+    printf " : %s\n" "'${SCRIPT_NM} -h' or '${SCRIPT_NM} list'"
+    exit
+  fi
+}
+init
 
 declare -A g_all_entries
 declare -a g_all_entry_keys=()
 
 fn_all_entries() {
-  local -a all_yml_list=(**/*.yml)
-  if (( ${#all_yml_list[@]} > 0 )); then
+  local -a all_compose_files=(**/*.yml)
+  if (( ${#all_compose_files[@]} > 0 )); then
     local r_project=""
     local r_file=""
     local r_key=""
     local r_services=""
-    for yml_file in ${all_yml_list[@]}; do
-      if [[ "${yml_file}" == */* ]]; then
-        r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
+    for file in ${all_compose_files[@]}; do
+      if [[ "${file}" == */* ]]; then
+        r_project=$(awk -F/ '{print $(NF-1)}' <<< "${file}")
       else
         r_project=$(basename `pwd`)
       fi
-      r_file=${yml_file}
+      r_file="${file}"
       r_key="${r_project}:${r_file}"
-      local -a services=($(yq '.services | keys | .[]' $yml_file))
+      local -a services=($(yq '.services | keys | .[]' "${file}"))
       r_services=$(IFS=,; echo "${services[*]}")
       g_all_entries[${r_key}]="${r_services}"
       g_all_entry_keys+=(${r_key})
@@ -141,7 +150,7 @@ fn_all_entries
 exec_compose() {
   local command="$1"
   local project="$2"
-  local -a services=($(IFS=,; read -ra services <<< "$3"; echo ${services[@]}))
+  local -a services=($(IFS=,; read -ra services <<< "$3"; echo "${services[@]}"))
   local compose_files=("$4")
 
   local detach_opt_y
@@ -187,15 +196,18 @@ fn_entries() {
     local r_key=""
     local r_services=""
     
-    local -a yml_list=(**/${target}/*.yml)
-    if (( ${#yml_list[@]} > 0 )); then
-      logtxt=$(printf "[INFO] filter by %-12s: > " "project-name")
-      local _services=""
-      for yml_file in ${yml_list[@]}; do
-        r_project=${target}
-        r_file=${yml_file}
+    local logs_txt=""
+    local logs_services=""
+
+    local project="${target}"
+    local -a compose_files=(**/${project}/*.yml)
+    if (( ${#compose_files[@]} > 0 )); then
+      logs_txt=$(printf "[INFO] filter by %-12s: > " "project-name")
+      for file in ${compose_files[@]}; do
+        r_project="${project}"
+        r_file="${file}"
         r_key="${r_project}:${r_file}"
-        local -a services=($(yq '.services | keys | .[]' $yml_file))
+        local -a services=($(yq '.services | keys | .[]' "${file}"))
         r_services=$(IFS=,; echo "${services[*]}")
         g_entries[${r_key}]="${r_services}"
 
@@ -203,44 +215,39 @@ fn_entries() {
         g_entries[${r_key}]=${merged}
         g_entry_keys+=(${r_key})
         
-        [ -n "${project_services}" ] && project_services+=","
-        project_services+="${r_services}"
+        logs_services+="${logs_services:+,}${r_services}"
       done
-      if [ -n "${project_services}" ]; then
-        echo "${logtxt}${project_services}"
-        continue
-      fi
+      [ -n "${logs_services}" ] && { echo "${logs_txt}${logs_services}"; continue; }
     else
-      logtxt=$(printf "[INFO] filter by %-12s: > " "service-name")
+      local service="${target}"
+      logs_txt=$(printf "[INFO] filter by %-12s: > " "service-name")
       for key in ${g_all_entry_keys[@]}; do
         r_key="${key}"
         local -a arr=($(IFS=,; read -ra arr <<< ${g_all_entries[$r_key]}; echo "${arr[@]}"))
-        if (( $(printf "%s\n" ${arr[@]} | grep -o ^"${target}"$ | wc -l) > 0 )); then
-          r_services="${target}"
+        if (( $(printf "%s\n" ${arr[@]} | grep -o ^"${service}"$ | wc -l) > 0 )); then
+          r_services="${service}"
           g_entries[${r_key}]="${r_services}${g_entries[${r_key}]:+,}${g_entries[${r_key}]}"
           local merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
           r_services="${merged}"
           g_entries[${r_key}]=${r_services}
           g_entry_keys+=(${r_key})
+          logs_services="${r_services}"
           break
         fi
       done
-      if [ -n "${r_services}" ]; then
-        echo "${logtxt}${r_services}"
-        continue
-      fi
+      [ -n "${logs_services}" ] && { echo "${logs_txt}${logs_services}"; continue; }
 
-      yml_file="${target}"
-      logtxt=$(printf "[INFO] filter by %-12s: > " "file-name")
-      if (( $(printf "%s\n" ${!g_all_entries[@]} | grep -o ":${yml_file}"$ | wc -l) > 0 )); then
-        if [[ "${yml_file}" == */* ]]; then
-          r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
+      local file="${target}"
+      logs_txt=$(printf "[INFO] filter by %-12s: > " "file-name")
+      if (( $(printf "%s\n" ${!g_all_entries[@]} | grep -o ":${file}"$ | wc -l) > 0 )); then
+        if [[ "${file}" == */* ]]; then
+          r_project=$(awk -F/ '{print $(NF-1)}' <<< ${file})
         else
           r_project=$(basename `pwd`)
         fi
-        r_file=${yml_file}
+        r_file="${file}"
         r_key="${r_project}:${r_file}"
-        local -a services=($(yq '.services | keys | .[]' $yml_file))
+        local -a services=($(yq '.services | keys | .[]' $file))
         r_services=$(IFS=,; echo "${services[*]}")
         g_entries[${r_key}]="${r_services}${g_entries[${r_key}]:+,}${g_entries[${r_key}]}"
 
@@ -248,11 +255,9 @@ fn_entries() {
         r_services="${merged}"
         g_entries[${r_key}]=${r_services}
         g_entry_keys+=(${r_key})
+        logs_services="${r_services}"
       fi
-      if [ -n "${r_services}" ]; then
-        echo "${logtxt}${r_services}"
-        continue
-      fi
+      [ -n "${logs_services}" ] && { echo "${logs_txt}${logs_services}"; continue; }
     fi
   done
 
