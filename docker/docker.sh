@@ -242,82 +242,17 @@ status() {
 # main
 declare -A all_entries
 declare -a all_entry_keys=()
-declare -a all_yml_list=(**/*.yml)
-if (( ${#all_yml_list[@]} > 0 )); then
-  declare r_project=""
-  declare r_file=""
-  declare r_key=""
-  declare r_services=""
-  for yml_file in ${all_yml_list[@]}; do
-    if [[ "${yml_file}" == */* ]]; then
-      r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
-    else
-      r_project=$(basename `pwd`)
-    fi
-    r_file=${yml_file}
-    r_key="${r_project}:${r_file}"
-    declare -a services=($(yq '.services | keys | .[]' $yml_file))
-    r_services=$(IFS=,; echo "${services[*]}")
-    all_entries[${r_key}]="${r_services}"
-    all_entry_keys+=(${r_key})
-  done
-fi
-
-declare -a entry_keys=()
 declare -A entries
+declare -a entry_keys=()
 
-for target in ${p_targets[@]}; do
-  declare r_project=""
-  declare r_file=""
-  declare r_key=""
-  declare r_services=""
-  
-  declare -a yml_list=(**/${target}/*.yml)
-  if (( ${#yml_list[@]} > 0 )); then
-    logtxt=$(printf "[INFO] filter by %-12s: > " "project-name")
-    declare _services=""
-    for yml_file in ${yml_list[@]}; do
-      r_project=${target}
-      r_file=${yml_file}
-      r_key="${r_project}:${r_file}"
-      declare -a services=($(yq '.services | keys | .[]' $yml_file))
-      r_services=$(IFS=,; echo "${services[*]}")
-      entries[${r_key}]="${r_services}"
-
-      declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
-      entries[${r_key}]=${merged}
-      entry_keys+=(${r_key})
-      
-      [ -n "${project_services}" ] && project_services+=","
-      project_services+="${r_services}"
-    done
-    if [ -n "${project_services}" ]; then
-      echo "${logtxt}${project_services}"
-      continue
-    fi
-  else
-    logtxt=$(printf "[INFO] filter by %-12s: > " "service-name")
-    for key in ${all_entry_keys[@]}; do
-      r_key="${key}"
-      declare -a arr=($(IFS=,; read -ra arr <<< ${all_entries[$r_key]}; echo "${arr[@]}"))
-      if (( $(printf "%s\n" ${arr[@]} | grep -o ^"${target}"$ | wc -l) > 0 )); then
-        r_services="${target}"
-        entries[${r_key}]="${r_services}${entries[${r_key}]:+,}${entries[${r_key}]}"
-        declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
-        r_services="${merged}"
-        entries[${r_key}]=${r_services}
-        entry_keys+=(${r_key})
-        break
-      fi
-    done
-    if [ -n "${r_services}" ]; then
-      echo "${logtxt}${r_services}"
-      continue
-    fi
-
-    yml_file="${target}"
-    logtxt=$(printf "[INFO] filter by %-12s: > " "file-name")
-    if (( $(printf "%s\n" ${!all_entries[@]} | grep -o ":${yml_file}"$ | wc -l) > 0 )); then
+fn_all_entries() {
+  declare -a all_yml_list=(**/*.yml)
+  if (( ${#all_yml_list[@]} > 0 )); then
+    declare r_project=""
+    declare r_file=""
+    declare r_key=""
+    declare r_services=""
+    for yml_file in ${all_yml_list[@]}; do
       if [[ "${yml_file}" == */* ]]; then
         r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
       else
@@ -327,26 +262,99 @@ for target in ${p_targets[@]}; do
       r_key="${r_project}:${r_file}"
       declare -a services=($(yq '.services | keys | .[]' $yml_file))
       r_services=$(IFS=,; echo "${services[*]}")
-      entries[${r_key}]="${r_services}${entries[${r_key}]:+,}${entries[${r_key}]}"
-
-      declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
-      r_services="${merged}"
-      entries[${r_key}]=${r_services}
-      entry_keys+=(${r_key})
-    fi
-    if [ -n "${r_services}" ]; then
-      echo "${logtxt}${r_services}"
-      continue
-    fi
+      all_entries[${r_key}]="${r_services}"
+      all_entry_keys+=(${r_key})
+    done
   fi
-done
+}
 
-if (( ${#entry_keys[@]} == 0 )); then
-  printf "[%-5s] %s\n" "ERROR" "target is empty"
-  echo ""
-  LIST
-  exit
-fi
+fn_entries() {
+  for target in ${p_targets[@]}; do
+    declare r_project=""
+    declare r_file=""
+    declare r_key=""
+    declare r_services=""
+    
+    declare -a yml_list=(**/${target}/*.yml)
+    if (( ${#yml_list[@]} > 0 )); then
+      logtxt=$(printf "[INFO] filter by %-12s: > " "project-name")
+      declare _services=""
+      for yml_file in ${yml_list[@]}; do
+        r_project=${target}
+        r_file=${yml_file}
+        r_key="${r_project}:${r_file}"
+        declare -a services=($(yq '.services | keys | .[]' $yml_file))
+        r_services=$(IFS=,; echo "${services[*]}")
+        entries[${r_key}]="${r_services}"
+
+        declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+        entries[${r_key}]=${merged}
+        entry_keys+=(${r_key})
+        
+        [ -n "${project_services}" ] && project_services+=","
+        project_services+="${r_services}"
+      done
+      if [ -n "${project_services}" ]; then
+        echo "${logtxt}${project_services}"
+        continue
+      fi
+    else
+      logtxt=$(printf "[INFO] filter by %-12s: > " "service-name")
+      for key in ${all_entry_keys[@]}; do
+        r_key="${key}"
+        declare -a arr=($(IFS=,; read -ra arr <<< ${all_entries[$r_key]}; echo "${arr[@]}"))
+        if (( $(printf "%s\n" ${arr[@]} | grep -o ^"${target}"$ | wc -l) > 0 )); then
+          r_services="${target}"
+          entries[${r_key}]="${r_services}${entries[${r_key}]:+,}${entries[${r_key}]}"
+          declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+          r_services="${merged}"
+          entries[${r_key}]=${r_services}
+          entry_keys+=(${r_key})
+          break
+        fi
+      done
+      if [ -n "${r_services}" ]; then
+        echo "${logtxt}${r_services}"
+        continue
+      fi
+
+      yml_file="${target}"
+      logtxt=$(printf "[INFO] filter by %-12s: > " "file-name")
+      if (( $(printf "%s\n" ${!all_entries[@]} | grep -o ":${yml_file}"$ | wc -l) > 0 )); then
+        if [[ "${yml_file}" == */* ]]; then
+          r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
+        else
+          r_project=$(basename `pwd`)
+        fi
+        r_file=${yml_file}
+        r_key="${r_project}:${r_file}"
+        declare -a services=($(yq '.services | keys | .[]' $yml_file))
+        r_services=$(IFS=,; echo "${services[*]}")
+        entries[${r_key}]="${r_services}${entries[${r_key}]:+,}${entries[${r_key}]}"
+
+        declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+        r_services="${merged}"
+        entries[${r_key}]=${r_services}
+        entry_keys+=(${r_key})
+      fi
+      if [ -n "${r_services}" ]; then
+        echo "${logtxt}${r_services}"
+        continue
+      fi
+    fi
+  done
+
+  if (( ${#entry_keys[@]} == 0 )); then
+    printf "[%-5s] %s\n" "ERROR" "target is empty"
+    echo ""
+    LIST
+    exit
+  fi
+}
+
+## setup targets
+fn_all_entries
+fn_entries
 
 ## process each service individually
 declare -i tot=${#entry_keys[@]}
