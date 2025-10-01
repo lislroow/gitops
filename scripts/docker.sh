@@ -21,8 +21,6 @@ COMMAND:
 
 OPTIONS:
   --logs    logs after 'start|restart|up|recreate'
-  --v       remove associate volumes 
-            'docker-compose [down|stop] --v service'
 
 EOF
   exit 1
@@ -54,7 +52,6 @@ function LIST {
 
 # options
 declare p_logs_y
-declare p_rm_vols_y
 OPTIONS="h"
 LONGOPTIONS="help,logs,v"
 opts=$(getopt --options "${OPTIONS}" \
@@ -70,9 +67,6 @@ while true; do
       ;;
     --logs)
       p_logs_y="y"
-      ;;
-    --v)
-      p_rm_vols_y="y"
       ;;
     --)
       ;;
@@ -108,8 +102,8 @@ if [ ${#p_targets[@]} -eq 0 ]; then
   USAGE
 fi
 
-declare -A all_entries
-declare -a all_entry_keys=()
+declare -A g_all_entries
+declare -a g_all_entry_keys=()
 fn_all_entries() {
   declare -a all_yml_list=(**/*.yml)
   if (( ${#all_yml_list[@]} > 0 )); then
@@ -127,13 +121,13 @@ fn_all_entries() {
       r_key="${r_project}:${r_file}"
       declare -a services=($(yq '.services | keys | .[]' $yml_file))
       r_services=$(IFS=,; echo "${services[*]}")
-      all_entries[${r_key}]="${r_services}"
-      all_entry_keys+=(${r_key})
+      g_all_entries[${r_key}]="${r_services}"
+      g_all_entry_keys+=(${r_key})
     done
   fi
 }
 
-## all entries
+## all g_entries
 fn_all_entries
 # -- init
 
@@ -233,12 +227,11 @@ status() {
     printf "\n"
   fi
 }
-
 # -- functions
 
 # main
-declare -A entries
-declare -a entry_keys=()
+declare -A g_entries
+declare -a g_entry_keys=()
 
 fn_entries() {
   for target in ${p_targets[@]}; do
@@ -257,11 +250,11 @@ fn_entries() {
         r_key="${r_project}:${r_file}"
         declare -a services=($(yq '.services | keys | .[]' $yml_file))
         r_services=$(IFS=,; echo "${services[*]}")
-        entries[${r_key}]="${r_services}"
+        g_entries[${r_key}]="${r_services}"
 
-        declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
-        entries[${r_key}]=${merged}
-        entry_keys+=(${r_key})
+        declare merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+        g_entries[${r_key}]=${merged}
+        g_entry_keys+=(${r_key})
         
         [ -n "${project_services}" ] && project_services+=","
         project_services+="${r_services}"
@@ -272,16 +265,16 @@ fn_entries() {
       fi
     else
       logtxt=$(printf "[INFO] filter by %-12s: > " "service-name")
-      for key in ${all_entry_keys[@]}; do
+      for key in ${g_all_entry_keys[@]}; do
         r_key="${key}"
-        declare -a arr=($(IFS=,; read -ra arr <<< ${all_entries[$r_key]}; echo "${arr[@]}"))
+        declare -a arr=($(IFS=,; read -ra arr <<< ${g_all_entries[$r_key]}; echo "${arr[@]}"))
         if (( $(printf "%s\n" ${arr[@]} | grep -o ^"${target}"$ | wc -l) > 0 )); then
           r_services="${target}"
-          entries[${r_key}]="${r_services}${entries[${r_key}]:+,}${entries[${r_key}]}"
-          declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+          g_entries[${r_key}]="${r_services}${g_entries[${r_key}]:+,}${g_entries[${r_key}]}"
+          declare merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
           r_services="${merged}"
-          entries[${r_key}]=${r_services}
-          entry_keys+=(${r_key})
+          g_entries[${r_key}]=${r_services}
+          g_entry_keys+=(${r_key})
           break
         fi
       done
@@ -292,7 +285,7 @@ fn_entries() {
 
       yml_file="${target}"
       logtxt=$(printf "[INFO] filter by %-12s: > " "file-name")
-      if (( $(printf "%s\n" ${!all_entries[@]} | grep -o ":${yml_file}"$ | wc -l) > 0 )); then
+      if (( $(printf "%s\n" ${!g_all_entries[@]} | grep -o ":${yml_file}"$ | wc -l) > 0 )); then
         if [[ "${yml_file}" == */* ]]; then
           r_project=$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})
         else
@@ -302,12 +295,12 @@ fn_entries() {
         r_key="${r_project}:${r_file}"
         declare -a services=($(yq '.services | keys | .[]' $yml_file))
         r_services=$(IFS=,; echo "${services[*]}")
-        entries[${r_key}]="${r_services}${entries[${r_key}]:+,}${entries[${r_key}]}"
+        g_entries[${r_key}]="${r_services}${g_entries[${r_key}]:+,}${g_entries[${r_key}]}"
 
-        declare merged=$(echo "${entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
+        declare merged=$(echo "${g_entries[${r_key}]}" | tr ',' '\n' | sort -u | paste -sd,)
         r_services="${merged}"
-        entries[${r_key}]=${r_services}
-        entry_keys+=(${r_key})
+        g_entries[${r_key}]=${r_services}
+        g_entry_keys+=(${r_key})
       fi
       if [ -n "${r_services}" ]; then
         echo "${logtxt}${r_services}"
@@ -316,7 +309,7 @@ fn_entries() {
     fi
   done
 
-  if (( ${#entry_keys[@]} == 0 )); then
+  if (( ${#g_entry_keys[@]} == 0 )); then
     printf "[%-5s] %s\n" "ERROR" "target is empty"
     echo ""
     LIST
@@ -324,79 +317,81 @@ fn_entries() {
   fi
 }
 
-## setup targets
-fn_entries
+fn_process() {
+  ## process each service individually
+  declare -i tot=${#g_entry_keys[@]}
+  declare -i idx
+  for key in ${g_entry_keys[@]}; do
+    declare project="${key%:*}"
+    declare compose_file="${key#*:}"
+    declare services="${g_entries[$key]}"
+    declare env_file="${project:+$project/}.env"
 
-## process each service individually
-declare -i tot=${#entry_keys[@]}
-declare -i idx
-for key in ${entry_keys[@]}; do
-  declare project="${key%:*}"
-  declare compose_file="${key#*:}"
-  declare services="${entries[$key]}"
-  declare env_file="${project:+$project/}.env"
-
-  declare -a compose_files=()
-  declare -a dep_compose_files=()
-  for dep_service in $(yq '.services[].depends_on | select(. != null) | keys | .[]' ${compose_file}); do
-    for key in ${all_entry_keys[@]}; do
-      if (( $(echo ${all_entries[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
-        echo " > ${key#*:}"
-        if [ "${key#*:}" != "${compose_file}" ]; then
-          dep_compose_files=(${key#*:})
+    declare -a compose_files=()
+    declare -a dep_compose_files=()
+    for dep_service in $(yq '.services[].depends_on | select(. != null) | keys | .[]' ${compose_file}); do
+      for key in ${g_all_entry_keys[@]}; do
+        if (( $(echo ${g_all_entries[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
+          echo " > ${key#*:}"
+          if [ "${key#*:}" != "${compose_file}" ]; then
+            dep_compose_files=(${key#*:})
+          fi
+          break
         fi
-        break
-      fi
+      done
     done
-  done
-  compose_files+=(${compose_file})
-  compose_files+=(${dep_compose_files[@]})
-  
-  ((idx++))
-  cat <<-EOF
-* [${idx}/${tot}] ${key}
-  project    : ${project}
-  services   : ${services}
-  env        : ${env_file}
-  compose    : ${compose_file}
-  depends_on : ${dep_compose_files[@]:-(none)}
+    compose_files+=(${compose_file})
+    compose_files+=(${dep_compose_files[@]})
+    
+    ((idx++))
+    cat <<-EOF
+  * [${idx}/${tot}] ${key}
+    project    : ${project}
+    services   : ${services}
+    env        : ${env_file}
+    compose    : ${compose_file}
+    depends_on : ${dep_compose_files[@]:-(none)}
 EOF
 
 
+    case "${p_command}" in
+      start|stop|up|down)
+        exec_compose "${p_command}" "${project}" "${services}" "${compose_files[*]}"
+        ;;
+      restart)
+        exec_compose "stop" "${project}" "${services}" "${compose_files[*]}"
+        exec_compose "start" "${project}" "${services}" "${compose_files[*]}"
+        ;;
+      recreate)
+        exec_compose "down" "${project}" "${services}" "${compose_files[*]}"
+        exec_compose "up" "${project}" "${services}" "${compose_files[*]}"
+        ;;
+    esac
+  done
+
+  ## process all services together
   case "${p_command}" in
-    start|stop|up|down)
-      exec_compose "${p_command}" "${project}" "${services}" "${compose_files[*]}"
+    logs)
+      sleep 0.3
+      exec_compose "logs" "${project}" "${services}"
       ;;
-    restart)
-      exec_compose "stop" "${project}" "${services}" "${compose_files[*]}"
-      exec_compose "start" "${project}" "${services}" "${compose_files[*]}"
+    start|restart|up|recreate)
+      if [ "${p_logs_y}" == "y" ]; then
+        sleep 0.5
+        exec_compose "logs" "${project}" "${services}"
+      fi
       ;;
-    recreate)
-      exec_compose "down" "${project}" "${services}" "${compose_files[*]}"
-      exec_compose "up" "${project}" "${services}" "${compose_files[*]}"
+    status)
+      sleep 0.3
+      # exec_compose "status" "${services}"
+      ;;
+    volume)
+      sleep 0.3
+      # exec_compose "volume" "${services}"
       ;;
   esac
-done
+}
 
-## process all services together
-case "${p_command}" in
-  logs)
-    sleep 0.3
-    exec_compose "logs" "${project}" "${services}"
-    ;;
-  start|restart|up|recreate)
-    if [ "${p_logs_y}" == "y" ]; then
-      sleep 0.5
-      exec_compose "logs" "${project}" "${services}"
-    fi
-    ;;
-  status)
-    sleep 0.3
-    # exec_compose "status" "${services}"
-    ;;
-  volume)
-    sleep 0.3
-    # exec_compose "volume" "${services}"
-    ;;
-esac
+fn_entries
+fn_process
 # -- main
