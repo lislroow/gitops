@@ -29,21 +29,25 @@ EOF
 }
 
 function LIST {
-  declare -a yml_files=(**/*.yml)
-  printf "* available list (${#yml_files[@]})\n"
+  declare -a files=(**/*.yml)
+  declare -i file_cnt=${#files[@]}
+  printf "* available list (${file_cnt})\n"
   
-  declare -i max_yml=0; for f in ${yml_files[@]}; do (( ${#f} > max_yml )) && max_yml=${#f}; done
-  for i in $(seq 1 ${#yml_files[@]}); do
-    yml_file="${yml_files[$((i-1))]}"
+  declare -i f3_len=$(printf "%s\n" ${files[@]} | wc -L)
+  declare output=""
+  for i in $(seq 0 $((file_cnt-1))); do
+    yml_file=${files[$i]}
     if [ $(echo "${yml_file}" | grep -o '/' | wc -l) -eq 0 ]; then
-      project="$(basename `pwd`)"
+      project="$(basename $PWD)"
     else
-      project=$(awk -F/ '{print $(NF-1)}' <<< "${yml_file}")
+      project="$(awk -F/ '{print $(NF-1)}' <<< ${yml_file})"
     fi
     declare -a services=($(yq '.services | keys | .[]' $yml_file))
     service_list="$(IFS=,; echo "${services[*]}")"
-    printf "  %2s | %-6s | %-$((max_yml+2))s | %s\n" "$i" "${project}" "${yml_file}" "${service_list}"
+    output+=$(printf "  %2s | %-6s | %-$((f3_len+2))s | %s\n" "$((i+1))" "${project}" "${yml_file}" "${service_list}")
+    output+="\n"
   done
+  echo -e "${output}"
   exit
 }
 # //usage
