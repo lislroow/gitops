@@ -118,11 +118,11 @@ get_compose() {
   local project_nm="$1"
   local service_nm="$2"
   [ -z "${project_nm}" ] && { echo "'${project_nm}' is required" 1>&2; return; }
-  [ ! -e "${BASEDIR}/${project_nm}" ] && { echo "'${BASEDIR}/${project_nm}' does not exist." 1>&2; return; }
-  [ ! -d "${BASEDIR}/${project_nm}" ] && { echo "'${BASEDIR}/${project_nm}' is not directory." 1>&2; return; }
+  [ ! -e "${project_nm}" ] && { echo "'${project_nm}' does not exist." 1>&2; return; }
+  [ ! -d "${project_nm}" ] && { echo "'${project_nm}' is not directory." 1>&2; return; }
   [ -z "${service_nm}" ] && { echo "'${service_nm}' is required" 1>&2; return; }
 
-  for yml_file in ${BASEDIR}/${project_nm}/*.yml; do
+  for yml_file in ${project_nm}/*.yml; do
     local cnt=$(yq '.services | keys | .[]' $yml_file | grep -E '^('$service_nm')$' | wc -l)
     if [ $cnt -gt 0 ]; then
       echo "${yml_file}"
