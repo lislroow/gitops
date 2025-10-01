@@ -3,10 +3,6 @@ BASEDIR=$(cd $(dirname $0) && pwd -P)
 SCRIPT_NM="${0##*/}"
 PRIVATE_REGISTRY="docker.mgkim.net"
 
-up="\033[A"
-clean="\033[K"
-end="\033[E"
-
 # usage
 function USAGE {
   cat << EOF
@@ -27,11 +23,11 @@ declare p_list_y
 declare p_name
 declare p_build_only_y
 declare p_rmi_y
-OPTIONS="l"
-LONGOPTIONS="registry:,list,name:,build-only,rmi"
-opts=$(getopt --options "${OPTIONS}" \
-              --longoptions "${LONGOPTIONS}" \
-              -- "$@" )
+declare OPTIONS="l"
+declare LONGOPTIONS="registry:,list,name:,build-only,rmi"
+declare opts=$(getopt --options "${OPTIONS}" \
+                      --longoptions "${LONGOPTIONS}" \
+                      -- "$@" )
 eval set -- "${opts}"
 while true; do
   [ -z "$1" ] && break
@@ -67,15 +63,15 @@ done
 declare registry="${p_registry:-$PRIVATE_REGISTRY}"
 [ -z "${registry}" ] && { echo "registry must not empty."; exit 1; }
 
-declare m_all_entries=($(ls Dockerfile*))
+declare -a g_all_entries=(Dockerfile*)
 # -- init
 
 # functions
 list_entries() {
   echo "## available dockerfiles"
-  declare dockerfile_list=()
-  declare -i idx=0
-  for entry in ${m_all_entries[@]}; do
+  local -a dockerfile_list=()
+  local -i idx=0
+  for entry in ${g_all_entries[@]}; do
     if [[ " ${argv[@]} " =~ " ${entry} " ]]; then
       printf "(*) %s. %-s\n" $((idx+1)) "${entry}"
       dockerfile_list+=("$entry")
@@ -107,8 +103,8 @@ build_entries() {
   local dockerfiles=("$1")
   # printf " > %s\n" ${dockerfiles[@]}
 
-  declare -i tot=${#m_entries[@]}
-  declare -i idx
+  local -i tot=${#m_entries[@]}
+  local -i idx
   for dockerfile in ${m_entries[@]}; do
     local _tmp=${dockerfile#*_}
     local image=${_tmp%_*}
@@ -130,13 +126,13 @@ EOF
 [ "${p_list_y}" == "y" ] && { list_entries; exit; }
 
 declare -a p_targets=("${argv[@]}")
-declare -a m_entries=($(printf "%s\n" "${m_all_entries[@]}" | \
+declare -a m_entries=($(printf "%s\n" "${g_all_entries[@]}" | \
   grep -E $(IFS='|'; echo "^(${p_targets[*]})$")
 ))
 
 if [ ${#m_entries[@]} -eq 0 ]; then
-  if [ ${#m_all_entries[@]} -eq 1 ]; then
-    dockerfile=${m_all_entries[0]}
+  if [ ${#g_all_entries[@]} -eq 1 ]; then
+    dockerfile=${g_all_entries[0]}
     if [ -n "${p_name}" ]; then
       if [ $(echo "${p_name}" | grep -o '_' | wc -l) -ne 1 ]; then
         echo "invalid --name value. '${p_name}', e.g) {image}_{tag}"
@@ -165,17 +161,17 @@ if [ ${#m_entries[@]} -eq 0 ]; then
     read input
 
     if [ "${input}" == "a" ]; then
-      m_entries=(${m_all_entries[@]})
+      m_entries=(${g_all_entries[@]})
       build_entries "${m_entries[*]}"
       continue
     fi
 
     for val in ${input[@]}; do
       if [[ "${val}" =~ ^[0-9]+$ ]]; then
-        [ ${val} -gt ${#m_all_entries[@]} ] && { echo "'${val}' is out of index."; continue; }
-        m_entries+=("${m_all_entries[$val-1]}")
+        [ ${val} -gt ${#g_all_entries[@]} ] && { echo "'${val}' is out of index."; continue; }
+        m_entries+=("${g_all_entries[$val-1]}")
       else
-        entry=$(printf "%s\n" "${m_all_entries[@]}" | grep "${val}")
+        entry=$(printf "%s\n" "${g_all_entries[@]}" | grep "${val}")
         [ "${entry}" == "" ] && { echo "'${val}' is not matched."; continue; }
         m_entries+=(${entry})
       fi
