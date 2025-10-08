@@ -48,7 +48,7 @@ declare opts=$(getopt --options "${OPTIONS}" \
                       -- "$@" )
 eval set -- "${opts}"
 while true; do
-  [ -z "$1" ] && break
+  [[ -z $1 ]] && break
   
   case "$1" in
     --registry)
@@ -79,12 +79,12 @@ done
 
 # init
 declare registry="${p_registry:-$PRIVATE_REGISTRY}"
-[ -z "${registry}" ] && { echo "registry must not empty."; exit 1; }
+[[ -z ${registry} ]] && { echo "registry must not empty."; exit 1; }
 
 declare -a g_all_entries=(Dockerfile*)
 
 declare -a p_targets=("${argv[@]}")
-if (( ${#p_targets[@]} > 0)) && [ "${p_targets[0]}" == "list" ]; then
+if (( ${#p_targets[@]} > 0)) && [[ ${p_targets[0]} == "list" ]]; then
   LIST
   exit
 fi
@@ -102,10 +102,10 @@ build() {
 
   printf "## build: ${dockerfile}\n"
   docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
-  if [ "${p_build_only_y}" != "y" ]; then
+  if [[ ${p_build_only_y} != "y" ]]; then
     docker push ${registry}/${image}:${tag}
   fi
-  if [ "${p_rmi_y}" == "y" ]; then
+  if [[ ${p_rmi_y} == "y" ]]; then
     docker rmi ${registry}/${image}:${tag}
   fi
   docker image prune -f
@@ -136,18 +136,18 @@ EOF
 
 
 # main
-if [ ${#m_entries[@]} -eq 0 ]; then
-  if [ ${#g_all_entries[@]} -eq 1 ]; then
+if (( ${#m_entries[@]} == 0 )); then
+  if (( ${#g_all_entries[@]} == 1 )); then
     dockerfile=${g_all_entries[0]}
-    if [ -n "${p_name}" ]; then
-      if [ $(echo "${p_name}" | grep -o '_' | wc -l) -ne 1 ]; then
+    if [[ -n ${p_name} ]]; then
+      if (( $(echo "${p_name}" | grep -o '_' | wc -l) != 1 )); then
         echo "invalid --name value. '${p_name}', e.g) {image}_{tag}"
         exit
       fi
       image=${p_name%_*}
       tag=${p_name#*_}
     else
-      if [ $(echo "${dockerfile}" | grep -o '_' | wc -l) -ne 2 ]; then
+      if (( $(echo "${dockerfile}" | grep -o '_' | wc -l) != 2 )); then
         echo "invalid Dockerfile name. '${dockerfile}', e.g) Dockerfile_{image}_{tag}"
         exit
       fi
@@ -166,19 +166,19 @@ if [ ${#m_entries[@]} -eq 0 ]; then
     echo -n "(NO or FILE, a=all): "
     read input
 
-    if [ "${input}" == "a" ]; then
+    if [[ ${input} == "a" ]]; then
       m_entries=(${g_all_entries[@]})
       build_entries "${m_entries[*]}"
       continue
     fi
 
     for val in ${input[@]}; do
-      if [[ "${val}" =~ ^[0-9]+$ ]]; then
-        [ ${val} -gt ${#g_all_entries[@]} ] && { echo "'${val}' is out of index."; continue; }
+      if [[ ${val} =~ ^[0-9]+$ ]]; then
+        (( ${val} > ${#g_all_entries[@]} )) && { echo "'${val}' is out of index."; continue; }
         m_entries+=("${g_all_entries[$val-1]}")
       else
         entry=$(printf "%s\n" "${g_all_entries[@]}" | grep "${val}")
-        [ "${entry}" == "" ] && { echo "'${val}' is not matched."; continue; }
+        [[ -z ${entry} ]] && { echo "'${val}' is not matched."; continue; }
         m_entries+=(${entry})
       fi
     done

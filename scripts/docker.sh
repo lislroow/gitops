@@ -34,9 +34,9 @@ function LIST {
   local FORMAT="  %2s  %-7s  %-$((f3_len+2))s  %s\n"
   local output=$(printf "${FORMAT}" "NO" "PROJECT" "FILE" "SERVICES")
   output+="\n"
-  for i in $(seq 0 $((file_cnt-1))); do
+  for ((i=0; i<file_cnt-1; i++)); do
     local file=${compose_files[$i]}
-    if [ $(echo "${file}" | grep -o '/' | wc -l) -eq 0 ]; then
+    if (( $(echo "${file}" | grep -o '/' | wc -l) == 0 )); then
       project="$(basename $PWD)"
     else
       project="$(awk -F/ '{print $(NF-1)}' <<< ${file})"
@@ -60,7 +60,7 @@ declare opts=$(getopt --options "${OPTIONS}" \
                       -- "$@" )
 eval set -- "${opts}"
 while true; do
-  [ -z "$1" ] && break
+  [[ -z $1 ]] && break
   
   case "$1" in
     -h|--help)
@@ -87,7 +87,7 @@ done
 declare p_command=${argv[0]}
 declare -a p_targets=("${argv[@]:1}")
 init() {
-  if [ -z "${p_command}" ]; then
+  if [[ -z ${p_command} ]]; then
     printf "[%-5s] %s\n\n" "ERROR" "COMMAND is required"
     printf " : %s\n" "'${SCRIPT_NM} -h'"
     exit
@@ -168,7 +168,7 @@ exec_compose() {
       return
       ;;
   esac
-  if [[ "${command}" != "logs"* ]]; then
+  if [[ ${command} != "logs"* ]]; then
     (( ${#services[@]} == 0 )) && { printf "[%-5s] %s\n\n" "ERROR" "services are required." 1>&2; return; }
     (( ${#compose_files[@]} == 0 )) && { printf "[%-5s] %s\n\n" "ERROR" "compose files are required"; return; }
   fi
@@ -217,7 +217,7 @@ fn_entries() {
         
         logs_services+="${logs_services:+,}${r_services}"
       done
-      [ -n "${logs_services}" ] && { echo "${logs_txt}${logs_services}"; continue; }
+      [[ -n ${logs_services} ]] && { echo "${logs_txt}${logs_services}"; continue; }
     else
       local service="${target}"
       logs_txt=$(printf "[INFO] filter by %-12s: > " "service-name")
@@ -235,12 +235,12 @@ fn_entries() {
           break
         fi
       done
-      [ -n "${logs_services}" ] && { echo "${logs_txt}${logs_services}"; continue; }
+      [[ -n ${logs_services} ]] && { echo "${logs_txt}${logs_services}"; continue; }
 
       local file="${target}"
       logs_txt=$(printf "[INFO] filter by %-12s: > " "file-name")
       if (( $(printf "%s\n" ${!g_all_entries[@]} | grep -o ":${file}"$ | wc -l) > 0 )); then
-        if [[ "${file}" == */* ]]; then
+        if [[ ${file} == */* ]]; then
           r_project=$(awk -F/ '{print $(NF-1)}' <<< ${file})
         else
           r_project=$(basename `pwd`)
@@ -257,7 +257,7 @@ fn_entries() {
         g_entry_keys+=(${r_key})
         logs_services="${r_services}"
       fi
-      [ -n "${logs_services}" ] && { echo "${logs_txt}${logs_services}"; continue; }
+      [[ -n ${logs_services} ]] && { echo "${logs_txt}${logs_services}"; continue; }
     fi
   done
 
@@ -283,7 +283,7 @@ fn_process() {
     for dep_service in $(yq '.services[].depends_on | select(. != null) | keys | .[]' ${compose_file}); do
       for key in ${g_all_entry_keys[@]}; do
         if (( $(echo ${g_all_entries[$key]} | grep -o ${dep_service} | wc -l) > 0 )); then
-          if [ "${key#*:}" != "${compose_file}" ]; then
+          if [[ ${key#*:} != ${compose_file} ]]; then
             dep_compose_files=(${key#*:})
           fi
           break
@@ -324,7 +324,7 @@ EOF
       exec_compose "logs" "${project}" "${services}"
       ;;
     start|restart|up|recreate)
-      if [ "${p_logs_y}" == "y" ]; then
+      if [[ ${p_logs_y} == "y" ]]; then
         sleep 0.5
         exec_compose "logs" "${project}" "${services}"
       fi
