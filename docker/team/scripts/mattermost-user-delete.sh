@@ -44,13 +44,13 @@ o_usernames=("${argv[@]:1}")
 
 
 # validate
-[ "${#o_usernames[@]}" -eq 0 ] && {echo "require 'username'"; USAGE;}
+(( ${#o_usernames[@]} == 0 )) && { echo "require 'username'"; USAGE; }
 # -- validate
 
 # check
 container="mattermost"
 running=$(docker inspect --format '{{.State.Running}}' ${container})
-[ "${running}" != "true" ] && {echo "not running '${container}'"; exit 1;}
+[ ${running} != "true" ] && { echo "not running '${container}'"; exit 1; }
 # -- check
 
 # main

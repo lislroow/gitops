@@ -8,10 +8,7 @@ function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM OPTIONS
 
-OPTIONS:          (*) required
-  --email         (*) email
-  --username      (*) username
-  --password      (*) password
+OPTIONS:
   --system-admin      system admin role (if --system-admin is empty > 'member')
 
 EOF
@@ -25,8 +22,8 @@ declare o_email
 declare o_username
 declare o_password
 declare o_sysadm
-OPTIONS=""
-LONGOPTIONS="email:,username:,password:,system-admin"
+OPTIONS="h"
+LONGOPTIONS="system-admin"
 opts=$(getopt --options "${OPTIONS}" \
               --longoptions "${LONGOPTIONS}" \
               -- "$@" )
@@ -35,20 +32,13 @@ while true; do
   [ -z "$1" ] && break
   
   case "$1" in
-    --email)
-      o_email="$2"
-      shift
-      ;;
-    --username)
-      o_username="$2"
-      shift
-      ;;
-    --password)
-      o_password="$2"
-      shift
+    -h)
+      USAGE
       ;;
     --system-admin)
       o_sysadm="true"
+      ;;
+    --)
       ;;
     *)
       argv+=($1)
@@ -56,19 +46,47 @@ while true; do
   esac
   shift
 done
+o_email=${argv[0]}
+o_username=${argv[1]}
+o_password=${argv[2]}
 # -- options
 
 
-# validate
-[ -z "${o_email}" ] && { echo "require 'email'"; USAGE; }
-[ -z "${o_username}" ] && { echo "require 'username'"; USAGE; }
-[ -z "${o_password}" ] && { echo "require 'password'"; USAGE; }
-# -- validate
+# input
+while [ -z ${o_email} ]; do
+  printf " > email: "
+  read o_email
+done
+
+while [ -z ${o_username} ]; do
+  printf " > username: "
+  read o_username
+done
+
+while [ -z ${o_password} ]; do
+  printf " > password: "
+  read o_password
+done
+# -- input
+
+cat <<EOF
+create mattermost user
+  - email: ${o_email}
+  - username: ${o_username}
+  - password: ${o_password}
+EOF
+
+printf " > correct? [a: abort] "
+read yn
+if [[ ${yn} == "a" ]]; then
+  printf "creation aborted\n"
+  exit
+fi
 
 # check
 container="mattermost"
 running=$(docker inspect --format '{{.State.Running}}' ${container})
-[ "${running}" != "true" ] && { echo "not running '${container}'"; exit 1; }
+[ ${running} != "true" ] && { echo "not running '${container}'"; exit 1; }
 # -- check
 
 # main
