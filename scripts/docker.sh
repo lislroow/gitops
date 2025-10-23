@@ -108,7 +108,7 @@ init() {
       ;;
   esac
 
-  if [ ${#p_targets[@]} -eq 0 ]; then
+  if (( ${#p_targets[@]} == 0 )); then
     printf "[%-5s] %s\n" "ERROR" "service or project is required. check available list."
     printf " : %s\n" "'${SCRIPT_NM} -h' or '${SCRIPT_NM} list'"
     exit
