@@ -21,6 +21,8 @@ services:
       MM_SQLSETTINGS_DRIVERNAME: postgres
       MM_SQLSETTINGS_DATASOURCE: postgres://${postgres_mattermost_user}:${postgres_mattermost_password}@postgres-team:5432/${postgres_mattermost_db}?sslmode=disable&connect_timeout=10
       MM_SERVICESETTINGS_SITEURL: ${mm_servicesettings_siteurl}
+      # MM_FEATUREFLAGS_ENABLEUPDATESNOTICES: false
+      # MM_DIAGNOSTICS_ENABLED: false
     security_opt:
       - no-new-privileges:true
     pids_limit: 200
