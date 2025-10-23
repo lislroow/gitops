@@ -50,7 +50,7 @@ o_usernames=("${argv[@]:1}")
 # check
 container="mattermost"
 running=$(docker inspect --format '{{.State.Running}}' ${container})
-[ "${running}" == "true" ] && {echo "not running '${container}'"; exit 1;}
+[ "${running}" != "true" ] && {echo "not running '${container}'"; exit 1;}
 # -- check
 
 # main
