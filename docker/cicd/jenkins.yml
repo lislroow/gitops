@@ -6,6 +6,8 @@ services:
     ports:
       - 8082:8080
       - 50000:50000
+    environment:
+      - TZ=Asia/Seoul
     volumes:
       - /data/cicd/jenkins-data:/var/jenkins_home
     networks:
