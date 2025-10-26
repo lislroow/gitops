@@ -121,7 +121,8 @@ build_entries() {
   for dockerfile in ${m_entries[@]}; do
     local _tmp=${dockerfile#*_}
     local image=${_tmp%_*}
-    local tag=${_tmp#*_}
+    image=${image//_//}
+    local tag=${_tmp##*_}
 
     ((idx++))
     cat <<-EOF
@@ -153,7 +154,8 @@ if (( ${#m_entries[@]} == 0 )); then
       fi
       _tmp=${dockerfile#*_}
       image=${_tmp%_*}
-      tag=${_tmp#*_}
+      image=${image//_//}
+      tag=${_tmp##*_}
     fi
     build "${dockerfile}" "${image}" "${tag}"
     exit

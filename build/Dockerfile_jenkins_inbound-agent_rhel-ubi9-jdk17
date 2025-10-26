@@ -1,0 +1,7 @@
+FROM jenkins/inbound-agent:rhel-ubi9-jdk17
+ARG DOCKER_VERSION=28.5.1
+USER root
+RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz -o docker.tgz \
+ && tar xzf docker.tgz --strip-components=1 -C /usr/local/bin \
+ && rm -f docker.tgz
+USER jenkins
