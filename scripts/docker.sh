@@ -25,17 +25,17 @@ EOF
   exit 1
 }
 
+declare compose_base="/app/gitops"
+declare -a g_all_compose_files=(${compose_base}/**/*.yml)
+
 function LIST {
-  local -a compose_files=(**/*.yml)
-  local -i file_cnt=${#compose_files[@]}
-  # printf "* available list (${file_cnt})\n"
-  
-  local -i f3_len=$(printf "%s\n" ${compose_files[@]} | wc -L)
+  local -i file_cnt=${#g_all_compose_files[@]}
+  local -i f3_len=$(printf "%s\n" ${g_all_compose_files[@]} | wc -L)
   local FORMAT="  %2s  %-7s  %-$((f3_len+2))s  %s\n"
   local output=$(printf "${FORMAT}" "NO" "PROJECT" "FILE" "SERVICES")
   output+="\n"
   for ((i=0; i<file_cnt-1; i++)); do
-    local file=${compose_files[$i]}
+    local file=${g_all_compose_files[$i]}
     if (( $(echo "${file}" | grep -o '/' | wc -l) == 0 )); then
       project="$(basename $PWD)"
     else
@@ -89,10 +89,8 @@ declare -a p_targets=("${argv[@]:1}")
 init() {
   if [[ -z ${p_command} ]]; then
     printf "[%-5s] %s\n\n" "ERROR" "COMMAND is required"
-    printf " : %s\n" "'${SCRIPT_NM} -h'"
-    exit
+    USAGE
   fi
-
 
   case "${p_command}" in
     list)
@@ -120,26 +118,23 @@ declare -A g_all_entries
 declare -a g_all_entry_keys=()
 
 fn_all_entries() {
-  local -a all_compose_files=(**/*.yml)
-  if (( ${#all_compose_files[@]} > 0 )); then
-    local r_project=""
-    local r_file=""
-    local r_key=""
-    local r_services=""
-    for file in ${all_compose_files[@]}; do
-      if [[ "${file}" == */* ]]; then
-        r_project=$(awk -F/ '{print $(NF-1)}' <<< "${file}")
-      else
-        r_project=$(basename `pwd`)
-      fi
-      r_file="${file}"
-      r_key="${r_project}:${r_file}"
-      local -a services=($(yq '.services | keys | .[]' "${file}"))
-      r_services=$(IFS=,; echo "${services[*]}")
-      g_all_entries[${r_key}]="${r_services}"
-      g_all_entry_keys+=(${r_key})
-    done
-  fi
+  local r_project=""
+  local r_file=""
+  local r_key=""
+  local r_services=""
+  for file in ${g_all_compose_files[@]}; do
+    if [[ "${file}" == */* ]]; then
+      r_project=$(awk -F/ '{print $(NF-1)}' <<< "${file}")
+    else
+      r_project=$(basename `pwd`)
+    fi
+    r_file="${file}"
+    r_key="${r_project}:${r_file}"
+    local -a services=($(yq '.services | keys | .[]' "${file}"))
+    r_services=$(IFS=,; echo "${services[*]}")
+    g_all_entries[${r_key}]="${r_services}"
+    g_all_entry_keys+=(${r_key})
+  done
 }
 fn_all_entries
 # -- init
