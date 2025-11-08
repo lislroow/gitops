@@ -4,4 +4,14 @@ USER root
 RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz -o docker.tgz \
  && tar xzf docker.tgz --strip-components=1 -C /usr/local/bin \
  && rm -f docker.tgz
+
+ARG BUILDX_VERSION=0.27.0
+RUN mkdir -p /usr/libexec/docker/cli-plugins \
+ && curl -fsSL https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64 \
+    -o /usr/libexec/docker/cli-plugins/docker-buildx \
+ && chmod +x /usr/libexec/docker/cli-plugins/docker-buildx
+
+ARG DOCKER_GID=990
+RUN groupadd -g ${DOCKER_GID} docker \
+  && usermod -aG docker jenkins
 USER jenkins
