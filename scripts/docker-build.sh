@@ -108,7 +108,8 @@ build() {
   local tag="$3"
 
   printf "## build: ${dockerfile}\n"
-  docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
+  # docker build -f ${dockerfile} -t ${registry}/${image}:${tag} .
+  docker buildx build -f ${dockerfile} -t ${registry}/${image}:${tag} --load .
   if [[ ${p_build_only_y} != "y" ]]; then
     docker push ${registry}/${image}:${tag}
   fi
