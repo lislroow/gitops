@@ -21,13 +21,17 @@ function LIST {
   local -i idx=0
 
   local -i f2_len=$(printf "%s\n" ${dockerfile_list[@]} | wc -L)
-  local FORMAT="  %2s  %-$((f2_len+2))s %s\n"
-  local output=$(printf "${FORMAT}" "NO" "FILE" "IMAGE")
+  local FORMAT="  %2s %-19s %-$((f2_len+2))s %s\n"
+  local output=$(printf "${FORMAT}" "NO" "Created At" "FILE" "IMAGE")
   output+="\n"
   for i in $(seq 0 $((file_cnt-1))); do
     local file="${dockerfile_list[$i]}"
-    IFS='_' read -r dfile image tag <<< "${file}"
-    output+=$(printf "${FORMAT}" "$((i+1))" "${file}" "${PRIVATE_REGISTRY}/${image}:${tag}")
+    local _tmp=${file#*_}
+    local image=${_tmp%_*}
+    image=${image//_//}
+    local tag=${_tmp##*_}
+    local ctime="$(docker image ls "${PRIVATE_REGISTRY}/${image}:${tag}" --format '{{.CreatedAt}}')"
+    output+=$(printf "${FORMAT}" "$((i+1))" "${ctime:0:19}" "${file}" "${PRIVATE_REGISTRY}/${image}:${tag}")
     output+="\n"
   done
   echo -e "${output}"
@@ -65,6 +69,9 @@ while true; do
     --build-only)
       p_build_only_y="y"
       ;;
+    # --no-cache)
+    #   p_no_cache_y="y"
+    #   ;;
     --rmi)
       p_rmi_y="y"
       ;;
