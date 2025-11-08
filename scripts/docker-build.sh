@@ -168,11 +168,16 @@ if (( ${#m_entries[@]} == 0 )); then
     echo -n "(NO or FILE, a=all): "
     read input
 
-    if [[ ${input} == "a" ]]; then
-      m_entries=(${g_all_entries[@]})
-      build_entries "${m_entries[*]}"
-      continue
-    fi
+    case "${input}" in
+      a|A*)
+        m_entries=(${g_all_entries[@]})
+        build_entries "${m_entries[*]}"
+        continue
+        ;;
+      n|N)
+        exit
+        ;;
+    esac
 
     for val in ${input[@]}; do
       if [[ ${val} =~ ^[0-9]+$ ]]; then
