@@ -11,7 +11,7 @@ RUN mkdir -p /usr/libexec/docker/cli-plugins \
     -o /usr/libexec/docker/cli-plugins/docker-buildx \
  && chmod +x /usr/libexec/docker/cli-plugins/docker-buildx
 
-ARG DOCKER_GID=990
+ARG DOCKER_GID=980
 RUN groupadd -g ${DOCKER_GID} docker \
   && usermod -aG docker jenkins
 USER jenkins

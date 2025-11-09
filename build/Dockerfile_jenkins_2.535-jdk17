@@ -15,7 +15,7 @@ RUN apt-get install -y curl tar \
  && tar xzf docker.tgz --strip-components=1 -C /usr/local/bin \
  && rm docker.tgz
 
-ARG DOCKER_GID=990
+ARG DOCKER_GID=980
 RUN groupadd -g ${DOCKER_GID} docker \
   && usermod -aG docker jenkins
 
