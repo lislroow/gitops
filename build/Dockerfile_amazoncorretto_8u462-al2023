@@ -6,9 +6,9 @@ RUN dnf install -y unzip iputils nmap-ncat net-tools bash libxml2 \
     && dnf clean all
 USER root
 RUN echo 'PS1="[\u@\h \w]\\$ "' >> /root/.bashrc
-RUN mkdir -p /app/scouter-agent
-COPY ./amazoncorretto/scouter-agent-2.22.0.zip /app/scouter-agent
-RUN unzip /app/scouter-agent/scouter-agent-2.22.0.zip -d /app/scouter-agent/ \
-    && rm /app/scouter-agent/scouter-agent-2.22.0.zip
+RUN mkdir -p /app/scouter.agent
+COPY amazoncorretto/scouter.agent-2.22.0.zip /app/scouter.agent
+RUN unzip /app/scouter.agent/scouter.agent-2.22.0.zip -d /app/scouter.agent/ \
+    && rm /app/scouter.agent/scouter.agent-2.22.0.zip
 ENV LANG=ko_KR.UTF-8 \
     TZ=Asia/Seoul
