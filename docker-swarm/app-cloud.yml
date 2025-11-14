@@ -1,0 +1,32 @@
+services:
+  cloud-eureka:
+    image: docker.develop/spring/cloud-eureka:latest
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - app_net
+    volumes:
+      - /logs/app/cloud-eureka:/logs/cloud-eureka
+
+  cloud-gateway:
+    image: docker.develop/spring/cloud-gateway:latest
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - app_net
+    volumes:
+      - /logs/app/cloud-gateway:/logs/cloud-gateway
+
+networks:
+  app_net:
+    external: true

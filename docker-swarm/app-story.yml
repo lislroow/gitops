@@ -1,0 +1,18 @@
+services:
+  story-api:
+    image: docker.develop/spring/story-api:latest
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - app_net
+    volumes:
+      - /logs/app/story-api:/logs/story-api
+
+networks:
+  app_net:
+    external: true
