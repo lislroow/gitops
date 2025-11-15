@@ -1,0 +1,18 @@
+services:
+  nginx: 
+    container_name: nginx
+    image: docker.mgkim.net/nginx:1.29
+    restart: unless-stopped
+    networks: 
+      - app_net 
+    ports: 
+      - "1080:80"
+    volumes: 
+      - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro 
+    environment: 
+      TZ: UTC 
+
+networks:
+  app_net:
+    external: true
+
