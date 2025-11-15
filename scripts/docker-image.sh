@@ -120,7 +120,7 @@ build() {
   echo ""
 }
 
-build_entries() {
+exec_build() {
   local dockerfiles=("$1")
   # printf " > %s\n" ${dockerfiles[@]}
 
@@ -179,7 +179,7 @@ if (( ${#m_entries[@]} == 0 )); then
     case "${input}" in
       a|A*)
         m_entries=(${g_all_entries[@]})
-        build_entries "${m_entries[*]}"
+        exec_build "${m_entries[*]}"
         continue
         ;;
       n|N)
@@ -198,9 +198,9 @@ if (( ${#m_entries[@]} == 0 )); then
       fi
     done
 
-    build_entries "${m_entries[*]}"
+    exec_build "${m_entries[*]}"
   done
 else
-  build_entries "${m_entries[*]}" # [caution]
+  exec_build "${m_entries[*]}" # [caution]
 fi
 # -- main

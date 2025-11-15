@@ -9,7 +9,7 @@ function USAGE {
   cat << EOF
 - Usage  $SCRIPT_NM COMMAND service [OPTIONS]
 COMMAND:
-  list      'list' available services
+  ls        'list' available services
   up        'create' and 'start'
   down      'stop' and 'remove'
   recreate  'down' and 'up'
@@ -93,7 +93,7 @@ init() {
   fi
 
   case "${p_command}" in
-    list)
+    ls)
       LIST
       exit
       ;;
