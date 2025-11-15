@@ -11,6 +11,7 @@ services:
     networks:
       - cicd_net
     environment:
+      - TZ=Asia/Seoul
       - INSTALL4J_ADD_VM_PARAMS=-Xms256m -Xmx768m -XX:MaxDirectMemorySize=256m -Djava.util.prefs.userRoot=/nexus-data/javaprefs
 
 networks:
