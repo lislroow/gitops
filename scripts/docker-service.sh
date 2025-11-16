@@ -10,8 +10,9 @@ function USAGE {
 - Usage  $SCRIPT_NM COMMAND [targets]
 COMMAND:
   ls        print service list
-  ps        print service process list
-  restart   'restart'
+  ps        print process list
+  update    update service (with '--force' option)
+  logs      tail service log
 
 EOF
   exit 1
@@ -46,6 +47,9 @@ while true; do
   [[ -z $1 ]] && break
   
   case "$1" in
+    -h)
+      USAGE
+      ;;
     --)
       ;;
     *)
@@ -69,7 +73,7 @@ init() {
       LIST
       exit
       ;;
-    ps|restart)
+    ps|update|logs)
       ;;
     *)
       printf "[%-5s] %s\n" "ERROR" "invalid COMMAND. '${p_command}'"
@@ -88,18 +92,23 @@ function exec_ps {
   printf "\n"
 }
 
-exec_restart() {
+exec_update() {
   declare -a targets=($*)
   for SVC in ${targets[@]}; do
     docker service update --force $SVC
   done
 }
 
+exec_logs() {
+  local SVC=$1
+  docker service logs $SVC -f -n 100
+}
+
 declare -i cnt=0
 while true; do
   m_entries=()
   
-  (( $cnt == 0 )) && { LIST; ((cnt++)) } 
+  (( $cnt == 0 )) || [[ ${p_command} == 'logs' ]] && { LIST; ((cnt++)) } 
   echo ""
   echo -n "(NAME, all='process all', ls='print list'): "
   read input
@@ -130,8 +139,11 @@ while true; do
         exec_ps "${entry}"
       done
       ;;
-    restart)
-      exec_restart "${m_entries[*]}"
+    update)
+      exec_update "${m_entries[*]}"
+      ;;
+    logs)
+      exec_logs "${m_entries[0]}"
       ;;
   esac
 done
