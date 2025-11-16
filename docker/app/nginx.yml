@@ -1,22 +1,21 @@
 services:
-  nginx: 
+  nginx:
     container_name: nginx
     image: docker.mgkim.net/nginx:1.29
     restart: unless-stopped
-    networks: 
+    networks:
       - app_net 
-    ports: 
-      - "172.28.200.102:443:443" 
-      - "172.28.200.102:80:80" 
-    volumes: 
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro 
-      - /app/certs/server/spring.develop.crt:/etc/nginx/certs/spring.develop.crt:ro 
-      - /app/certs/server/spring.develop.key:/etc/nginx/certs/spring.develop.key:ro 
-      - /app/certs/ca/developCA.crt:/etc/nginx/certs/developCA.crt:ro 
-    environment: 
-      TZ: UTC 
+    ports:
+      - 172.28.200.102:443:443
+      - 172.28.200.102:80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /app/certs/server/api.develop.crt:/etc/nginx/certs/api.develop.crt:ro
+      - /app/certs/server/api.develop.key:/etc/nginx/certs/api.develop.key:ro
+      - /app/certs/ca/developCA.crt:/etc/nginx/certs/developCA.crt:ro
+    environment:
+      TZ: Asia/Seoul
 
 networks:
   app_net:
     external: true
-
