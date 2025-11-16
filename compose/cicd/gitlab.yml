@@ -10,7 +10,7 @@ services:
       - /data/cicd/gitlab-data:/var/opt/gitlab
       - /logs/cicd/gitlab:/var/log/gitlab
       - /conf/cicd/gitlab:/etc/gitlab
-      - ./conf/gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
+      - ./gitlab/gitlab.rb:/etc/gitlab/gitlab.rb
     networks:
       - cicd_net
     environment:

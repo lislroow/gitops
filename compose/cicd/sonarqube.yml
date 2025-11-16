@@ -14,7 +14,7 @@ services:
       - /conf/cicd/sonarqube:/opt/sonarqube/conf
       - /logs/cicd/sonarqube:/opt/sonarqube/logs
       - sonarqube_temp:/opt/sonarqube/temp
-      # - ./conf/sonarqube/sonar.properties:/opt/sonarqube/conf/sonar.properties:ro # 비밀번호 정책 완화 설정 포함 (동작 안함)
+      # - ./sonarqube/sonar.properties:/opt/sonarqube/conf/sonar.properties:ro # 비밀번호 정책 완화 설정 포함 (동작 안함)
     networks:
       - cicd_net
     environment:

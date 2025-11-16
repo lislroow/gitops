@@ -25,7 +25,7 @@ EOF
   exit 1
 }
 
-declare compose_base="/app/gitops"
+declare compose_base="/app/gitops/compose"
 declare -a g_all_compose_files=(${compose_base}/**/*.yml)
 
 function LIST {
